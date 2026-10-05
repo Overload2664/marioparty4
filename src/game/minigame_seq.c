@@ -3501,7 +3501,7 @@ static s16 practiceTbl[][2] = {
     DLL_m432dll,
     1,
     DLL_m433dll,
-    0,
+    1,
     DLL_m434dll,
     1,
     DLL_m404dll,

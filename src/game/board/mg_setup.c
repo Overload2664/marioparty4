@@ -298,7 +298,7 @@ static void ExecMGSetup(void) {
 }
 
 static void DetermineMGList(bitcopy* arg0) {
-    MgInfo* var_r31;
+    MgInfo* var_r31; // IMPORTANT: For minigame selection
     s32 temp_r23;
     s32 var_r30;
     s16* var_r28;
@@ -328,7 +328,8 @@ static void DetermineMGList(bitcopy* arg0) {
     var_r31 = mgInfoTbl;
     
     for (var_r29 = var_r30 = 0; var_r30 < var_r27; var_r30++, var_r31++) {
-        if ((mgType == var_r31->type) && (var_r31->ovl != 0x29)) {
+        // if ((mgType == var_r31->type) && (var_r31->ovl != 0x29)) {
+        if (mgType == var_r31->type) { // Don't let the list exclude beach volley
             if ((GWMGListGet() != 2) || (GWMGCustomGet(var_r30 + 0x191) != 0)) {
                 if (GWMGListGet() == 1) {
                     var_r21 = 0;
