@@ -1,6 +1,7 @@
 #include "game/board/main.h"
 #include "REL/mentDll.h"
 #include "dolphin/os.h"
+#include "dolphin/pad.h"
 #include "ext_math.h"
 #include "game/armem.h"
 #include "game/chrman.h"
@@ -1849,7 +1850,7 @@ static void extSetRedraw(s32 topic_idx, s32 sel, s32 top, s32 editing)
         extSetPutText(extSetWins[EXTSET_VALUE_WIN(i)], extSetValueBuf[i]);
     }
     sprintf(&extSetFootBuf[1], (editing != 0) ? "LEFT RIGHT:CHANGE  A:OK  B:CANCEL"
-        : "STICK:MOVE  A:EDIT  B:END  L R:TOPIC");
+        : "STICK:MOVE A:EDIT B:END L_R:TOPIC");
     extSetPutText(extSetWins[EXTSET_FOOT_WIN], extSetFootBuf);
 }
 
@@ -1924,7 +1925,7 @@ s32 extraOptionsMenu(void)
                 changed = 1;
                 HuAudFXPlay(2);
             }
-            else if (HuPadBtnDown[pad] & PAD_BUTTON_B) {
+            else if (HuPadBtnDown[pad] & PAD_BUTTON_START) {
                 HuAudFXPlay(3);
                 break;
             }
