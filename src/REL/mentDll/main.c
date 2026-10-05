@@ -190,6 +190,7 @@ void configureBoardWithController(OMOBJ *board_menu_obj, MentBoardMenuConfig *bo
 void createChooseBoardSettingsGroup(MentBoardMenuConfig *game_config0, s32 arg1, s32 arg2, s32 arg3);
 void setupSettingSelectionCursor(void);
 void hideHighlighter(void);
+s32 extraOptionsMenu(void);
 void pushDownBoardSettings(void);
 void pushUpBoardSettings(void);
 void initCharacterSelectionPos(void);
@@ -1638,6 +1639,345 @@ loop_4:
     return next_section;
 }
 
+// ---------------------------------------------------------------------------
+// Extra settings menu (proof of concept)
+//
+// Triggered from openPartyMenu() when getBoardSettings() confirms with 0x63.
+// The whole menu is table driven: topics and entries live in ext_topics[]
+// below, so adding or removing an entry or a topic is a one-line change.
+//
+// Controls (browse mode):
+//   stick up/down    move selection (list scrolls at the edges)
+//   L / R            switch topic
+//   A                enter edit mode for the selected entry
+//   B                close the menu
+// Controls (edit mode):
+//   stick left/right change the value (clamped to min/max)
+//   A                commit the value
+//   B                cancel, restoring the previous value
+//
+// Values are stored in the tables only; nothing here changes any real game
+// setting yet.
+// ---------------------------------------------------------------------------
+
+#define EXTSET_ROWS 7
+#define EXTSET_KIND_ONOFF 0
+#define EXTSET_KIND_NUM 1
+
+#define EXTSET_COUNT(arr) ((s32)(sizeof(arr) / sizeof(arr[0])))
+
+typedef struct ExtSetEntry {
+    /* 0x00 */ char *label;
+    /* 0x04 */ s32 kind;
+    /* 0x08 */ s32 min;
+    /* 0x0C */ s32 max;
+    /* 0x10 */ s32 value;
+} ExtSetEntry;
+
+typedef struct ExtSetTopic {
+    /* 0x00 */ char *title;
+    /* 0x04 */ ExtSetEntry *entries;
+    /* 0x08 */ s32 count;
+} ExtSetTopic;
+
+static ExtSetEntry ext_board_entries[] = {
+    { "TEAMS", EXTSET_KIND_ONOFF, 0, 0, 0 },
+    { "BONUS STAR", EXTSET_KIND_ONOFF, 0, 0, 1 },
+    { "TURN COUNT", EXTSET_KIND_NUM, 5, 99, 10 },
+    { "HANDICAP P1", EXTSET_KIND_NUM, 0, 3, 0 },
+    { "HANDICAP P2", EXTSET_KIND_NUM, 0, 3, 0 },
+    { "HANDICAP P3", EXTSET_KIND_NUM, 0, 3, 0 },
+    { "HANDICAP P4", EXTSET_KIND_NUM, 0, 3, 0 },
+    { "STARTING COINS", EXTSET_KIND_NUM, 0, 99, 10 },
+    { "BOWSER EVENT", EXTSET_KIND_ONOFF, 0, 0, 1 },
+    { "END GAME EARLY", EXTSET_KIND_ONOFF, 0, 0, 0 },
+};
+
+static ExtSetEntry ext_minigame_entries[] = {
+    { "MG LIST", EXTSET_KIND_NUM, 0, 2, 0 },
+    { "MG TIME", EXTSET_KIND_NUM, 1, 5, 3 },
+    { "COM LEVEL", EXTSET_KIND_NUM, 0, 3, 1 },
+    { "ITEM MINIGAMES", EXTSET_KIND_ONOFF, 0, 0, 1 },
+    { "REPLAY VOTES", EXTSET_KIND_ONOFF, 0, 0, 1 },
+};
+
+static ExtSetEntry ext_other_entries[] = {
+    { "MUSIC VOLUME", EXTSET_KIND_NUM, 0, 10, 8 },
+    { "SOUND FX VOL", EXTSET_KIND_NUM, 0, 10, 8 },
+    { "RUMBLE", EXTSET_KIND_ONOFF, 0, 0, 1 },
+    { "TEXT SPEED", EXTSET_KIND_NUM, 0, 2, 1 },
+    { "DEBUG INFO", EXTSET_KIND_ONOFF, 0, 0, 0 },
+    { "STAGE HAZARDS", EXTSET_KIND_ONOFF, 0, 0, 1 },
+    { "CPU ASSIST", EXTSET_KIND_NUM, 0, 3, 1 },
+    { "LUCKY SPACE", EXTSET_KIND_ONOFF, 0, 0, 1 },
+    { "UNLOCK ALL", EXTSET_KIND_ONOFF, 0, 0, 0 },
+};
+
+static ExtSetTopic ext_topics[] = {
+    { "BOARD SETTINGS", ext_board_entries, EXTSET_COUNT(ext_board_entries) },
+    { "MINIGAME SETTINGS", ext_minigame_entries, EXTSET_COUNT(ext_minigame_entries) },
+    { "OTHER SETTINGS", ext_other_entries, EXTSET_COUNT(ext_other_entries) },
+};
+
+#define EXTSET_TOPIC_COUNT EXTSET_COUNT(ext_topics)
+
+// window ids: 0 = title, 1..7 = row labels, 8..14 = row values, 15 = footer
+#define EXTSET_TITLE_WIN 0
+#define EXTSET_LABEL_WIN(i) (1 + (i))
+#define EXTSET_VALUE_WIN(i) (1 + EXTSET_ROWS + (i))
+#define EXTSET_FOOT_WIN (1 + 2 * EXTSET_ROWS)
+#define EXTSET_WIN_COUNT (2 + 2 * EXTSET_ROWS)
+
+static s16 extSetWins[EXTSET_WIN_COUNT];
+static char extSetTitleBuf[96];
+static char extSetLabelBuf[EXTSET_ROWS][64];
+static char extSetValueBuf[EXTSET_ROWS][32];
+static char extSetFootBuf[96];
+static GXColor extSetColDim = { 24, 32, 68, 255 };
+static GXColor extSetColSel = { 72, 104, 208, 255 };
+static GXColor extSetColEdit = { 216, 128, 32, 255 };
+
+static void extSetPutText(s16 win, char *buf)
+{
+    // control code 11 = home + clear: raw strings must start with it or the
+    // new text appends onto the glyphs already in the window
+    buf[0] = 11;
+    HuWinMesSet(win, MAKE_MESSID_PTR(buf));
+}
+
+static void extSetCreateWindows(void)
+{
+    s32 i;
+    s16 win;
+
+    win = HuWinExCreateStyled(8.0f, 16.0f, 560, 40, -1, 1);
+    extSetWins[EXTSET_TITLE_WIN] = win;
+    HuWinMesSpeedSet(win, 0);
+    HuWinAttrSet(win, 0x800); // centered
+    HuWinBGTPLvlSet(win, 0.8f);
+    HuWinBGColSet(win, &extSetColDim);
+    HuWinDispOn(win);
+    for (i = 0; i < EXTSET_ROWS; i++) {
+        win = HuWinExCreateStyled(28.0f, 72.0f + i * 40.0f, 344, 32, -1, 1);
+        extSetWins[EXTSET_LABEL_WIN(i)] = win;
+        HuWinMesSpeedSet(win, 0);
+        HuWinBGTPLvlSet(win, 0.7f);
+        HuWinBGColSet(win, &extSetColDim);
+        HuWinDispOn(win);
+        win = HuWinExCreateStyled(388.0f, 72.0f + i * 40.0f, 168, 32, -1, 1);
+        extSetWins[EXTSET_VALUE_WIN(i)] = win;
+        HuWinMesSpeedSet(win, 0);
+        HuWinBGTPLvlSet(win, 0.7f);
+        HuWinBGColSet(win, &extSetColDim);
+        HuWinDispOn(win);
+    }
+    win = HuWinExCreateStyled(8.0f, 400.0f, 560, 40, -1, 1);
+    extSetWins[EXTSET_FOOT_WIN] = win;
+    HuWinMesSpeedSet(win, 0);
+    HuWinAttrSet(win, 0x800); // centered
+    HuWinBGTPLvlSet(win, 0.8f);
+    HuWinBGColSet(win, &extSetColDim);
+    HuWinDispOn(win);
+}
+
+static void extSetDestroyWindows(void)
+{
+    s32 i;
+
+    for (i = 0; i < EXTSET_WIN_COUNT; i++) {
+        HuWinExCleanup(extSetWins[i]);
+    }
+}
+
+static void extSetRedraw(s32 topic_idx, s32 sel, s32 top, s32 editing)
+{
+    ExtSetTopic *topic;
+    ExtSetEntry *entry;
+    GXColor color;
+    s32 i;
+    s32 row;
+    s32 selected;
+    s32 marked;
+
+    topic = &ext_topics[topic_idx];
+    // "^"/"V" mark that more entries exist above/below the visible window
+    sprintf(&extSetTitleBuf[1], "< %s %d OF %d >%s%s", topic->title, topic_idx + 1,
+        EXTSET_TOPIC_COUNT, (top > 0) ? " ^" : "", (top + EXTSET_ROWS < topic->count) ? " V" : "");
+    extSetPutText(extSetWins[EXTSET_TITLE_WIN], extSetTitleBuf);
+    for (i = 0; i < EXTSET_ROWS; i++) {
+        row = top + i;
+        if (row >= topic->count) {
+            // entry window: hide the panel and clear any old text
+            sprintf(&extSetLabelBuf[i][1], "%s", "");
+            sprintf(&extSetValueBuf[i][1], "%s", "");
+            HuWinBGTPLvlSet(extSetWins[EXTSET_LABEL_WIN(i)], 0.0f);
+            HuWinBGTPLvlSet(extSetWins[EXTSET_VALUE_WIN(i)], 0.0f);
+            extSetPutText(extSetWins[EXTSET_LABEL_WIN(i)], extSetLabelBuf[i]);
+            extSetPutText(extSetWins[EXTSET_VALUE_WIN(i)], extSetValueBuf[i]);
+            continue;
+        }
+        entry = &topic->entries[row];
+        selected = (row == sel) ? 1 : 0;
+        marked = (selected != 0 && editing != 0) ? 1 : 0;
+        sprintf(&extSetLabelBuf[i][1], "%s%s", (selected != 0) ? "> " : "  ", entry->label);
+        if (entry->kind == EXTSET_KIND_ONOFF) {
+            sprintf(&extSetValueBuf[i][1], "%s%s%s", (marked != 0) ? "<" : "",
+                (entry->value != 0) ? "YES" : "NO", (marked != 0) ? ">" : "");
+        }
+        else {
+            sprintf(&extSetValueBuf[i][1], "%s%d%s", (marked != 0) ? "<" : "",
+                entry->value, (marked != 0) ? ">" : "");
+        }
+        if (selected != 0) {
+            if (editing != 0) {
+                color = extSetColEdit;
+            }
+            else {
+                color = extSetColSel;
+            }
+            HuWinBGTPLvlSet(extSetWins[EXTSET_LABEL_WIN(i)], 0.9f);
+            HuWinBGTPLvlSet(extSetWins[EXTSET_VALUE_WIN(i)], 0.9f);
+        }
+        else {
+            color = extSetColDim;
+            HuWinBGTPLvlSet(extSetWins[EXTSET_LABEL_WIN(i)], 0.7f);
+            HuWinBGTPLvlSet(extSetWins[EXTSET_VALUE_WIN(i)], 0.7f);
+        }
+        HuWinBGColSet(extSetWins[EXTSET_LABEL_WIN(i)], &color);
+        HuWinBGColSet(extSetWins[EXTSET_VALUE_WIN(i)], &color);
+        extSetPutText(extSetWins[EXTSET_LABEL_WIN(i)], extSetLabelBuf[i]);
+        extSetPutText(extSetWins[EXTSET_VALUE_WIN(i)], extSetValueBuf[i]);
+    }
+    sprintf(&extSetFootBuf[1], (editing != 0) ? "LEFT RIGHT:CHANGE  A:OK  B:CANCEL"
+        : "STICK:MOVE  A:EDIT  B:END  L R:TOPIC");
+    extSetPutText(extSetWins[EXTSET_FOOT_WIN], extSetFootBuf);
+}
+
+s32 extraOptionsMenu(void)
+{
+    ExtSetEntry *entry;
+    s32 topic_idx;
+    s32 sel;
+    s32 top;
+    s32 editing;
+    s32 orig_value;
+    s32 pad;
+    s32 changed;
+
+    topic_idx = 0;
+    sel = 0;
+    top = 0;
+    editing = 0;
+    orig_value = 0;
+    pad = mtPlayerData[0].pad_idx;
+    OSReport("EXTRA MENU: open\n");
+    HuAudFXPlay(menuSoundFXTbl[gameConfigs[2]][0]);
+    extSetCreateWindows();
+    extSetRedraw(topic_idx, sel, top, editing);
+    while (1) {
+        MenuPrcVSleep();
+        changed = 0;
+        if (editing == 0) {
+            if (HuPadBtnDown[pad] & PAD_TRIGGER_R) {
+                topic_idx++;
+                if (topic_idx >= EXTSET_TOPIC_COUNT) {
+                    topic_idx = 0;
+                }
+                sel = 0;
+                top = 0;
+                changed = 1;
+                HuAudFXPlay(0);
+            }
+            else if (HuPadBtnDown[pad] & PAD_TRIGGER_L) {
+                topic_idx--;
+                if (topic_idx < 0) {
+                    topic_idx = EXTSET_TOPIC_COUNT - 1;
+                }
+                sel = 0;
+                top = 0;
+                changed = 1;
+                HuAudFXPlay(0);
+            }
+            else if (HuPadDStkRep[pad] & PAD_BUTTON_UP) {
+                if (sel > 0) {
+                    sel--;
+                    if (sel < top) {
+                        top = sel;
+                    }
+                    changed = 1;
+                    HuAudFXPlay(0);
+                }
+            }
+            else if (HuPadDStkRep[pad] & PAD_BUTTON_DOWN) {
+                if (sel < ext_topics[topic_idx].count - 1) {
+                    sel++;
+                    if (sel >= top + EXTSET_ROWS) {
+                        top = sel - EXTSET_ROWS + 1;
+                    }
+                    changed = 1;
+                    HuAudFXPlay(0);
+                }
+            }
+            else if (HuPadBtnDown[pad] & PAD_BUTTON_A) {
+                orig_value = ext_topics[topic_idx].entries[sel].value;
+                editing = 1;
+                changed = 1;
+                HuAudFXPlay(2);
+            }
+            else if (HuPadBtnDown[pad] & PAD_BUTTON_B) {
+                HuAudFXPlay(3);
+                break;
+            }
+        }
+        else {
+            entry = &ext_topics[topic_idx].entries[sel];
+            if (HuPadDStkRep[pad] & PAD_BUTTON_RIGHT) {
+                if (entry->kind == EXTSET_KIND_ONOFF) {
+                    entry->value = 1;
+                }
+                else {
+                    entry->value++;
+                    if (entry->value > entry->max) {
+                        entry->value = entry->max;
+                    }
+                }
+                changed = 1;
+                HuAudFXPlay(0);
+            }
+            else if (HuPadDStkRep[pad] & PAD_BUTTON_LEFT) {
+                if (entry->kind == EXTSET_KIND_ONOFF) {
+                    entry->value = 0;
+                }
+                else {
+                    entry->value--;
+                    if (entry->value < entry->min) {
+                        entry->value = entry->min;
+                    }
+                }
+                changed = 1;
+                HuAudFXPlay(0);
+            }
+            else if (HuPadBtnDown[pad] & PAD_BUTTON_A) {
+                editing = 0; // commit: the value is already stored in the table
+                changed = 1;
+                HuAudFXPlay(2);
+            }
+            else if (HuPadBtnDown[pad] & PAD_BUTTON_B) {
+                entry->value = orig_value; // cancel: restore the old value
+                editing = 0;
+                changed = 1;
+                HuAudFXPlay(3);
+            }
+        }
+        if (changed != 0) {
+            extSetRedraw(topic_idx, sel, top, editing);
+        }
+    }
+    extSetDestroyWindows();
+    OSReport("EXTRA MENU: close\n");
+    return 0;
+}
+
 void fn_1_A990(void)
 {
     pushUpBoardSettings();
@@ -1932,6 +2272,9 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
                     case 1:
                         configure_section = 1;
                         resetToChooseBoard();
+                        break;
+                    case 0x63:
+                        extraOptionsMenu();
                         break;
                 }
                 break;
