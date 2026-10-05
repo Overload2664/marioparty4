@@ -17,6 +17,7 @@ typedef struct save_buf_data {
 	PlayerState player[4];
 	SystemState systemStory;
 	PlayerState playerStory[4];
+	ExtraGameConfig exGameCfg;
 } SaveBufData;
 
 typedef union save_buf_all {

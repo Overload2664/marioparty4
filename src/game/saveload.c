@@ -391,6 +391,7 @@ void SLSaveBoard(void)
     for (i = 0; i < 4; i++) {
         memcpy(SAVE_GET_PLAYER(i), &GWPlayer[i], sizeof(PlayerState));
     }
+    memcpy(&saveBuf.data.exGameCfg, &ExGameCfg, sizeof(ExtraGameConfig)); // save extra game configs
 }
 
 void SLSaveBoardStory(void)
@@ -569,6 +570,7 @@ void SLLoadBoard(void)
         GWPlayerCfg[i].iscom = GWPlayer[i].com;
         GWPlayerCfg[i].group = GWPlayer[i].team;
     }
+    memcpy(&ExGameCfg, &saveBuf.data.exGameCfg, sizeof(ExtraGameConfig)); // load extra game configs
 }
 
 void SLLoadBoardStory(void)
