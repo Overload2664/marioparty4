@@ -268,9 +268,13 @@ void MenuMain(HUPROCESS *objman)
     if (gameConfigs[0] != 0xB) {
         CharDataClose(-1);
     }
-    gameConfigs[4] = GWGameStat.open_w06;
-    gameConfigs[5] = GWGameStat.veryHardUnlock;
-    gameConfigs[6] = GWGameStat.customPackEnable;
+    // Unlock everything by default
+    // gameConfigs[4] = GWGameStat.open_w06;
+    // gameConfigs[5] = GWGameStat.veryHardUnlock;
+    // gameConfigs[6] = GWGameStat.customPackEnable;
+    gameConfigs[4] = 1;
+    gameConfigs[5] = 1;
+    gameConfigs[6] = 1;
     switch (gameConfigs[0]) {
         case 0:
             HuAudSndGrpSetSet(7);
