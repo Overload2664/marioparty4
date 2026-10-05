@@ -145,6 +145,10 @@ typedef struct game_stat {
 /* 0x110 */ PauseBackupConfig party_pause; 
 } GameStat;
 
+typedef struct extra_game_config {
+    u8 disable_1v3;
+} ExtraGameConfig;
+
 extern s16 GwLanguage;
 extern s16 GwLanguageSave;
 
@@ -152,6 +156,7 @@ extern PlayerConfig GWPlayerCfg[4];
 extern PlayerState GWPlayer[4];
 extern SystemState GWSystem;
 extern GameStat GWGameStat;
+extern ExtraGameConfig ExGameCfg;
 
 static inline s32 GWPlayerCfgGroupGet(s32 player)
 {

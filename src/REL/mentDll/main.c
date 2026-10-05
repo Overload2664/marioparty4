@@ -5,6 +5,7 @@
 #include "ext_math.h"
 #include "game/armem.h"
 #include "game/chrman.h"
+#include "game/gamework_data.h"
 #include "game/hsfex.h"
 #include "game/hu3d.h"
 #include "game/minigame_seq.h"
@@ -1695,7 +1696,7 @@ static ExtSetEntry ext_board_entries[] = {
 };
 
 static ExtSetEntry ext_minigame_entries[] = {
-    { "MG LIST", EXTSET_KIND_NUM, 0, 2, 0 },
+    { "DISABLE 1v3", EXTSET_KIND_ONOFF, 0, 0, 1 },
     { "MG TIME", EXTSET_KIND_NUM, 1, 5, 3 },
     { "COM LEVEL", EXTSET_KIND_NUM, 0, 3, 1 },
     { "ITEM MINIGAMES", EXTSET_KIND_ONOFF, 0, 0, 1 },
@@ -2338,6 +2339,10 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
                 GWPlayerCfg[2].group = GWPlayerCfg[3].group = 1;
                 break;
         }
+    }
+    {
+        // Extra settings
+        ExGameCfg.disable_1v3 = ext_minigame_entries[0].value;
     }
     BoardSaveInit(gameConfigs[2]);
     transitionToPartyBoard();

@@ -16,6 +16,7 @@ GameStat GWGameStat;
 SystemState GWSystem;
 PlayerState GWPlayer[4];
 PlayerConfig GWPlayerCfg[4];
+ExtraGameConfig ExGameCfg;
 
 static inline void GWErase(void)
 {
