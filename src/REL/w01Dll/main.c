@@ -1618,10 +1618,10 @@ static void CupExec(void)
     float rotYNew;
 
     cupDir = boardWork->cupDir[cupSide];
-    boardWork->cupDir[cupSide] ^= 1;
+    boardWork->cupDir[cupSide] ^= 1; // IMPORTANT: This is where we change the arrow dir (logic)
     cupArrowMdlId = mapObjMdlId[cupArrowMapObj[cupSide]];
     rotY = cupArrowRot[cupSide][cupDir];
-    rotYNew = cupArrowRot[cupSide][cupDir ^ 1];
+    rotYNew = cupArrowRot[cupSide][cupDir ^ 1]; // IMPORTANT: This is where we change the arrow dir (anim)
     HuAudFXPlay(0x403);
     while (TRUE) {
         HuPrcVSleep();
