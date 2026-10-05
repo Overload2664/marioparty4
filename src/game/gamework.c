@@ -263,12 +263,13 @@ s32 GWMGAvailGet(s32 id)
     id -= 401;
     word = id >> 5;
     bit = id % 32;
-    if (GWGameStat.mg_avail[word] & (1 << bit)) {
-        return 1;
-    }
-    else {
-        return 0;
-    }
+    // if (GWGameStat.mg_avail[word] & (1 << bit)) {
+    //     return 1;
+    // }
+    // else {
+    //     return 0;
+    // }
+    return 1; // Always return that a game is unlocked
 }
 
 void GWMGAvailSet(s32 id)
