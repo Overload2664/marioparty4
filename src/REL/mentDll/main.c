@@ -16,6 +16,8 @@
 #include "game/sprite.h"
 #include "game/window.h"
 #include "game/wipe.h"
+#include <stdio.h>
+#include <string.h>
 
 #ifndef __MWERKS__
 extern s32 rand8(void);
@@ -1730,6 +1732,29 @@ static ExtSetTopic ext_topics[] = {
 #define EXTSET_FOOT_WIN (1 + 2 * EXTSET_ROWS)
 #define EXTSET_WIN_COUNT (2 + 2 * EXTSET_ROWS)
 
+u32 getEntryValue(const char* entry_name) {
+    u32 topic_idx;
+    u32 entry_idx;
+    ExtSetEntry* entries;
+    u32 entries_count;
+    char error_msg[256];
+
+    for (topic_idx = 0; topic_idx < EXTSET_TOPIC_COUNT; topic_idx++) {
+        entries = ext_topics[topic_idx].entries;
+        entries_count = ext_topics[topic_idx].count;
+
+        for (entry_idx = 0; entry_idx < entries_count; entry_idx++) {
+            if(!strcmp(entry_name, entries[entry_idx].label)) {
+                return entries[entry_idx].value;
+            }
+        }
+    }
+
+    sprintf(error_msg, "getEntryValue: %s not found\n", entry_name);
+    OSReport(error_msg);
+    return -1;
+}
+
 static s16 extSetWins[EXTSET_WIN_COUNT];
 static char extSetTitleBuf[96];
 static char extSetLabelBuf[EXTSET_ROWS][64];
@@ -2342,7 +2367,10 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
     }
     {
         // Extra settings
-        ExGameCfg.disable_1v3 = ext_minigame_entries[0].value;
+        char msg[256];
+        ExGameCfg.disable_1v3 = getEntryValue("DISABLE 1v3");
+        sprintf(msg, "Extra Game Config: disable_1v3 set to %d\n", ExGameCfg.disable_1v3);
+        OSReport(msg);
     }
     BoardSaveInit(gameConfigs[2]);
     transitionToPartyBoard();
