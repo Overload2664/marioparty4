@@ -5485,14 +5485,12 @@ void configureBoardWithController(OMOBJ *board_menu_obj, MentBoardMenuConfig *bo
                     switch (board_config1->handicaps[0]) {
                         case 1: // Animate turn setting change
                             // Disable for now as numbers 6 through 9 are not supported
-                            // HuSprBankSet(boardsettings_group, 0x4A, board_config1->board_settings[1] % 10);
+                            HuSprBankSet(boardsettings_group, 0x4A, board_config1->board_settings[1] % 10);
                             // HuSprBankSet(boardsettings_group, 0x4C, board_config1->board_settings[1] % 10);
-                            // HuSprBankSet(boardsettings_group, 0x4B, board_config1->board_settings[1] / 10);
+                            HuSprAttrSet(boardsettings_group, 0x4C, HUSPR_ATTR_DISPOFF); // Make number shadow invisible
+                            HuSprBankSet(boardsettings_group, 0x4B, board_config1->board_settings[1] / 10);
                             // HuSprBankSet(boardsettings_group, 0x4D, board_config1->board_settings[1] / 10);
-                            HuSprBankSet(boardsettings_group, 0x4A, 0);
-                            HuSprBankSet(boardsettings_group, 0x4C, 0);
-                            HuSprBankSet(boardsettings_group, 0x4B, 0);
-                            HuSprBankSet(boardsettings_group, 0x4D, 0);
+                            HuSprAttrSet(boardsettings_group, 0x4D, HUSPR_ATTR_DISPOFF); // Make number shadow invisible
                             break;
                         case 2:
                             HuSprBankSet(boardsettings_group, 0x4E, board_config1->board_settings[2]);
@@ -5623,13 +5621,15 @@ void createChooseBoardSettingsGroup(MentBoardMenuConfig *game_config0, s32 arg1,
     HuSprGrpMemberSet(group, 0x48, sprite_idx);
     sprite_idx = HuSprCreate(HuSprAnimReadFile(DATA_MAKE_NUM(DATADIR_MENT, 0x46)), 0x3F2, 0);
     HuSprGrpMemberSet(group, 0x49, sprite_idx);
-    sprite_animation_1 = HuSprAnimReadFile(DATA_MAKE_NUM(DATADIR_MENT, 0x45));
+    // sprite_animation_1 = HuSprAnimReadFile(DATA_MAKE_NUM(DATADIR_MENT, 0x45));
+    sprite_animation_1 = HuSprAnimReadFile(DATA_MAKE_NUM(DATADIR_MGCONST, 0x30)); // Switch to this as the previous on only support up to 5 nums
     sprite_animation_2 = HuSprAnimReadFile(DATA_MAKE_NUM(DATADIR_MENT, 0x47));
     for (i = 0; i < 2; i++) {
         sprite_idx = HuSprCreate(sprite_animation_1, 0x3E8, 0);
         HuSprGrpMemberSet(group, i + 0x4A, sprite_idx);
         sprite_idx = HuSprCreate(sprite_animation_2, 0x3F2, 0);
         HuSprGrpMemberSet(group, i + 0x4C, sprite_idx);
+        HuSprScaleSet(group, i + 0x4C, 0.1, 0.1);  // This is the shadow of the turn numbers, make them small so we don't see them
     }
     sprite_idx = HuSprCreate(HuSprAnimReadFile(DATA_MAKE_NUM(DATADIR_MENT, 0x48)), 0x3E8, 0);
     HuSprGrpMemberSet(group, 0x4E, sprite_idx);

@@ -362,7 +362,7 @@ void fn_1_918(s16 group, s16 base_member, u32 value, s32 state)
     }
     HuSprBankSet(group, member, time[0] % 10);
     HuSprBankSet(group, member + 1, time[0] / 10);
-    HuSprBankSet(group, member + 3, time[1] % 10);
+    HuSprBankSet(group, member + 3, time[1] % 10); // Important
     HuSprBankSet(group, member + 4, time[1] / 10);
     HuSprBankSet(group, member + 6, time[2] % 10);
 }
