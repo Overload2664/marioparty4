@@ -587,7 +587,7 @@ MgInfo mgInfoTbl[] = {
     },
     {
         DLL_m433dll, // ovl
-        7, // type
+        2, // type
         3, // flag
         255, // record_idx
         MAKE_MESSID(0x17, 0x21), // name_mess
