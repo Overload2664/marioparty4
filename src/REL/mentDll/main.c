@@ -4886,10 +4886,10 @@ void configureBoardWithController(OMOBJ *board_menu_obj, MentBoardMenuConfig *bo
                         board_config1->board_settings[0] = 0;
                     }
                     break;
-                case 1:
-                    board_config1->board_settings[1] += 5;
-                    if (board_config1->board_settings[1] > 0x32) {
-                        board_config1->board_settings[1] = 0xA;
+                case 1: // Turn selection in settings
+                    board_config1->board_settings[1] += 1; // Increase turn
+                    if (board_config1->board_settings[1] > 99) {
+                        board_config1->board_settings[1] = 1;
                     }
                     break;
                 case 2:
@@ -4931,10 +4931,10 @@ void configureBoardWithController(OMOBJ *board_menu_obj, MentBoardMenuConfig *bo
                         board_config1->board_settings[0] = 3;
                     }
                     break;
-                case 1:
-                    board_config1->board_settings[1] -= 5;
-                    if (board_config1->board_settings[1] < 0xA) {
-                        board_config1->board_settings[1] = 0x32;
+                case 1: // Turn selection in settings
+                    board_config1->board_settings[1] -= 1; // Increase turn
+                    if (board_config1->board_settings[1] < 1) {
+                        board_config1->board_settings[1] = 99;
                     }
                     break;
                 case 2:
@@ -4983,6 +4983,7 @@ void configureBoardWithController(OMOBJ *board_menu_obj, MentBoardMenuConfig *bo
                         if (board_config1->handicaps[board_config1->board_settings[4] + 1] < 0) {
                             board_config1->handicaps[board_config1->board_settings[4] + 1] = 9;
                         }
+                        // Set handicap number
                         HuSprBankSet(boardsettings_group, board_config1->board_settings[4] + 0x33, board_config1->handicaps[board_config1->board_settings[4] + 1]);
                         HuSprBankSet(boardsettings_group, board_config1->board_settings[4] + 0x43, board_config1->handicaps[board_config1->board_settings[4] + 1]);
                     }
@@ -5135,11 +5136,16 @@ void configureBoardWithController(OMOBJ *board_menu_obj, MentBoardMenuConfig *bo
                 }
                 if (progress == 6) {
                     switch (board_config1->handicaps[0]) {
-                        case 1:
-                            HuSprBankSet(boardsettings_group, 0x4A, board_config1->board_settings[1] % 10);
-                            HuSprBankSet(boardsettings_group, 0x4C, board_config1->board_settings[1] % 10);
-                            HuSprBankSet(boardsettings_group, 0x4B, board_config1->board_settings[1] / 10);
-                            HuSprBankSet(boardsettings_group, 0x4D, board_config1->board_settings[1] / 10);
+                        case 1: // Animate turn setting change
+                            // Disable for now as numbers 6 through 9 are not supported
+                            // HuSprBankSet(boardsettings_group, 0x4A, board_config1->board_settings[1] % 10);
+                            // HuSprBankSet(boardsettings_group, 0x4C, board_config1->board_settings[1] % 10);
+                            // HuSprBankSet(boardsettings_group, 0x4B, board_config1->board_settings[1] / 10);
+                            // HuSprBankSet(boardsettings_group, 0x4D, board_config1->board_settings[1] / 10);
+                            HuSprBankSet(boardsettings_group, 0x4A, 0);
+                            HuSprBankSet(boardsettings_group, 0x4C, 0);
+                            HuSprBankSet(boardsettings_group, 0x4B, 0);
+                            HuSprBankSet(boardsettings_group, 0x4D, 0);
                             break;
                         case 2:
                             HuSprBankSet(boardsettings_group, 0x4E, board_config1->board_settings[2]);
