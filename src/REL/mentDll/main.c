@@ -1875,7 +1875,7 @@ static void extSetRedraw(s32 topic_idx, s32 sel, s32 top, s32 editing)
         extSetPutText(extSetWins[EXTSET_LABEL_WIN(i)], extSetLabelBuf[i]);
         extSetPutText(extSetWins[EXTSET_VALUE_WIN(i)], extSetValueBuf[i]);
     }
-    sprintf(&extSetFootBuf[1], (editing != 0) ? "LEFT RIGHT:CHANGE  A:OK  B:CANCEL"
+    sprintf(&extSetFootBuf[1], (editing != 0) ? "LEFT_RIGHT:CHANGE  A:OK  B:CANCEL"
         : "STICK:MOVE A:EDIT B:END L_R:TOPIC");
     extSetPutText(extSetWins[EXTSET_FOOT_WIN], extSetFootBuf);
 }
@@ -1965,7 +1965,7 @@ s32 extraOptionsMenu(void)
                 else {
                     entry->value++;
                     if (entry->value > entry->max) {
-                        entry->value = entry->max;
+                        entry->value = entry->min;
                     }
                 }
                 changed = 1;
@@ -1978,7 +1978,7 @@ s32 extraOptionsMenu(void)
                 else {
                     entry->value--;
                     if (entry->value < entry->min) {
-                        entry->value = entry->min;
+                        entry->value = entry->max;
                     }
                 }
                 changed = 1;
