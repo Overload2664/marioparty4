@@ -1700,9 +1700,16 @@ static ExtSetEntry ext_board_entries[] = {
 static ExtSetEntry ext_minigame_entries[] = {
     { "DISABLE 1v3", EXTSET_KIND_ONOFF, 0, 0, 1 },
     { "NORMALIZE COIN GAMES", EXTSET_KIND_ONOFF, 0, 0, 1 },
-    { "COM LEVEL", EXTSET_KIND_NUM, 0, 3, 1 },
-    { "ITEM MINIGAMES", EXTSET_KIND_ONOFF, 0, 0, 1 },
-    { "REPLAY VOTES", EXTSET_KIND_ONOFF, 0, 0, 1 },
+    { "F4A WINNER GETS", EXTSET_KIND_NUM, 0, 99, 10 },
+    { "F4A LOSER GETS", EXTSET_KIND_NUM, 0, 99, 0 },
+    { "2v2 WINNER GETS", EXTSET_KIND_NUM, 0, 99, 10 },
+    { "2v2 LOSER GETS", EXTSET_KIND_NUM, 0, 99, 0 },
+    { "1v3 WINNER GETS", EXTSET_KIND_NUM, 0, 99, 10 },
+    { "1v3 LOSER GETS", EXTSET_KIND_NUM, 0, 99, 0 },
+    { "COIN GAME 1st GETS", EXTSET_KIND_NUM, 0, 99, 10 },
+    { "COIN GAME 2nd GETS", EXTSET_KIND_NUM, 0, 99, 3 },
+    { "COIN GAME 3rd GETS", EXTSET_KIND_NUM, 0, 99, 2 },
+    { "COIN GAME 4th GETS", EXTSET_KIND_NUM, 0, 99, 0 },
 };
 
 static ExtSetEntry ext_other_entries[] = {
@@ -2401,6 +2408,16 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
                 break;
         }
     }
+    // { "F4A WINNER GETS", EXTSET_KIND_NUM, 0, 99, 10 },
+    // { "F4A LOSER GETS", EXTSET_KIND_NUM, 0, 99, 0 },
+    // { "2v2 WINNER GETS", EXTSET_KIND_NUM, 0, 99, 10 },
+    // { "2v2 LOSER GETS", EXTSET_KIND_NUM, 0, 99, 0 },
+    // { "1v3 WINNER GETS", EXTSET_KIND_NUM, 0, 99, 10 },
+    // { "1v3 LOSER GETS", EXTSET_KIND_NUM, 0, 99, 0 },
+    // { "COIN GAME 1st GETS", EXTSET_KIND_NUM, 0, 99, 10 },
+    // { "COIN GAME 2nd GETS", EXTSET_KIND_NUM, 0, 99, 3 },
+    // { "COIN GAME 3rd GETS", EXTSET_KIND_NUM, 0, 99, 2 },
+    // { "COIN GAME 4th GETS", EXTSET_KIND_NUM, 0, 99, 0 },
     {
         // Extra settings
         char msg[256];
@@ -2410,6 +2427,32 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
         OSReport(msg);
         ExGameCfg.mg_config.norm_coin_mg = getEntryValue("NORMALIZE COIN GAMES");
         sprintf(msg, "Extra Game Config: norm_coin_mg set to %d\n", ExGameCfg.mg_config.norm_coin_mg);
+        OSReport(msg);
+
+        ExGameCfg.mg_config.f4a_rew[0] = getEntryValue("F4A WINNER GETS");
+        ExGameCfg.mg_config.f4a_rew[1] = getEntryValue("F4A LOSER GETS");
+        sprintf(msg, "Extra Game Config: f4a_rew set to %d and %d\n",
+            ExGameCfg.mg_config.f4a_rew[0], ExGameCfg.mg_config.f4a_rew[1]);
+        OSReport(msg);
+
+        ExGameCfg.mg_config.v2_rew[0] = getEntryValue("2v2 WINNER GETS");
+        ExGameCfg.mg_config.v2_rew[1] = getEntryValue("2v2 LOSER GETS");
+        sprintf(msg, "Extra Game Config: v2_rew set to %d and %d\n",
+            ExGameCfg.mg_config.v2_rew[0], ExGameCfg.mg_config.v2_rew[1]);
+        OSReport(msg);
+        
+        ExGameCfg.mg_config.v3_rew[0] = getEntryValue("1v3 WINNER GETS");
+        ExGameCfg.mg_config.v3_rew[1] = getEntryValue("1v3 LOSER GETS");
+        sprintf(msg, "Extra Game Config: v3_rew set to %d and %d\n",
+            ExGameCfg.mg_config.v3_rew[0], ExGameCfg.mg_config.v3_rew[1]);
+        OSReport(msg);
+        
+        ExGameCfg.mg_config.coin_mg_rew[0] = getEntryValue("COIN GAME 1st GETS");
+        ExGameCfg.mg_config.coin_mg_rew[1] = getEntryValue("COIN GAME 2nd GETS");
+        ExGameCfg.mg_config.coin_mg_rew[2] = getEntryValue("COIN GAME 3rd GETS");
+        ExGameCfg.mg_config.coin_mg_rew[3] = getEntryValue("COIN GAME 4th GETS");
+        sprintf(msg, "Extra Game Config: coin_mg_rew set to %d and %d and %d and %d\n",
+            ExGameCfg.mg_config.coin_mg_rew[0], ExGameCfg.mg_config.coin_mg_rew[1], ExGameCfg.mg_config.coin_mg_rew[2], ExGameCfg.mg_config.coin_mg_rew[3]);
         OSReport(msg);
     }
     BoardSaveInit(gameConfigs[2]);

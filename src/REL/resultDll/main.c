@@ -145,7 +145,7 @@ void ObjectSetup(void)
 // Extra
 static u8 ResultIsCoinMg(void)
 {
-    u8 i;
+    s16 i;
     u8 is_coins_added;
 
     is_coins_added = FALSE;
@@ -179,18 +179,90 @@ static void GetCoinMgRank(s16 mg_rank[4])
 }
 
 static void HandleCoinMgWins(void) {
-    u16 i;
+    s16 i;
+    u16 mgType;
     float scale[4];
     s16 mg_rank[4];
-    if (ResultIsCoinMg() && ExGameCfg.mg_config.norm_coin_mg) {
-        GetCoinMgRank(mg_rank);
+
+    mgType = mgInfoTbl[GWSystem.mg_next].type;
+
+    // Only apply if the game is a coin game and the option is enabled
+    if (!(ResultIsCoinMg() && ExGameCfg.mg_config.norm_coin_mg)) {
+        return;
+    }
+
+    GetCoinMgRank(mg_rank);
+    if(mgType == 0) {
         for (i = 0; i < 4; i++) {
             if (mg_rank[i] == 0) {
-                GWPlayerCoinWinSet(i, 10);
-            } else {
-                GWPlayerCoinWinSet(i, 0);
+                GWPlayerCoinWinSet(i, ExGameCfg.mg_config.coin_mg_rew[0]);
+            } else if (mg_rank[i] == 1) {
+                GWPlayerCoinWinSet(i, ExGameCfg.mg_config.coin_mg_rew[1]);
+            } else if (mg_rank[i] == 2) {
+                GWPlayerCoinWinSet(i, ExGameCfg.mg_config.coin_mg_rew[2]);
+            } else { // 4th player
+                GWPlayerCoinWinSet(i, ExGameCfg.mg_config.coin_mg_rew[3]);
             }
             GWPlayerCoinCollectSet(i, 0);
+        }
+    } else if (mgType == 1) {
+        for (i = 0; i < 4; i++) {
+            if (mg_rank[i] == 0) {
+                GWPlayerCoinWinSet(i, ExGameCfg.mg_config.v3_rew[0]);
+            } else {
+                GWPlayerCoinWinSet(i, ExGameCfg.mg_config.v3_rew[1]);
+            }
+            GWPlayerCoinCollectSet(i, 0);
+        }
+    } else if (mgType == 2) {
+        for (i = 0; i < 4; i++) {
+            if (mg_rank[i] == 0) {
+                GWPlayerCoinWinSet(i, ExGameCfg.mg_config.v2_rew[0]);
+            } else {
+                GWPlayerCoinWinSet(i, ExGameCfg.mg_config.v2_rew[1]);
+            }
+            GWPlayerCoinCollectSet(i, 0);
+        }
+    } else {
+        return; // Minigame should be other of type 0, 1 or 2.
+    }
+}
+
+static void changeNormalMgRewards(void) {
+    s16 i;
+    u16 mgType;
+    u16 win_coin;
+    u16 lose_coin;
+
+    // Only applies to normal minigames
+    if (ResultIsCoinMg()) {
+        return;
+    }
+
+    mgType = mgInfoTbl[GWSystem.mg_next].type;
+    switch (mgType) {
+        case 0:
+            win_coin = ExGameCfg.mg_config.f4a_rew[0];
+            lose_coin = ExGameCfg.mg_config.f4a_rew[1];
+            break;
+        case 1:
+            win_coin = ExGameCfg.mg_config.v3_rew[0];
+            lose_coin = ExGameCfg.mg_config.v3_rew[1];
+            break;
+        case 2:
+            win_coin = ExGameCfg.mg_config.v2_rew[0];
+            lose_coin = ExGameCfg.mg_config.v2_rew[1];
+            break;
+        default:
+            return; // Only apply to free for all, 1v3 and 2v2 minigames
+    }
+
+    for (i = 0; i < 4; i++) {
+        // GWPlayerCoinCollectGet used in coin minigames and GWPlayerCoinWinGet used in normal minigames (usually I think)
+        if(GWPlayerCoinWinGet(i) > 0) {
+            GWPlayerCoinWinSet(i, win_coin);
+        } else {
+            GWPlayerCoinWinSet(i, lose_coin);
         }
     }
 }
@@ -203,6 +275,7 @@ static void ResultMain(void)
     s16 btnDown;
     HUPROCESS *proc = HuPrcCurrentGet();
     HuAudSeqPlay(57);
+    changeNormalMgRewards();
     HandleCoinMgWins();
     for (i = player = 0; i < 4; i++) {
         if (GWPlayerCfg[i].iscom) {
@@ -979,7 +1052,6 @@ void ResultCoinNumGet(s16 *coinNum)
     s16 rank[4];
     s16 mg_rank[4];
     mgType = mgInfoTbl[GWSystem.mg_next].type;
-    isCoinMg = ResultIsCoinMg();
     switch (mgType) {
         case 4:
             unkRankF = 0;

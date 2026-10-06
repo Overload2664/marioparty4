@@ -149,6 +149,10 @@ typedef struct extra_game_config {
     struct MGConfig {
         u8 disable_1v3;
         u8 norm_coin_mg;
+        u8 f4a_rew[2];
+        u8 v3_rew[2];
+        u8 v2_rew[2];
+        u8 coin_mg_rew[4];
     } mg_config;
     
 } ExtraGameConfig;
