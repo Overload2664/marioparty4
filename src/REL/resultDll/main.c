@@ -6,6 +6,7 @@
 #include "game/disp.h"
 #include "game/frand.h"
 #include "game/gamework.h"
+#include "game/gamework_data.h"
 #ifndef __MWERKS__
 #include "game/hsfex.h"
 #endif
@@ -141,6 +142,59 @@ void ObjectSetup(void)
     resultBonusPlayer = frandmod(4);
 }
 
+// Extra
+static u8 ResultIsCoinMg(void)
+{
+    u8 i;
+    u8 is_coins_added;
+
+    is_coins_added = FALSE;
+    for (i = 0; i < 4; i++) {
+        // GWPlayerCoinCollectGet used in coin minigames and GWPlayerCoinWinGet used in normal minigames (usually I think)
+        if (GWPlayerCoinWinGet(i) > 0) {
+            return FALSE;
+        }
+
+        if(GWPlayerCoinCollectGet(i) > 0) {
+            is_coins_added = TRUE;
+        }
+    }
+    return is_coins_added;
+}
+
+static void GetCoinMgRank(s16 mg_rank[4])
+{
+    s16 i;
+    s16 j;
+    s16 rank;
+
+    for (i = 0; i < 4; i++) {
+        mg_rank[i] = 0;
+        for (j = 0; j < 4; j++) {
+            if (GWPlayerCoinCollectGet(j) > GWPlayerCoinCollectGet(i)) {
+                mg_rank[i]++;
+            }
+        }
+    }
+}
+
+static void HandleCoinMgWins(void) {
+    u16 i;
+    float scale[4];
+    s16 mg_rank[4];
+    if (ResultIsCoinMg() && ExGameCfg.mg_config.norm_coin_mg) {
+        GetCoinMgRank(mg_rank);
+        for (i = 0; i < 4; i++) {
+            if (mg_rank[i] == 0) {
+                GWPlayerCoinWinSet(i, 10);
+            } else {
+                GWPlayerCoinWinSet(i, 0);
+            }
+            GWPlayerCoinCollectSet(i, 0);
+        }
+    }
+}
+
 static void ResultMain(void)
 {
     s16 player;
@@ -149,6 +203,7 @@ static void ResultMain(void)
     s16 btnDown;
     HUPROCESS *proc = HuPrcCurrentGet();
     HuAudSeqPlay(57);
+    HandleCoinMgWins();
     for (i = player = 0; i < 4; i++) {
         if (GWPlayerCfg[i].iscom) {
             player++;
@@ -919,9 +974,12 @@ void ResultCoinNumGet(s16 *coinNum)
     u32 coin_battle;
     s16 unkRankF;
     s16 mgType;
+    u16 isCoinMg;
     float scale[4];
     s16 rank[4];
+    s16 mg_rank[4];
     mgType = mgInfoTbl[GWSystem.mg_next].type;
+    isCoinMg = ResultIsCoinMg();
     switch (mgType) {
         case 4:
             unkRankF = 0;
@@ -978,7 +1036,6 @@ void ResultCoinNumGet(s16 *coinNum)
                 coinNum[4] = 0;
             }
             break;
-
         default:
             for (i = 0; i < 4; i++) {
                 coin = GWPlayerCoinWinGet(i) + GWPlayerCoinCollectGet(i);

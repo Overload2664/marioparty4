@@ -1699,7 +1699,7 @@ static ExtSetEntry ext_board_entries[] = {
 
 static ExtSetEntry ext_minigame_entries[] = {
     { "DISABLE 1v3", EXTSET_KIND_ONOFF, 0, 0, 1 },
-    { "MG TIME", EXTSET_KIND_NUM, 1, 5, 3 },
+    { "NORMALIZE COIN GAMES", EXTSET_KIND_ONOFF, 0, 0, 1 },
     { "COM LEVEL", EXTSET_KIND_NUM, 0, 3, 1 },
     { "ITEM MINIGAMES", EXTSET_KIND_ONOFF, 0, 0, 1 },
     { "REPLAY VOTES", EXTSET_KIND_ONOFF, 0, 0, 1 },
@@ -2404,8 +2404,12 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
     {
         // Extra settings
         char msg[256];
+
         ExGameCfg.mg_config.disable_1v3 = getEntryValue("DISABLE 1v3");
         sprintf(msg, "Extra Game Config: disable_1v3 set to %d\n", ExGameCfg.mg_config.disable_1v3);
+        OSReport(msg);
+        ExGameCfg.mg_config.norm_coin_mg = getEntryValue("NORMALIZE COIN GAMES");
+        sprintf(msg, "Extra Game Config: norm_coin_mg set to %d\n", ExGameCfg.mg_config.norm_coin_mg);
         OSReport(msg);
     }
     BoardSaveInit(gameConfigs[2]);
