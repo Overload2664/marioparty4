@@ -2,6 +2,7 @@
 #include "game/armem.h"
 #include "game/audio.h"
 #include "game/board/player.h"
+#include "game/board/start.h"
 #include "game/data.h"
 #include "game/disp.h"
 #include "game/frand.h"
@@ -267,6 +268,62 @@ static void changeNormalMgRewards(void) {
     }
 }
 
+static void getNewOrder(s8 order[4]) {
+    s16 i;
+    s16 j;
+    u16 mgType;
+
+    mgType = mgInfoTbl[GWSystem.mg_next].type;
+
+    for (i = 0; i < 4; i++) {
+        order[i] = 0;
+        for (j = 0; j < 4; j++) {
+            if (GWPlayerCoinWinGet(j) > GWPlayerCoinWinGet(i) ||
+                (i > j && (GWPlayerCoinWinGet(j) == GWPlayerCoinWinGet(i)))) {
+                order[i]++;
+            }
+        }
+        if (mgType != 4 || ExGameCfg.mg_config.battle_reverse_turn == 1) {
+            order[i] = 3 - order[i]; // In OrderPlayers() order works the opposite way
+        }
+    }
+}
+
+void handleNewOrder(void) {
+    s16 i;
+    u8 is_coin_mg;
+    u16 mgType;
+
+    getNewOrder(playerOrderNew);
+
+    mgType = mgInfoTbl[GWSystem.mg_next].type;
+    switch (mgType) {
+        case 0:
+            is_coin_mg = ResultIsCoinMg();
+            if ((!is_coin_mg && ExGameCfg.mg_config.f4a_turn) || (is_coin_mg && ExGameCfg.mg_config.coin_mg_turn)) {
+                OrderPlayers();
+            } 
+            break;
+        case 1:
+            if (ExGameCfg.mg_config.v3_turn) {
+                OrderPlayers();
+            }
+            break;
+        case 2:
+            if (ExGameCfg.mg_config.v2_turn) {
+                OrderPlayers();
+            }
+            break;
+        case 4:
+            if (ExGameCfg.mg_config.battle_turn) {
+                OrderPlayers();
+            }
+            break;
+        default:
+            return; // Only apply to free for all, 1v3, 2v2 and battle minigames
+    }
+}
+
 static void ResultMain(void)
 {
     s16 player;
@@ -277,6 +334,7 @@ static void ResultMain(void)
     HuAudSeqPlay(57);
     changeNormalMgRewards();
     HandleCoinMgWins();
+    handleNewOrder();
     for (i = player = 0; i < 4; i++) {
         if (GWPlayerCfg[i].iscom) {
             player++;

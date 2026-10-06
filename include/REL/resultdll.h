@@ -44,4 +44,7 @@ extern s32 resultReadEndF;
 extern s32 resultFastF;
 extern s16 resultBonusPlayer;
 
+// Extra
+void handleNewOrder(void);
+
 #endif

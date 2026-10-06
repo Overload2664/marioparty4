@@ -125,6 +125,7 @@ void ResultBattleMain(void)
     s16 winId;
     s16 btnDown;
     HUPROCESS *proc = HuPrcCurrentGet();
+    handleNewOrder();
     HuAudSeqPlay(10);
     for (i = playerNo = 0; i < 4; i++) {
         if (GWPlayerCfg[i].iscom) {

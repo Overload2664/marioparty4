@@ -68,14 +68,14 @@ static void ExecStartRoll(void);
 static void InitCamera(void);
 static void InitHost(void);
 static void CreateTapWin(void);
-static void OrderPlayers(void);
+void OrderPlayers(void);
 
 static Vec spacePos;
 static Vec camStartFocusPos;
 
 static s16 hostMdl;
 static s16 startSpace;
-static s8 playerOrderNew[4];
+s8 playerOrderNew[4];
 static s8 playerOrderOld[4];
 static HUPROCESS *startProc;
 
@@ -858,7 +858,7 @@ static void CreateTapWin(void) {
     }
 }
 
-static void OrderPlayers(void) {
+void OrderPlayers(void) {
     s32 pOrderTemp;
     PlayerConfig *playerCfg;
     PlayerState *state;

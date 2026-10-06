@@ -153,6 +153,12 @@ typedef struct extra_game_config {
         u8 v3_rew[2];
         u8 v2_rew[2];
         u8 coin_mg_rew[4];
+        u8 f4a_turn;
+        u8 v3_turn;
+        u8 v2_turn;
+        u8 coin_mg_turn;
+        u8 battle_turn;
+        u8 battle_reverse_turn;
     } mg_config;
     
 } ExtraGameConfig;

@@ -1700,6 +1700,12 @@ static ExtSetEntry ext_board_entries[] = {
 static ExtSetEntry ext_minigame_entries[] = {
     { "DISABLE 1v3", EXTSET_KIND_ONOFF, 0, 0, 1 },
     { "NORMALIZE COIN GAMES", EXTSET_KIND_ONOFF, 0, 0, 1 },
+    { "F4A CHANGES TURN", EXTSET_KIND_ONOFF, 0, 0, 1 },
+    { "2v2 CHANGES TURN", EXTSET_KIND_ONOFF, 0, 0, 1 },
+    { "1v3 CHANGES TURN", EXTSET_KIND_ONOFF, 0, 0, 1 },
+    { "COIN MG CHANGES TURN", EXTSET_KIND_ONOFF, 0, 0, 1 },
+    { "BATTLE CHANGES TURN", EXTSET_KIND_ONOFF, 0, 0, 1 },
+    { "BATTLE REVERSE TURN", EXTSET_KIND_ONOFF, 0, 0, 1 },
     { "F4A WINNER GETS", EXTSET_KIND_NUM, 0, 99, 10 },
     { "F4A LOSER GETS", EXTSET_KIND_NUM, 0, 99, 0 },
     { "2v2 WINNER GETS", EXTSET_KIND_NUM, 0, 99, 10 },
@@ -2408,16 +2414,6 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
                 break;
         }
     }
-    // { "F4A WINNER GETS", EXTSET_KIND_NUM, 0, 99, 10 },
-    // { "F4A LOSER GETS", EXTSET_KIND_NUM, 0, 99, 0 },
-    // { "2v2 WINNER GETS", EXTSET_KIND_NUM, 0, 99, 10 },
-    // { "2v2 LOSER GETS", EXTSET_KIND_NUM, 0, 99, 0 },
-    // { "1v3 WINNER GETS", EXTSET_KIND_NUM, 0, 99, 10 },
-    // { "1v3 LOSER GETS", EXTSET_KIND_NUM, 0, 99, 0 },
-    // { "COIN GAME 1st GETS", EXTSET_KIND_NUM, 0, 99, 10 },
-    // { "COIN GAME 2nd GETS", EXTSET_KIND_NUM, 0, 99, 3 },
-    // { "COIN GAME 3rd GETS", EXTSET_KIND_NUM, 0, 99, 2 },
-    // { "COIN GAME 4th GETS", EXTSET_KIND_NUM, 0, 99, 0 },
     {
         // Extra settings
         char msg[256];
@@ -2425,8 +2421,39 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
         ExGameCfg.mg_config.disable_1v3 = getEntryValue("DISABLE 1v3");
         sprintf(msg, "Extra Game Config: disable_1v3 set to %d\n", ExGameCfg.mg_config.disable_1v3);
         OSReport(msg);
+
         ExGameCfg.mg_config.norm_coin_mg = getEntryValue("NORMALIZE COIN GAMES");
         sprintf(msg, "Extra Game Config: norm_coin_mg set to %d\n", ExGameCfg.mg_config.norm_coin_mg);
+        OSReport(msg);
+
+        ExGameCfg.mg_config.f4a_turn = getEntryValue("F4A CHANGES TURN");
+        sprintf(msg, "Extra Game Config: f4a_turn set to %d\n",
+            ExGameCfg.mg_config.f4a_turn);
+        OSReport(msg);
+
+        ExGameCfg.mg_config.v2_turn = getEntryValue("2v2 CHANGES TURN");
+        sprintf(msg, "Extra Game Config: v2_turn set to %d\n",
+            ExGameCfg.mg_config.v2_turn);
+        OSReport(msg);
+
+        ExGameCfg.mg_config.v3_turn = getEntryValue("1v3 CHANGES TURN");
+        sprintf(msg, "Extra Game Config: v3_turn set to %d\n",
+            ExGameCfg.mg_config.v3_turn);
+        OSReport(msg);
+
+        ExGameCfg.mg_config.coin_mg_turn = getEntryValue("COIN MG CHANGES TURN");
+        sprintf(msg, "Extra Game Config: coin_mg_turn set to %d\n",
+            ExGameCfg.mg_config.coin_mg_turn);
+        OSReport(msg);
+
+        ExGameCfg.mg_config.battle_turn = getEntryValue("BATTLE CHANGES TURN");
+        sprintf(msg, "Extra Game Config: battle_turn set to %d\n",
+            ExGameCfg.mg_config.battle_turn);
+        OSReport(msg);
+
+        ExGameCfg.mg_config.battle_reverse_turn = getEntryValue("BATTLE REVERSE TURN");
+        sprintf(msg, "Extra Game Config: battle_reverse_turn set to %d\n",
+            ExGameCfg.mg_config.battle_reverse_turn);
         OSReport(msg);
 
         ExGameCfg.mg_config.f4a_rew[0] = getEntryValue("F4A WINNER GETS");
