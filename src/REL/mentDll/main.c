@@ -1755,11 +1755,39 @@ u32 getEntryValue(const char* entry_name) {
     return -1;
 }
 
+// ---------------------------------------------------------------------------
+// Window-font glyph codes.
+//
+// The HuWin message font is NOT laid out in ASCII order. A message byte is
+// used directly as an index into a 16x13 glyph atlas at (byte - 48), 20x24
+// cells (see HuWinDrawMes / MesDispFunc in src/game/window.c), so the byte
+// you write selects a *cell*, not the character of the same ASCII value.
+//
+// Decoding WIN_FONTE_ANM (files/data/win.bin, DATADIR_WIN entry 1) shows:
+//
+//   48-57  0-9          65-90  A-Z          97-122 a-z
+//   58     coin icon    59     X mark      60  plus       61  equals
+//   62     diamond      63     crosshair   91  quote      92  comma-ish
+//   93     '('          94     '^' caret   95  '/'        123 ':' colon
+//   124    '%'          125    '.' period  126 '&'
+//
+// There is no '<' or '>' glyph anywhere in the atlas, so ASCII 60/62 cannot
+// be used for the cursor and edit brackets. The codes below are the ones
+// that actually draw what this menu wants. charWETbl[] in window.c is
+// indexed by the same byte and agrees with the atlas, which is how the
+// layout was confirmed.
+// ---------------------------------------------------------------------------
+// Written as escapes rather than the literal ASCII character on purpose: the
+// literal is exactly the wrong glyph. Octal, not hex, because these get
+// string-concatenated with following letters ("\x7bCHANGE" would parse the C
+// as part of the hex value); an octal escape stops after 3 digits.
+#define EXTSET_G_COLON "\173"  // 123 dec: the real ':' (ASCII 58 draws a coin)
+#define EXTSET_G_HYPEHN "\075"     //  61 dec: '-' brackets the edited value
+#define EXTSET_G_CROSS "\076"   //  62 dec: diamond, used as the row cursor bullet
+
 static s16 extSetWins[EXTSET_WIN_COUNT];
-static char extSetTitleBuf[96];
 static char extSetLabelBuf[EXTSET_ROWS][64];
 static char extSetValueBuf[EXTSET_ROWS][32];
-static char extSetFootBuf[96];
 static GXColor extSetColDim = { 24, 32, 68, 255 };
 static GXColor extSetColSel = { 72, 104, 208, 255 };
 static GXColor extSetColEdit = { 216, 128, 32, 255 };
@@ -1825,12 +1853,11 @@ static void extSetRedraw(s32 topic_idx, s32 sel, s32 top, s32 editing)
     s32 row;
     s32 selected;
     s32 marked;
+    char buffer[128];
 
     topic = &ext_topics[topic_idx];
-    // "^"/"V" mark that more entries exist above/below the visible window
-    sprintf(&extSetTitleBuf[1], "< %s %d OF %d >%s%s", topic->title, topic_idx + 1,
-        EXTSET_TOPIC_COUNT, (top > 0) ? " ^" : "", (top + EXTSET_ROWS < topic->count) ? " V" : "");
-    extSetPutText(extSetWins[EXTSET_TITLE_WIN], extSetTitleBuf);
+    sprintf(buffer, " " "%s %d OF %d", topic->title, topic_idx + 1, EXTSET_TOPIC_COUNT);
+    extSetPutText(extSetWins[EXTSET_TITLE_WIN], buffer);
     for (i = 0; i < EXTSET_ROWS; i++) {
         row = top + i;
         if (row >= topic->count) {
@@ -1846,14 +1873,14 @@ static void extSetRedraw(s32 topic_idx, s32 sel, s32 top, s32 editing)
         entry = &topic->entries[row];
         selected = (row == sel) ? 1 : 0;
         marked = (selected != 0 && editing != 0) ? 1 : 0;
-        sprintf(&extSetLabelBuf[i][1], "%s%s", (selected != 0) ? "> " : "  ", entry->label);
+        sprintf(&extSetLabelBuf[i][1], "%s%s", (selected != 0) ? EXTSET_G_CROSS " " : "  ", entry->label);
         if (entry->kind == EXTSET_KIND_ONOFF) {
-            sprintf(&extSetValueBuf[i][1], "%s%s%s", (marked != 0) ? "<" : "",
-                (entry->value != 0) ? "YES" : "NO", (marked != 0) ? ">" : "");
+            sprintf(&extSetValueBuf[i][1], "%s%s%s", (marked != 0) ? EXTSET_G_HYPEHN : "",
+                (entry->value != 0) ? "YES" : "NO", (marked != 0) ? EXTSET_G_HYPEHN : "");
         }
         else {
-            sprintf(&extSetValueBuf[i][1], "%s%d%s", (marked != 0) ? "<" : "",
-                entry->value, (marked != 0) ? ">" : "");
+            sprintf(&extSetValueBuf[i][1], "%s%d%s", (marked != 0) ? EXTSET_G_HYPEHN : "",
+                entry->value, (marked != 0) ? EXTSET_G_HYPEHN : "");
         }
         if (selected != 0) {
             if (editing != 0) {
@@ -1875,9 +1902,18 @@ static void extSetRedraw(s32 topic_idx, s32 sel, s32 top, s32 editing)
         extSetPutText(extSetWins[EXTSET_LABEL_WIN(i)], extSetLabelBuf[i]);
         extSetPutText(extSetWins[EXTSET_VALUE_WIN(i)], extSetValueBuf[i]);
     }
-    sprintf(&extSetFootBuf[1], (editing != 0) ? "LEFT_RIGHT:CHANGE  A:OK  B:CANCEL"
-        : "STICK:MOVE A:EDIT B:END L_R:TOPIC");
-    extSetPutText(extSetWins[EXTSET_FOOT_WIN], extSetFootBuf);
+
+    if (editing != 0) {
+        extSetPutText(
+            extSetWins[EXTSET_FOOT_WIN],
+            " " "LEFT_RIGHT" EXTSET_G_COLON "CHANGE A" EXTSET_G_COLON "OK B" EXTSET_G_COLON "CANCEL"
+        );
+    } else {
+        extSetPutText(
+            extSetWins[EXTSET_FOOT_WIN],
+            " " "UP_DOWN" EXTSET_G_COLON "MOVE A" EXTSET_G_COLON "EDIT L_R" EXTSET_G_COLON "TOPIC START" EXTSET_G_COLON "END"
+        );
+    }
 }
 
 s32 extraOptionsMenu(void)
@@ -2368,8 +2404,8 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
     {
         // Extra settings
         char msg[256];
-        ExGameCfg.disable_1v3 = getEntryValue("DISABLE 1v3");
-        sprintf(msg, "Extra Game Config: disable_1v3 set to %d\n", ExGameCfg.disable_1v3);
+        ExGameCfg.mg_config.disable_1v3 = getEntryValue("DISABLE 1v3");
+        sprintf(msg, "Extra Game Config: disable_1v3 set to %d\n", ExGameCfg.mg_config.disable_1v3);
         OSReport(msg);
     }
     BoardSaveInit(gameConfigs[2]);

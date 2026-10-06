@@ -530,7 +530,7 @@ static s32 GetMGType(void) {
     }
 
     if (var_r30 == 1 || var_r30 == 3) {
-        if (ExGameCfg.disable_1v3) {
+        if (ExGameCfg.mg_config.disable_1v3) {
             return 0; // If 1v3s are disabled then they become free for alls
         }
         return 1;

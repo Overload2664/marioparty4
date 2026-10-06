@@ -146,7 +146,10 @@ typedef struct game_stat {
 } GameStat;
 
 typedef struct extra_game_config {
-    u8 disable_1v3;
+    struct MGConfig {
+        u8 disable_1v3;
+    } mg_config;
+    
 } ExtraGameConfig;
 
 extern s16 GwLanguage;
