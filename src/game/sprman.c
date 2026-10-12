@@ -210,7 +210,7 @@ void HuSprPauseSet(BOOL value)
 {
     HuSprPauseF = value;
 }
-
+// Important
 ANIMDATA *HuSprAnimRead(void *data)
 {
     s16 i;

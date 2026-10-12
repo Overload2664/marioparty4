@@ -398,7 +398,7 @@ static void InitBox(s32 arg0) {
         itemResult = (boardTutorialData[0] ^ 1);
         var_r29 = 0;
     }
-    itemMdl = BoardModelCreate(sp8[itemResult], NULL, 0);
+    itemMdl = BoardModelCreate(BoardItemModelGet(itemResult), NULL, 0);
     BoardModelVisibilitySet(itemMdl, 0);
     temp_r31 = omObjGetWork(boxObj[var_r29], boxObjWork);
     BoardModelScaleSet(temp_r31->unk_02, 1.5f, 1.5f, 1.5f);

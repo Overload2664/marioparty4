@@ -392,7 +392,7 @@ s32 BoardPlayerItemAdd(s32 arg0, s32 arg1)
     for (var_r31 = 0; var_r31 < ARRAY_COUNT(GWPlayer[arg0].items); var_r31++) {
         if (GWPlayer[arg0].items[var_r31] == BOARD_ITEM_NONE) {
             HuAudFXPlay(0x360);
-            var_r30->items[var_r31] = arg1;
+            var_r30->items[var_r31] = arg1; // Important
             BoardItemStatusKill(arg0);
             var_r29 = var_r31;
             break;

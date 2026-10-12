@@ -4,7 +4,7 @@
 #include "game/sprite.h"
 
 s32 BoardItemModelGet(s32 arg0);
-s32 BoardItemNameGet(s32 arg0);
+s32 BoardItemDescriptionGet(s32 arg0);
 BOOL BoardStatusStopCheck(s32 arg0);
 s32 BoardStatusVisibleGet(s32 arg0);
 void BoardStatusShowSetAll(s32 arg0);

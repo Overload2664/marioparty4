@@ -32,7 +32,7 @@ static BOOL CheckLampUse(s32 player, s32 item);
 
 static s8 itemUse = -1;
 
-static s8 comItemPreferTbl[CHARNO_MAX ][SHOP_ITEMS_END] = {
+static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
     {   //Mario
         BOARD_ITEM_MAGIC_LAMP,
         BOARD_ITEM_BOOS_CRYSTAL_BALL,
@@ -45,7 +45,9 @@ static s8 comItemPreferTbl[CHARNO_MAX ][SHOP_ITEMS_END] = {
         BOARD_ITEM_MINI_MUSHROOM,
         BOARD_ITEM_SPARKY_STICKER,
         BOARD_ITEM_CHOMP_CALL,
-        BOARD_ITEM_BOWSER_SUIT
+        BOARD_ITEM_BOWSER_SUIT,
+        BOARD_ITEM_MUSHROOM,
+        BOARD_ITEM_LATER
     },
     {   //Luigi
         BOARD_ITEM_MAGIC_LAMP,
@@ -59,7 +61,9 @@ static s8 comItemPreferTbl[CHARNO_MAX ][SHOP_ITEMS_END] = {
         BOARD_ITEM_SWAP_CARD,
         BOARD_ITEM_MINI_MEGA_HAMMER,
         BOARD_ITEM_SPARKY_STICKER,
-        BOARD_ITEM_CHOMP_CALL
+        BOARD_ITEM_CHOMP_CALL,
+        BOARD_ITEM_MUSHROOM,
+        BOARD_ITEM_LATER
     },   
     {   //Peach
         BOARD_ITEM_MAGIC_LAMP,
@@ -73,7 +77,9 @@ static s8 comItemPreferTbl[CHARNO_MAX ][SHOP_ITEMS_END] = {
         BOARD_ITEM_SPARKY_STICKER,
         BOARD_ITEM_CHOMP_CALL,
         BOARD_ITEM_MINI_MUSHROOM,
-        BOARD_ITEM_MINI_MEGA_HAMMER
+        BOARD_ITEM_MINI_MEGA_HAMMER,
+        BOARD_ITEM_MUSHROOM,
+        BOARD_ITEM_LATER
     },   
     {   //Yoshi
         BOARD_ITEM_MAGIC_LAMP,
@@ -87,7 +93,9 @@ static s8 comItemPreferTbl[CHARNO_MAX ][SHOP_ITEMS_END] = {
         BOARD_ITEM_MINI_MUSHROOM,
         BOARD_ITEM_MINI_MEGA_HAMMER,
         BOARD_ITEM_BOWSER_SUIT,
-        BOARD_ITEM_SPARKY_STICKER
+        BOARD_ITEM_SPARKY_STICKER,
+        BOARD_ITEM_MUSHROOM,
+        BOARD_ITEM_LATER
     },    
     {   //Wario
         BOARD_ITEM_MAGIC_LAMP,
@@ -101,7 +109,9 @@ static s8 comItemPreferTbl[CHARNO_MAX ][SHOP_ITEMS_END] = {
         BOARD_ITEM_SUPER_MINI_MUSHROOM,
         BOARD_ITEM_SWAP_CARD,
         BOARD_ITEM_MINI_MUSHROOM,
-        BOARD_ITEM_SPARKY_STICKER
+        BOARD_ITEM_SPARKY_STICKER,
+        BOARD_ITEM_MUSHROOM,
+        BOARD_ITEM_LATER
     },   
     {   //DK
         BOARD_ITEM_MAGIC_LAMP,
@@ -115,7 +125,9 @@ static s8 comItemPreferTbl[CHARNO_MAX ][SHOP_ITEMS_END] = {
         BOARD_ITEM_MINI_MUSHROOM,
         BOARD_ITEM_MINI_MEGA_HAMMER,
         BOARD_ITEM_CHOMP_CALL,
-        BOARD_ITEM_SPARKY_STICKER
+        BOARD_ITEM_SPARKY_STICKER,
+        BOARD_ITEM_MUSHROOM,
+        BOARD_ITEM_LATER
     },   
     {   //Daisy
         BOARD_ITEM_MAGIC_LAMP,
@@ -129,7 +141,9 @@ static s8 comItemPreferTbl[CHARNO_MAX ][SHOP_ITEMS_END] = {
         BOARD_ITEM_BOWSER_SUIT,
         BOARD_ITEM_SWAP_CARD,
         BOARD_ITEM_SUPER_MINI_MUSHROOM,
-        BOARD_ITEM_MINI_MUSHROOM
+        BOARD_ITEM_MINI_MUSHROOM,
+        BOARD_ITEM_MUSHROOM,
+        BOARD_ITEM_LATER
     },   
     {   //Waluigi
         BOARD_ITEM_MAGIC_LAMP,
@@ -143,7 +157,9 @@ static s8 comItemPreferTbl[CHARNO_MAX ][SHOP_ITEMS_END] = {
         BOARD_ITEM_SUPER_MEGA_MUSHROOM,
         BOARD_ITEM_MEGA_MUSHROOM,
         BOARD_ITEM_SUPER_MINI_MUSHROOM,
-        BOARD_ITEM_MINI_MUSHROOM
+        BOARD_ITEM_MINI_MUSHROOM,
+        BOARD_ITEM_MUSHROOM,
+        BOARD_ITEM_LATER
     }
 };
 
@@ -238,7 +254,7 @@ s8 BoardComPreferItemGet(s32 player, s8 *items, s8 num_items) {
     weight = 100;
     for (i = 0; i < num_items; i++) {
         item = items[i];
-        for (j = 0; j < SHOP_ITEMS_END; j++) {
+        for (j = 0; j < BOARD_ITEMS_END - 1; j++) {
             if (item == comItemPreferTbl[character][j]) {
                 if (j < weight && (BoardPlayerItemFind(player, item) == -1 || item == BOARD_ITEM_MAGIC_LAMP || item == BOARD_ITEM_BOOS_CRYSTAL_BALL)) {
                     weight = j;
@@ -269,7 +285,7 @@ s32 BoardComItemWeightGet(s32 player, s32 item) {
     s32 weight;
     s32 i;
 
-    for (i = 0; i < SHOP_ITEMS_END; i++) {
+    for (i = 0; i < BOARD_ITEMS_END - 1; i++) {
         if (item == comItemPreferTbl[GWPlayer[player].character][i]) {
             break;
         }
@@ -349,7 +365,7 @@ static s32 ChooseUseItem(s32 player) {
         }
         result = func(player, item);
         if (result) {
-            for (j = 0; j < SHOP_ITEMS_END; j++) {
+            for (j = 0; j < BOARD_ITEMS_END - 1; j++) {
                 if (item == comItemPreferTbl[character][j]) {
                     if (j < weight) {
                         weight = j;

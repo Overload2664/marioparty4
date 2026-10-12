@@ -34,3 +34,8 @@ compile_commands.json
 # Miscellaneous
 /*.txt
 *.exe
+
+# Mod
+doc/
+new_root/
+DX/

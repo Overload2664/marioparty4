@@ -232,8 +232,8 @@ static float statusItemPosTbl[6][2] = {
     {  70.0f,   4.0f }, //item 2 pos
     { -56.0f, -16.0f }
 };
-
-static s32 itemMdlTbl[14] = {
+// IMPORTANT: For adding a new item model (2D for ui)
+static s32 itemMdlTbl[BOARD_ITEMS_END] = {
     DATA_MAKE_NUM(DATADIR_BOARD, 0x83),
     DATA_MAKE_NUM(DATADIR_BOARD, 0x84),
     DATA_MAKE_NUM(DATADIR_BOARD, 0x85),
@@ -247,16 +247,18 @@ static s32 itemMdlTbl[14] = {
     DATA_MAKE_NUM(DATADIR_BOARD, 0x8D),
     DATA_MAKE_NUM(DATADIR_BOARD, 0x8E),
     DATA_MAKE_NUM(DATADIR_BOARD, 0x8F),
-    DATA_MAKE_NUM(DATADIR_BOARD, 0x90)
+    DATA_MAKE_NUM(DATADIR_BOARD, 0x90),
+    DATA_MAKE_NUM(DATADIR_BOARD, 163),
+    DATA_MAKE_NUM(DATADIR_BOARD, 165)
 };
 
 static Vec teamItemStatusPosTbl[2] = {
     { HU_DISP_CENTERX-98, 116.0f, 0.0f },
     { HU_DISP_CENTERX+98, 116.0f, 0.0f }
 };
-
+// IMPORTANT: For adding a new item model (3D)
 s32 BoardItemModelGet(s32 arg0) {
-    s32 sp8[14] = {
+    s32 sp8[BOARD_ITEMS_END] = {
         DATA_MAKE_NUM(DATADIR_BOARD, 0x6D),
         DATA_MAKE_NUM(DATADIR_BOARD, 0x6E),
         DATA_MAKE_NUM(DATADIR_BOARD, 0x6F),
@@ -270,14 +272,35 @@ s32 BoardItemModelGet(s32 arg0) {
         DATA_MAKE_NUM(DATADIR_BOARD, 0x78),
         DATA_MAKE_NUM(DATADIR_BOARD, 0x79),
         DATA_MAKE_NUM(DATADIR_BOARD, 0x7A),
-        DATA_MAKE_NUM(DATADIR_BOARD, 0x7B)
+        DATA_MAKE_NUM(DATADIR_BOARD, 0x7B),
+        DATA_MAKE_NUM(DATADIR_BOARD, 164),
+        DATA_MAKE_NUM(DATADIR_BOARD, 166)
     };
 
     return sp8[arg0];
 }
 
-s32 BoardItemNameGet(s32 arg0) {
-    s32 sp8[15] = {
+static s32 itemNameTbl[BOARD_ITEMS_END] = {
+    0 + MAKE_MESSID(0x08, 0x0E),
+    1 + MAKE_MESSID(0x08, 0x0E),
+    3 + MAKE_MESSID(0x08, 0x0E),
+    4 + MAKE_MESSID(0x08, 0x0E),
+    5 + MAKE_MESSID(0x08, 0x0E),
+    6 + MAKE_MESSID(0x08, 0x0E),
+    7 + MAKE_MESSID(0x08, 0x0E),
+    8 + MAKE_MESSID(0x08, 0x0E),
+    9 + MAKE_MESSID(0x08, 0x0E),
+    10 + MAKE_MESSID(0x08, 0x0E),
+    11 + MAKE_MESSID(0x08, 0x0E),
+    12 + MAKE_MESSID(0x08, 0x0E),
+    13 + MAKE_MESSID(0x08, 0x0E),
+    14 + MAKE_MESSID(0x08, 0x0E),
+    3604514,
+    3604518
+};
+
+s32 BoardItemDescriptionGet(s32 arg0) {
+    s32 sp8[BOARD_ITEMS_END] = {
         DATA_MAKE_NUM(DATADIR_EFFECT, 0x00),
         DATA_MAKE_NUM(DATADIR_EFFECT, 0x01),
         DATA_MAKE_NUM(DATADIR_EFFECT, 0x02),
@@ -292,7 +315,8 @@ s32 BoardItemNameGet(s32 arg0) {
         DATA_MAKE_NUM(DATADIR_EFFECT, 0x0B),
         DATA_MAKE_NUM(DATADIR_EFFECT, 0x0C),
         DATA_MAKE_NUM(DATADIR_EFFECT, 0x0D),
-        DATA_MAKE_NUM(DATADIR_EFFECT, 0x0E)
+        3604515,
+        3604519
     };
 
     return sp8[arg0];
@@ -690,14 +714,14 @@ void BoardSpriteDigitUpdate(s16 arg0, s16 arg1, s32 arg2) {
         HuSprAttrReset(arg0, arg1, HUSPR_ATTR_DISPOFF);
     }
 }
-
+// IMPORTAMNT: This is where when not picking an item a 2d icon of the icon shows
 static void UpdateStatusItem(UnkUiStatusStruct *arg0, s32 arg1, s32 arg2) {
     float temp_f31;
     float temp_f30;
 
     temp_f31 = statusSprPosTbl[arg1 + 0xD][0];
     temp_f30 = statusSprPosTbl[arg1 + 0xD][1];
-    HuSprBankSet(arg0->unk02, arg1 + 0xD, arg2);
+    HuSprBankSet(arg0->unk02, arg1 + 0xD, arg2); // from board_file145.atb
     HuSprPosSet(arg0->unk02, arg1 + 0xD, temp_f31, temp_f30);
 }
 
@@ -1826,12 +1850,12 @@ static void CreateItemWindow(s32 arg0, s32 arg1) {
             HuWinDrawNoSet(temp_r31->unk12[i], 0x40);
             HuWinCenterPosSet(temp_r31->unk12[i], 0.0f, 48.0f);
             HuWinMesSpeedSet(temp_r31->unk12[i], 0);
-            HuWinMesSet(temp_r31->unk12[i], BoardItemNameGet(temp_r28));
-            HuWinMesMaxSizeGet(1, sp8, temp_r28 + MAKE_MESSID(0x08, 0x0E));
+            HuWinMesSet(temp_r31->unk12[i], BoardItemDescriptionGet(temp_r28));
+            HuWinMesMaxSizeGet(1, sp8, itemNameTbl[temp_r28]);
             temp_r31->unk1E[i] = HuWinCreate(temp_r31->unk2C[i].x, temp_r31->unk2C[i].y - (-94.0f), sp8[0], sp8[1], 0);
             HuWinDrawNoSet(temp_r31->unk1E[i], 0x40);
             HuWinMesSpeedSet(temp_r31->unk1E[i], 0);
-            HuWinMesSet(temp_r31->unk1E[i], temp_r28 + MAKE_MESSID(0x08, 0x0E));
+            HuWinMesSet(temp_r31->unk1E[i], itemNameTbl[temp_r28]);
             sp10.x = temp_r31->unk2C[i].x + 48.0f;
             sp10.y = temp_r31->unk2C[i].y;
             sp10.z = 400.0f;

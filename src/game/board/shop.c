@@ -1,3 +1,4 @@
+#include "dolphin/os.h"
 #include "types.h"
 #include "game/board/shop.h"
 #include "game/audio.h"
@@ -29,8 +30,8 @@
 
 typedef struct {
     struct {
-        u8 unk00_field0 : 1;
-        u8 unk00_field1 : 4;
+        u8 unk00_field0;
+        u8 unk00_field1;  // full u8 to hold 0xFF sentinel (item indices go 0-15)
     };
     u8 unk01;
     s8 unk02;
@@ -42,8 +43,8 @@ typedef struct {
 
 typedef struct {
     struct {
-        u8 unk00_field0 : 1;
-        u8 unk00_field1 : 3;
+        u8 unk00_field0;
+        u8 unk00_field1;
     };
     char unk01[1];
     s16 unk02;
@@ -52,8 +53,8 @@ typedef struct {
 
 typedef struct {
     struct {
-        u8 unk00_field0 : 1;
-        u8 unk00_field1 : 2;
+        u8 unk00_field0;
+        u8 unk00_field1;
     };
     u8 unk01;
     s8 unk02;
@@ -134,7 +135,7 @@ static s8 itemPriceTbl[] = {
      5,  5, 15, 15,
     10, 10, 15, 15,
     15, 15,  0, 25,
-    30, 30,  0,  0
+    30, 30,  5,  3
 };
 
 static s32 shopMotTbl[9][3] = {
@@ -148,6 +149,72 @@ static s32 shopMotTbl[9][3] = {
     { DATA_MAKE_NUM(DATADIR_BGUEST, 0x2A), DATA_MAKE_NUM(DATADIR_BGUEST, 0x2C), DATA_MAKE_NUM(DATADIR_BGUEST, 0x2D) },
     { DATA_MAKE_NUM(DATADIR_BGUEST, 0x2A), DATA_MAKE_NUM(DATADIR_BGUEST, 0x2C), DATA_MAKE_NUM(DATADIR_BGUEST, 0x2D) }
 };
+
+#define MESS_SMALL_SPACE "\20"
+
+// 0B 1E 02 XX XX XX XX XX XX XX XX XX 1E 08 0C 0C 0C 0C 0C 0C 0C 0E 13 3E YY YY 00
+static const char *bank_names[] = {
+    "Mini" MESS_SMALL_SPACE "Mushroom",
+    "Mega" MESS_SMALL_SPACE "Mushroom",
+    "Super" MESS_SMALL_SPACE "Mini" MESS_SMALL_SPACE "Mushroom",
+    "Super" MESS_SMALL_SPACE "Mega" MESS_SMALL_SPACE "Mushroom",
+    "MiniMega" MESS_SMALL_SPACE "Hammer",
+    "Warp" MESS_SMALL_SPACE "Pipe",
+    "Swap" MESS_SMALL_SPACE "Card",
+    "Sparky" MESS_SMALL_SPACE "Sticker",
+    "Gaddlight",
+    "Chomp" MESS_SMALL_SPACE "Call",
+    "Bowser" MESS_SMALL_SPACE "Suit",
+    "Boo's" MESS_SMALL_SPACE "Crystal" MESS_SMALL_SPACE "Ball",
+    "Magic" MESS_SMALL_SPACE "Lamp",
+    "Item" MESS_SMALL_SPACE "Bag",
+    "Bowser" MESS_SMALL_SPACE "Phone",
+    "Mushroom"
+};
+
+
+static char itemChoiceNamesTbl[BOARD_ITEMS_END][100];
+
+static void setItemChoiceNames(void) {
+    static const unsigned char prefix[] = {
+        0x0B, 0x1E, 0x02
+    };
+    // static const unsigned char middle[] = {
+    //     0x1E, 0x08,
+    //     0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C,
+    //     0x0E, 0x13, 0x3E
+    // };
+    static const unsigned char middle[] = {
+        0x1E, 0x08,
+        0x0C,
+        0x0E, 0x13, 0x3E
+    }; // TODO: Fix the spacing issue
+
+    u32 i;
+    u32 pos;
+    u32 nameLen;
+    u32 priceLen;
+
+    for (i = 0; i < BOARD_ITEMS_END; i++) {
+        char *dst = itemChoiceNamesTbl[i];
+        pos = 0;
+
+        memcpy(dst + pos, prefix, sizeof prefix);
+        pos += sizeof prefix;
+
+        nameLen = strlen(bank_names[i]);
+        memcpy(dst + pos, bank_names[i], nameLen);
+        pos += nameLen;
+
+        memcpy(dst + pos, middle, sizeof middle);
+        pos += sizeof middle;
+
+        priceLen = sprintf(dst + pos, "%d", itemPriceTbl[i]);
+        pos += priceLen;
+
+        dst[pos] = '\0';
+    }
+}
 
 void BoardShopHostSet(s16 arg0) {
     hostMdl = arg0;
@@ -224,6 +291,9 @@ static void ExecShop(void) {
     s32 temp_r24;
     s32 var_r23;
     s32 i;
+
+    // Extra
+    setItemChoiceNames();
 
     itemCurChoice = -1;
     temp_r27 = GWBoardGet();
@@ -311,9 +381,9 @@ static void ExecShop(void) {
         BoardWinCreate(1, hostMessTbl[temp_r27] + 2, temp_r26);
         BoardWinPriSet(1000);
         for (i = 0; i < 5; i++) {
-            var_r30 = MAKE_MESSID(15, activeItemTbl[i]);
-            var_r30 += 0x16;
-            BoardWinInsertMesSet(var_r30, i);
+            // var_r30 = MAKE_MESSID(15, activeItemTbl[i]); MAKE_MESSID_PTR(buf)
+            // var_r30 += 0x16;
+            BoardWinInsertMesSet(MAKE_MESSID_PTR(itemChoiceNamesTbl[activeItemTbl[i]]), i);
             var_r29 = itemPriceTbl[activeItemTbl[i]];
             if (var_r29 > BoardPlayerCoinsGet(shopPlayer)) {
                 BoardWinChoiceDisable(i);
@@ -571,7 +641,7 @@ static void SetShopWinItem(ShopWinWork *arg0, OMOBJ *arg1) {
         var_r26 = BoardItemModelGet(temp_r28);
         itemMdl = BoardModelCreate(var_r26, NULL, 0);
         BoardModelLayerSet(itemMdl, 6);
-        HuWinMesSet(arg0->unk06, BoardItemNameGet(temp_r28));
+        HuWinMesSet(arg0->unk06, BoardItemDescriptionGet(temp_r28));
         arg0->unk04 = 0;
         arg0->unk00_field1 = temp_r28;
         if (temp_r28 == 4) {
@@ -747,20 +817,20 @@ static void WaitItemGive(OMOBJ *arg0, ItemGiveWork *arg1) {
     }
 }
 
-static s8 itemPrioTbl[2][5][14] = {
+static s8 itemPrioTbl[2][5][BOARD_ITEMS_END] = {
     {
-        { 0x14, 0x14, 0x0F, 0x0F, 0x05, 0x07, 0x05, 0x05, 0x00, 0x05, 0x00, 0x03, 0x00, 0x00 },
-        { 0x0F, 0x0F, 0x0D, 0x0A, 0x0A, 0x0A, 0x0A, 0x05, 0x00, 0x07, 0x00, 0x05, 0x00, 0x00 },
-        { 0x07, 0x07, 0x0E, 0x0C, 0x0A, 0x0A, 0x0A, 0x08, 0x05, 0x09, 0x00, 0x08, 0x00, 0x00 },
-        { 0x0A, 0x0A, 0x0D, 0x0C, 0x0A, 0x0A, 0x07, 0x0A, 0x05, 0x05, 0x00, 0x08, 0x00, 0x00 },
-        { 0x07, 0x07, 0x0D, 0x0A, 0x0D, 0x07, 0x0A, 0x0A, 0x07, 0x08, 0x00, 0x08, 0x00, 0x00 }
+        { 0x14, 0x14, 0x0F, 0x0F, 0x05, 0x07, 0x05, 0x05, 0x00, 0x05, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00 },
+        { 0x0F, 0x0F, 0x0D, 0x0A, 0x0A, 0x0A, 0x0A, 0x05, 0x00, 0x07, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00 },
+        { 0x07, 0x07, 0x0E, 0x0C, 0x0A, 0x0A, 0x0A, 0x08, 0x05, 0x09, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00 },
+        { 0x0A, 0x0A, 0x0D, 0x0C, 0x0A, 0x0A, 0x07, 0x0A, 0x05, 0x05, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00 },
+        { 0x07, 0x07, 0x0D, 0x0A, 0x0D, 0x07, 0x0A, 0x0A, 0x07, 0x08, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00 }
     },
     {
-        { 0x0F, 0x0F, 0x12, 0x0F, 0x05, 0x05, 0x05, 0x05, 0x00, 0x05, 0x00, 0x02, 0x05, 0x05 },
-        { 0x0F, 0x0F, 0x0D, 0x0A, 0x07, 0x0A, 0x07, 0x03, 0x00, 0x07, 0x00, 0x00, 0x05, 0x08 },
-        { 0x05, 0x04, 0x0D, 0x0C, 0x0A, 0x05, 0x0A, 0x08, 0x05, 0x05, 0x00, 0x05, 0x08, 0x0A },
-        { 0x07, 0x04, 0x0D, 0x0C, 0x08, 0x08, 0x07, 0x0A, 0x05, 0x05, 0x00, 0x05, 0x08, 0x08 },
-        { 0x03, 0x02, 0x0D, 0x0A, 0x0D, 0x03, 0x08, 0x08, 0x07, 0x07, 0x00, 0x08, 0x08, 0x0A }
+        { 0x0F, 0x0F, 0x12, 0x0F, 0x05, 0x05, 0x05, 0x05, 0x00, 0x05, 0x00, 0x02, 0x05, 0x05, 0x00, 0x00 },
+        { 0x0F, 0x0F, 0x0D, 0x0A, 0x07, 0x0A, 0x07, 0x03, 0x00, 0x07, 0x00, 0x00, 0x05, 0x08, 0x00, 0x00 },
+        { 0x05, 0x04, 0x0D, 0x0C, 0x0A, 0x05, 0x0A, 0x08, 0x05, 0x05, 0x00, 0x05, 0x08, 0x0A, 0x00, 0x00 },
+        { 0x07, 0x04, 0x0D, 0x0C, 0x08, 0x08, 0x07, 0x0A, 0x05, 0x05, 0x00, 0x05, 0x08, 0x08, 0x00, 0x00 },
+        { 0x03, 0x02, 0x0D, 0x0A, 0x0D, 0x03, 0x08, 0x08, 0x07, 0x07, 0x00, 0x08, 0x08, 0x0A, 0x00, 0x00 }
     }
 };
 
@@ -816,7 +886,7 @@ static void GetShopItems(s32 arg0) {
     while (var_r29 < 5) {
         temp_r18 = BoardRandMod(100);
         var_r26 = 0;
-        for (var_r30 = 13; var_r30 >= 0; var_r30--) {
+        for (var_r30 = BOARD_ITEMS_END - 1; var_r30 >= 0; var_r30--) {
             temp_r25 = itemPrioTbl[var_r27][temp_r19][var_r30];
             if (temp_r25 != 0) {
                 var_r26 += temp_r25;

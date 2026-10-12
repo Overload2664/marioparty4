@@ -100,21 +100,24 @@ s32 BoardRollExec(s32 arg0)
 {
     rollPlayer = arg0;
     inputTimer = 0;
-    numDice = 1;
+    numDice = 1; // Dice rolls
     diceSize = 0;
     maxRoll = 0xA;
     switch (BoardItemPrevGet()) {
-        case 0:
+        case BOARD_ITEM_MINI_MUSHROOM:
             numDice = 1;
             break;
-        case 2:
+        case BOARD_ITEM_SUPER_MINI_MUSHROOM:
             numDice = 2;
             break;
-        case 1:
+        case BOARD_ITEM_MEGA_MUSHROOM:
             numDice = 2;
             break;
-        case 3:
+        case BOARD_ITEM_SUPER_MEGA_MUSHROOM:
             numDice = 3;
+            break;
+        case BOARD_ITEM_MUSHROOM: // Double Mushroom
+            numDice = 2;
             break;
     }
     if (BoardPlayerSizeGet(arg0) == 1) {
