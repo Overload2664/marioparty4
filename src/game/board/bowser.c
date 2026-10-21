@@ -63,6 +63,9 @@ static s16 scareMot = -1;
 static s16 suitItemMdl = -1;
 static s16 bowserMdl = -1;
 
+// Extra
+static u8 is_item = 0; 
+
 static void ExecBowser(void);
 static void ExecBowserMain(void);
 static void ExecMGReturn(void);
@@ -104,8 +107,33 @@ static void KillBowserFire(void);
 
 static s32 ExecMiniBowserEvent(void);
 
+// Extra
+BOOL BoardIsBowserItem(void) {
+    return is_item;
+}
+
+void BoardItemBowserExec(s32 player, s32 space)
+{
+    is_item = 1;
+    eventPlayer = player;
+    eventSpace = space;
+    playerMot[0] = playerMot[1] = playerMot[2] = playerMot[3] = -1;
+    bowserProc = HuPrcChildCreate(ExecBowser, 8196, 14336, 0, boardMainProc);
+    HuPrcDestructorSet2(bowserProc, DestroyBowser);
+    while(bowserProc) {
+        HuPrcVSleep();
+    }
+    is_item = 0;
+}
+
 s32 BoardBowserExec(s32 player, s32 space)
 {
+    if(is_item) {
+        BoardItemBowserExec(eventPlayer, eventSpace);
+        is_item = 0; // Just to be sure lmao
+        return 0;
+    }
+
     if(_CheckFlag(FLAG_ID_MAKE(1, 11))) {
         HuAudFXPlay(841);
         BoardCameraViewSet(2);
@@ -221,7 +249,9 @@ static void ExecBowserMain(void)
         HuPrcVSleep();
     }
     BoardMusStart(1, 5, 127, 0);
-    BoardCameraViewSet(3);
+    if(!is_item) {
+        BoardCameraViewSet(3);
+    }
     BoardFilterFadeInit(30, 160);
     BoardCameraMotionWait();
     BoardPlayerMotionShiftSet(eventPlayer, jumpMot, 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
@@ -272,12 +302,16 @@ static void ExecMGReturn(void)
     }
     BoardCameraMoveSet(0);
     BoardCameraTargetPlayerSet(eventPlayer);
-    BoardCameraViewSet(2);
+    if(!is_item) {
+        BoardCameraViewSet(2);
+    }
     BoardCameraMotionWait();
     CreateBowserObj();
     SquishPlayers();
     BoardPlayerMotBlendSet(eventPlayer, 0, 15);
-    BoardCameraViewSet(3);
+    if(!is_item) {
+        BoardCameraViewSet(3);
+    }
     BoardFilterFadeInit(30, 160);
     BoardStatusItemSet(0);
     BoardCameraMotionWait();
@@ -286,7 +320,6 @@ static void ExecMGReturn(void)
         HuPrcVSleep();
     }
     _ClearFlag(0x1001C);
-    BoardCameraMoveSet(1);
     player = GWSystem.player_curr;
     GWSystem.player_curr = -1;
     DoMGReturnEffect();
@@ -454,7 +487,7 @@ static void ExecBowserGame(void)
     mg = (s16)mgTbl[BoardRandMod(3)];
     GWMGAvailSet(mg);
     GWSystem.mg_next = mg-401;
-    _SetFlag(0x10003);
+    _SetFlag(FLAG_ID_MAKE(1, 3));
     BoardNextOvlSet(DLL_instdll);
     BoardFilterFadeOut(30);
     HuPrcEnd();

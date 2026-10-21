@@ -47,7 +47,7 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
         BOARD_ITEM_CHOMP_CALL,
         BOARD_ITEM_BOWSER_SUIT,
         BOARD_ITEM_MUSHROOM,
-        BOARD_ITEM_LATER
+        BOARD_ITEM_BOWSER_PHONE
     },
     {   //Luigi
         BOARD_ITEM_MAGIC_LAMP,
@@ -63,7 +63,7 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
         BOARD_ITEM_SPARKY_STICKER,
         BOARD_ITEM_CHOMP_CALL,
         BOARD_ITEM_MUSHROOM,
-        BOARD_ITEM_LATER
+        BOARD_ITEM_BOWSER_PHONE
     },   
     {   //Peach
         BOARD_ITEM_MAGIC_LAMP,
@@ -79,7 +79,7 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
         BOARD_ITEM_MINI_MUSHROOM,
         BOARD_ITEM_MINI_MEGA_HAMMER,
         BOARD_ITEM_MUSHROOM,
-        BOARD_ITEM_LATER
+        BOARD_ITEM_BOWSER_PHONE
     },   
     {   //Yoshi
         BOARD_ITEM_MAGIC_LAMP,
@@ -95,7 +95,7 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
         BOARD_ITEM_BOWSER_SUIT,
         BOARD_ITEM_SPARKY_STICKER,
         BOARD_ITEM_MUSHROOM,
-        BOARD_ITEM_LATER
+        BOARD_ITEM_BOWSER_PHONE
     },    
     {   //Wario
         BOARD_ITEM_MAGIC_LAMP,
@@ -111,7 +111,7 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
         BOARD_ITEM_MINI_MUSHROOM,
         BOARD_ITEM_SPARKY_STICKER,
         BOARD_ITEM_MUSHROOM,
-        BOARD_ITEM_LATER
+        BOARD_ITEM_BOWSER_PHONE
     },   
     {   //DK
         BOARD_ITEM_MAGIC_LAMP,
@@ -127,7 +127,7 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
         BOARD_ITEM_CHOMP_CALL,
         BOARD_ITEM_SPARKY_STICKER,
         BOARD_ITEM_MUSHROOM,
-        BOARD_ITEM_LATER
+        BOARD_ITEM_BOWSER_PHONE
     },   
     {   //Daisy
         BOARD_ITEM_MAGIC_LAMP,
@@ -143,7 +143,7 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
         BOARD_ITEM_SUPER_MINI_MUSHROOM,
         BOARD_ITEM_MINI_MUSHROOM,
         BOARD_ITEM_MUSHROOM,
-        BOARD_ITEM_LATER
+        BOARD_ITEM_BOWSER_PHONE
     },   
     {   //Waluigi
         BOARD_ITEM_MAGIC_LAMP,
@@ -159,7 +159,7 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
         BOARD_ITEM_SUPER_MINI_MUSHROOM,
         BOARD_ITEM_MINI_MUSHROOM,
         BOARD_ITEM_MUSHROOM,
-        BOARD_ITEM_LATER
+        BOARD_ITEM_BOWSER_PHONE
     }
 };
 

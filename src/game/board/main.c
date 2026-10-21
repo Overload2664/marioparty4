@@ -1,6 +1,7 @@
 #include "game/board/main.h"
 #include "ext_math.h"
 #include "game/board/battle.h"
+#include "game/board/item.h"
 #include "game/board/lottery.h"
 #include "game/board/model.h"
 #include "game/board/pause.h"
@@ -431,7 +432,8 @@ static void MainFunc(void)
     } else {
         fade_enable = 0;
     }
-    if(ExecTurnStart()) {
+    if(ExecTurnStart() && !BoardIsBowserItem()) {
+        // BoardIsBowserItem() is a fix related to bowser phone item
         turn_cont = 1;
     }
     if(CHECK_LAST5_TURN() && GWSystem.player_curr == 0 && !turn_cont) {

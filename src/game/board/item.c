@@ -1,3 +1,4 @@
+#include "dolphin/types.h"
 #include "types.h"
 #include "game/board/item.h"
 #include "game/audio.h"
@@ -25,6 +26,7 @@
 #include "game/sprite.h"
 #include "game/window.h"
 #include "game/wipe.h"
+#include "game/board/bowser.h"
 
 #include "ext_math.h"
 
@@ -83,6 +85,7 @@ static void ExecItemLight(void);
 static void ExecItemWhistle(void);
 static void ExecItemBowser(void);
 static void ExecItemBooBall(void);
+static void ExecItemBowserPhone(void);
 static void ExecItemMushroom(void);
 static void LampParticleUpdate(HU3DMODEL *model, HU3DPARTICLE *particle, Mtx matrix);
 static void GenieParticleUpdate(HU3DMODEL *model, HU3DPARTICLE *particle, Mtx matrix);
@@ -99,6 +102,9 @@ static void RestoreItemMega(void);
 static void RestoreItemMiniSuper(void);
 static void RestoreItemMegaSuper(void);
 static void RestoreItemBowser(void);
+
+// Extra
+BOOL BoardIsBowserItem(void);
 
 static Vec booBallScale;
 static Vec booBallPos;
@@ -123,7 +129,7 @@ static HUPROCESS *itemProc;
 static s32 itemMotTbl[2] = { DATA_MAKE_NUM(DATADIR_BOARD, 117), -1 };
 
 static void (*itemFuncTbl[])(void) = { ExecItemMini, ExecItemMega, ExecItemMiniSuper, ExecItemMegaSuper, ExecItemHammer, ExecItemPipe, ExecItemSwap,
-    ExecItemSpark, ExecItemLight, ExecItemWhistle, ExecItemBowser, ExecItemBooBall, ExecItemGenie, ExecItemBag, ExecItemMushroom, ExecItemMushroom };
+    ExecItemSpark, ExecItemLight, ExecItemWhistle, ExecItemBowser, ExecItemBooBall, ExecItemGenie, ExecItemBag, ExecItemBowserPhone, ExecItemMushroom };
 
 static void (*itemRestoreFuncTbl[])(void)
     = { RestoreItemMini, RestoreItemMega, RestoreItemMiniSuper, RestoreItemMegaSuper, RestoreItemNull, RestoreItemNull, RestoreItemNull,
@@ -600,18 +606,6 @@ static void ExecItemMega(void)
     omVibrate(currItemRestore, 90, 4, 2);
     HuAudFXPlay(0x311);
     ItemSizeSet(2);
-    HuPrcSleep(60);
-    HuPrcKill(NULL);
-    while (1) {
-        HuPrcVSleep();
-    }
-}
-
-static void ExecItemMushroom(void)
-{
-    HuAudFXPlay(0x350);
-    ItemShowProc(NULL, NULL);
-    omVibrate(currItemRestore, 90, 4, 2);
     HuPrcSleep(60);
     HuPrcKill(NULL);
     while (1) {
@@ -1701,11 +1695,11 @@ static void ExecItemBooBall(void)
     s16 spC;
     s16 spA;
     s32 sp18;
-    s32 var_r26;
-    s32 var_r28;
+    s32 others_coin_total;
+    s32 others_star_total;
     s32 var_r29;
     s32 var_r30;
-    s32 var_r31;
+    s32 player_idx;
 
     BoardAudSeqPause(0, 1, 1000);
     suitMdl = BoardBooCreate(currItemRestore, &sp74);
@@ -1740,29 +1734,29 @@ static void ExecItemBooBall(void)
         BoardWinKill();
     }
     else {
-        var_r28 = 0;
-        for (var_r31 = 0; var_r31 < 4; var_r31++) {
-            if (var_r31 != currItemRestore) {
-                var_r28 += GWStarsGet(var_r31);
+        others_star_total = 0;
+        for (player_idx = 0; player_idx < 4; player_idx++) {
+            if (player_idx != currItemRestore) {
+                others_star_total += GWStarsGet(player_idx);
             }
         }
-        var_r26 = 0;
-        for (var_r31 = 0; var_r31 < 4; var_r31++) {
-            if (var_r31 != currItemRestore) {
-                var_r26 += BoardPlayerCoinsGet(var_r31);
+        others_coin_total = 0;
+        for (player_idx = 0; player_idx < 4; player_idx++) {
+            if (player_idx != currItemRestore) {
+                others_coin_total += BoardPlayerCoinsGet(player_idx);
             }
         }
         do {
             BoardWinCreateChoice(4, MAKE_MESSID(18, 24), 3, 0);
             BoardWinAttrSet(0x10);
-            if (BoardPlayerCoinsGet(currItemRestore) < 50 || var_r28 == 0) {
+            if (BoardPlayerCoinsGet(currItemRestore) < 50 || others_star_total == 0) {
                 BoardWinChoiceDisable(1);
             }
-            if (var_r26 == 0) {
+            if (others_coin_total == 0) {
                 BoardWinChoiceDisable(0);
             }
             if (GWPlayer[currItemRestore].com) {
-                if (var_r28 != 0 && BoardPlayerCoinsGet(currItemRestore) >= 50) {
+                if (others_star_total != 0 && BoardPlayerCoinsGet(currItemRestore) >= 50) {
                     BoardComKeySetDown();
                 }
                 else {
@@ -1774,7 +1768,7 @@ static void ExecItemBooBall(void)
             var_r29 = BoardWinChoiceGet();
             switch (var_r29) {
                 case 0:
-                    for (var_r31 = 0; var_r31 < 5; var_r31++) {
+                    for (player_idx = 0; player_idx < 5; player_idx++) {
                         BoardPlayerCoinsAdd(currItemRestore, -1);
                         HuAudFXPlay(0xE);
                         HuPrcSleep(6);
@@ -1821,7 +1815,7 @@ static void ExecItemBooBall(void)
                     if (var_r29 != 0) {
                         BoardPlayerMotionShiftSet(currItemRestore, 7, 0.0f, 8.0f, HU3D_MOTATTR_NONE);
                         HuPrcSleep(30);
-                        for (var_r31 = 0; var_r31 < spC; var_r31++) {
+                        for (player_idx = 0; player_idx < spC; player_idx++) {
                             BoardPlayerCoinsAdd(currItemRestore, 1);
                             HuAudFXPlay(7);
                             HuPrcVSleep();
@@ -1832,7 +1826,7 @@ static void ExecItemBooBall(void)
                     }
                     break;
                 case 1:
-                    for (var_r31 = 0; var_r31 < 50; var_r31++) {
+                    for (player_idx = 0; player_idx < 50; player_idx++) {
                         BoardPlayerCoinsAdd(currItemRestore, -1);
                         HuAudFXPlay(0xE);
                         HuPrcSleep(1);
@@ -1907,6 +1901,49 @@ static void ExecItemBooBall(void)
     BoardModelKill(suitMdl);
     BoardModelKill(booBallMdl);
     HuPrcSleep(15);
+    HuPrcKill(NULL);
+    while (1) {
+        HuPrcVSleep();
+    }
+}
+
+static void ExecItemBowserPhone(void)
+{
+    s32 i;
+    s32 player_idx;
+    HuAudFXPlay(0x350);
+    ItemShowProc(NULL, NULL);
+    omVibrate(currItemRestore, 90, 4, 2);
+
+    // 3604602 is for 4 players and 1179662 is for 3 players
+    BoardWinCreateChoice(4, 3604602, -1, 0); // Fix extra space
+    BoardWinAttrSet(0x10);
+    for (i = 0; i < 4; i++) {
+        BoardWinInsertMesSet(BoardPlayerGetCharMess(i), i);
+    }
+    BoardWinWait();
+    BoardWinKill();
+    player_idx = BoardWinChoiceGet();
+
+    BoardCameraTargetPlayerSet(player_idx);
+    BoardCameraMotionWait();
+    BoardItemBowserExec(player_idx, GWPlayer[player_idx].space_curr);
+    BoardCameraTargetPlayerSet(currItemRestore);
+    BoardCameraMotionWait();
+
+    HuPrcSleep(60);
+    HuPrcKill(NULL);
+    while (1) {
+        HuPrcVSleep();
+    }
+}
+
+static void ExecItemMushroom(void)
+{
+    HuAudFXPlay(0x350);
+    ItemShowProc(NULL, NULL);
+    omVibrate(currItemRestore, 90, 4, 2);
+    HuPrcSleep(60);
     HuPrcKill(NULL);
     while (1) {
         HuPrcVSleep();

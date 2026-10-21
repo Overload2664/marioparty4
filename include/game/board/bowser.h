@@ -5,4 +5,8 @@
 
 void BoardBowserExec(s32 player, s32 space);
 
+// Extra
+void BoardItemBowserExec(s32 player, s32 space);
+BOOL BoardIsBowserItem(void);
+
 #endif

@@ -656,7 +656,7 @@ void BoardPlayerMotionShiftSet(s32 arg0, s32 arg1, f32 arg8, f32 arg9, u32 arg2)
         }
     }
 }
-
+// Important
 void BoardPlayerMotionSpeedSet(s32 arg0, f32 arg8)
 {
     BoardModelMotionSpeedSet(BoardPlayerModelGet(arg0), arg8);
