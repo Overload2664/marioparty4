@@ -91,6 +91,9 @@ static void MoveShopItemChoice(OMOBJ *arg0, ItemChoiceWork *arg1);
 static void UpdateShopItemChoice(OMOBJ *arg0);
 static void GetShopItemChoiceInput(ItemChoiceWork *arg0, OMOBJ *arg1, u32 *arg2);
 
+// Extra
+static void GetShopItemsEx(u32 itemSize);
+
 static s32 activeItemTbl[5];
 static s32 choiceEnableTbl[6];
 
@@ -359,7 +362,8 @@ static void ExecShop(void) {
     BoardModelMotionStart(BoardShopHostGet(), shopMot[0], 0x40000001);
     BoardStatusShowSetForce(shopPlayer);
     BoardStatusShowSet(shopPlayer, 1);
-    GetShopItems(shopPlayer);
+    // GetShopItems(shopPlayer);
+    GetShopItemsEx(5);
     SortShopItems();
     while (1) {
         BoardWinCreateChoice(1, hostMessTbl[temp_r27], temp_r26, 0);
@@ -819,7 +823,7 @@ static void WaitItemGive(OMOBJ *arg0, ItemGiveWork *arg1) {
 
 static s8 itemPrioTbl[2][5][BOARD_ITEMS_END] = {
     {
-        { 0x14, 0x14, 0x0F, 0x0F, 0x05, 0x07, 0x05, 0x05, 0x00, 0x05, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00 },
+        { 0x14, 0x14, 0x0F, 0x0F, 0x05, 0x07, 0x05, 0x05, 0x00, 0x05, 0x00, 0x03, 0x00, 0x00, 0x14, 0x0F },
         { 0x0F, 0x0F, 0x0D, 0x0A, 0x0A, 0x0A, 0x0A, 0x05, 0x00, 0x07, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00 },
         { 0x07, 0x07, 0x0E, 0x0C, 0x0A, 0x0A, 0x0A, 0x08, 0x05, 0x09, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00 },
         { 0x0A, 0x0A, 0x0D, 0x0C, 0x0A, 0x0A, 0x07, 0x0A, 0x05, 0x05, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00 },
@@ -853,6 +857,86 @@ static float cursorPosTbl[6][2] = {
     { 190.0f, 286.0f },
     { 190.0f, 312.0f }
 };
+
+
+
+// Extra
+static u32 itemCandids[BOARD_ITEMS_END];
+
+static void GetShopItemsEx(u32 itemSize) {
+    u32 i;
+    u32 j;
+    u32 candidSize;
+    u32 candidPos;
+    u32 totalWeight;
+    u32 randomWeight;
+    u32 newItem;
+    u32 repeatItem;
+
+    candidSize = BOARD_ITEMS_END;
+    for (i = 0; i < BOARD_ITEMS_END; i++) {
+        itemCandids[i] = i;
+    }
+
+    candidPos = 0;
+    for (i = 0; i < BOARD_ITEMS_END; i++) {
+        if(itemPrioTbl[0][0][itemCandids[i]] > 0) {
+            itemCandids[candidPos] = itemCandids[i];
+            candidPos++;
+        }
+    }
+
+    candidSize = candidPos;
+
+    if (candidSize <= itemSize) {
+        candidPos = 0;
+        for (i = 0; i < candidSize; i++) {
+            activeItemTbl[i] = itemCandids[candidPos];
+            candidPos++;
+        }
+
+        if (candidPos > 0) {
+            repeatItem = itemCandids[candidPos - 1];
+        } else {
+            repeatItem = 0;
+        }
+
+        for (i = candidSize; i < itemSize; i++) {
+            activeItemTbl[i] = repeatItem;
+        }
+
+        return;
+    }
+
+    for (i = 0; i < itemSize; i++) {
+        newItem = 0;
+        totalWeight = 0;
+        for (j = 0; j < candidSize; j++) {
+            totalWeight += itemPrioTbl[0][0][itemCandids[j]];
+        }
+
+        randomWeight = BoardRandMod(totalWeight);
+        for (j = 0; j < candidSize; j++) {
+            if (randomWeight < itemPrioTbl[0][0][itemCandids[j]]) {
+                newItem = itemCandids[j];
+                break;
+            }
+
+            randomWeight -= itemPrioTbl[0][0][itemCandids[j]];
+        }
+
+        activeItemTbl[i] = newItem;
+        
+        candidPos = 0;
+        for (j = 0; j < candidSize; j++) {
+            if (itemCandids[j] != newItem) {
+                itemCandids[candidPos] = itemCandids[j];
+                candidPos++;
+            }
+        }
+        candidSize--;
+    }
+}
 
 static void GetShopItems(s32 arg0) {
     s32 temp_r25;
