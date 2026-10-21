@@ -1172,7 +1172,7 @@ static s32 GetComItemChoice(s32 player) {
     }
     if (max_desire == 0) {
         comF = 1;
-        choice = 5;
+        choice = SHOP_ITEMS_COUNT;
     } else {
         choice = i_most_desired;
     }
