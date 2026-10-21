@@ -27,6 +27,7 @@
 #include "ext_math.h"
 
 #include "game/hsfex.h"
+#include <string.h>
 
 typedef struct {
     struct {
@@ -93,9 +94,9 @@ static void GetShopItemChoiceInput(ItemChoiceWork *arg0, OMOBJ *arg1, u32 *arg2)
 
 // Extra
 static void GetShopItemsEx(u32 itemSize);
-
-static s32 activeItemTbl[5];
-static s32 choiceEnableTbl[6];
+#define SHOP_ITEMS_COUNT 7
+static s32 activeItemTbl[SHOP_ITEMS_COUNT];
+static s32 choiceEnableTbl[SHOP_ITEMS_COUNT + 1];
 
 static s16 shopMdlIdx[2][1];
 static s16 *shopMdlPtr;
@@ -217,6 +218,44 @@ static void setItemChoiceNames(void) {
 
         dst[pos] = '\0';
     }
+}
+
+static u8 shopMessBuf[512];
+
+static u32 ShopMessExpand(u32 messId)
+{
+    const u8 lastLength = 7;
+    const u8 extraIdx = SHOP_ITEMS_COUNT - 5;
+    u8 i;
+    u8 j;
+    u8 pos = 0;
+    u8 *src = (u8 *)MessData_MesPtrGet(messDataPtr, messId);
+    u32 len = 0;
+    // 6 of 32
+
+    if (src != NULL) {
+        while (src[len] != 0 && len < sizeof(shopMessBuf)) {
+            len++;
+        }
+        memcpy(shopMessBuf, src, len - lastLength);
+        pos += len - lastLength;
+    }
+    // shopMessBuf[len] = '\0';
+    for (i = 5; i < 5 + extraIdx; i++) {
+        shopMessBuf[pos++] = 15; // Choice
+        shopMessBuf[pos++] = 31; // Insert
+        shopMessBuf[pos++] = i + 1; // Insert index
+        shopMessBuf[pos++] = 10;  // New line
+        for (j = 0; j < 5; j++) {
+            shopMessBuf[pos++] = 32; // Long space
+        }
+    }
+
+    memcpy(shopMessBuf + pos, src + len - lastLength, lastLength);
+    pos += lastLength;
+    shopMessBuf[pos] = 0;
+    
+    return MAKE_MESSID_PTR(shopMessBuf);   /* bit31 set -> treated as pointer */
 }
 
 void BoardShopHostSet(s16 arg0) {
@@ -363,7 +402,7 @@ static void ExecShop(void) {
     BoardStatusShowSetForce(shopPlayer);
     BoardStatusShowSet(shopPlayer, 1);
     // GetShopItems(shopPlayer);
-    GetShopItemsEx(5);
+    GetShopItemsEx(SHOP_ITEMS_COUNT);
     SortShopItems();
     while (1) {
         BoardWinCreateChoice(1, hostMessTbl[temp_r27], temp_r26, 0);
@@ -382,9 +421,10 @@ static void ExecShop(void) {
             continue;
         }
         CreateShopWin();
-        BoardWinCreate(1, hostMessTbl[temp_r27] + 2, temp_r26);
+        // BoardWinCreate(1, hostMessTbl[temp_r27] + 2, temp_r26);
+        BoardWinCreate(1, ShopMessExpand(hostMessTbl[temp_r27] + 2), temp_r26);
         BoardWinPriSet(1000);
-        for (i = 0; i < 5; i++) {
+        for (i = 0; i < SHOP_ITEMS_COUNT; i++) {
             // var_r30 = MAKE_MESSID(15, activeItemTbl[i]); MAKE_MESSID_PTR(buf)
             // var_r30 += 0x16;
             BoardWinInsertMesSet(MAKE_MESSID_PTR(itemChoiceNamesTbl[activeItemTbl[i]]), i);
@@ -396,7 +436,8 @@ static void ExecShop(void) {
                 choiceEnableTbl[i] = 1;
             }
         }
-        choiceEnableTbl[5] = 1;
+        // choiceEnableTbl[5] = 1;
+        choiceEnableTbl[SHOP_ITEMS_COUNT] = 1; // Return
         BoardWinSpeedSet(0);
         BoardWinPause();
         BoardWinAttrSet(0x10);
@@ -407,14 +448,14 @@ static void ExecShop(void) {
         itemCurChoice = GetShopItemChoice();
         BoardWinKill();
         HuPrcSleep(0xF);
-        if (itemCurChoice == -1 || itemCurChoice == 5 || itemCurChoice == 0x7F) {
+        if (itemCurChoice == -1 || itemCurChoice == SHOP_ITEMS_COUNT || itemCurChoice == 0x7F) {
             PauseShopWin();
         } else {
             PauseShopWin();
             while (!BoardStatusStopCheck(shopPlayer)) {
                 HuPrcVSleep();
             }
-            if (itemCurChoice == 5) {
+            if (itemCurChoice == SHOP_ITEMS_COUNT) {
                 BoardWinCreate(2, hostMessTbl[temp_r27] + 1, temp_r26);
                 BoardWinWait();
                 BoardWinKill();
@@ -589,7 +630,7 @@ static void UpdateShopWin(OMOBJ *arg0) {
     temp_r28->unk02 = GetShopItemWinChoice();
     if (temp_r28->unk02 != -1) {
         if (temp_r28->unk04 == 90 && temp_r28->unk03 != temp_r28->unk02) {
-            if (temp_r28->unk02 == 5) {
+            if (temp_r28->unk02 == SHOP_ITEMS_COUNT) {
                 HuWinDispOff(temp_r28->unk06);
                 if (temp_r28->unk00_field0 == 0) {
                     BoardModelVisibilitySet(itemMdl, 0);
@@ -849,6 +890,10 @@ static s8 rankItemGroupTbl[2][4][3] = {
     }
 };
 
+static float cursorPosX = 190.0f;
+static float cursorPosYOffset = 182.0f;
+static float cursorPosYInc = 26.0f;
+
 static float cursorPosTbl[6][2] = {
     { 190.0f, 182.0f },
     { 190.0f, 208.0f },
@@ -1015,16 +1060,16 @@ static void GetDefaultShopItems(s32 _unused) {
 }
 
 static void SortShopItems(void) {
-    s32 sp8[5];
+    s32 sp8[SHOP_ITEMS_COUNT];
     s32 var_r29;
     s32 i;
     s32 j;
 
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < SHOP_ITEMS_COUNT; i++) {
         sp8[i] = itemPriceTbl[activeItemTbl[i]];
     }
-    for (i = 0; i < 4; i++) {
-        for (j = 4; j >= i + 1; j--) {
+    for (i = 0; i < SHOP_ITEMS_COUNT - 1; i++) {
+        for (j = SHOP_ITEMS_COUNT - 1; j >= i + 1; j--) {
             if (sp8[j] < sp8[j - 1]) {
                 var_r29 = activeItemTbl[j];
                 activeItemTbl[j] = activeItemTbl[j - 1];
@@ -1111,7 +1156,7 @@ static s32 GetComItemChoice(s32 player) {
     }
     _space = GWPlayer[player].space_curr;
     num_coins = BoardPlayerCoinsGet(player);
-    for (max_desire = i = 0; i < 5; i++) {
+    for (max_desire = i = 0; i < SHOP_ITEMS_COUNT; i++) {
         if (num_coins >= itemPriceTbl[activeItemTbl[i]]) {
             desire_for_item = BoardComItemWeightGet(player, activeItemTbl[i]);
         } else {
@@ -1146,8 +1191,9 @@ static void CreateShopItemChoice(s32 arg0, s32 arg1) {
     s16 spC;
     s16 i;
     #if VERSION_PAL
-    for(i=0; i<6; i++) {
-        cursorPosTbl[i][0] = 190;
+    for(i=0; i<SHOP_ITEMS_COUNT+1; i++) {
+        // cursorPosTbl[i][0] = 190;
+        cursorPosX = 190.0f;
     }
     #endif
     temp_r30 = omAddObjEx(boardObjMan, 0x7E01, 0, 0, -1, UpdateShopItemChoice);
@@ -1166,20 +1212,26 @@ static void CreateShopItemChoice(s32 arg0, s32 arg1) {
         s16 winId = BoardWinIDGet();
         if(winId != -1) {
             WindowData *winP = &winData[winId];
-            for(i=0; i<6; i++) {
-                cursorPosTbl[i][0] = winP->pos_x+96;
+            for(i=0; i<SHOP_ITEMS_COUNT+1; i++) {
+                // cursorPosTbl[i][0] = winP->pos_x+96;
+                cursorPosX = winP->pos_x+96;
             }
         } else {
-            for(i=0; i<6; i++) {
-                cursorPosTbl[i][0] = 166;
+            for(i=0; i<SHOP_ITEMS_COUNT+1; i++) {
+                // cursorPosTbl[i][0] = 166;
+                cursorPosX = 166;
             }
         }
     }
-    temp_r30->trans.x = cursorPosTbl[0][0];
-    temp_r30->trans.y = cursorPosTbl[0][1];
+    // temp_r30->trans.x = cursorPosTbl[0][0];
+    // temp_r30->trans.y = cursorPosTbl[0][1];
+    temp_r30->trans.x = cursorPosX;
+    temp_r30->trans.y = cursorPosYOffset;
     #else
-    temp_r30->trans.x = cursorPosTbl[0][0];
-    temp_r30->trans.y = cursorPosTbl[0][1];
+    // temp_r30->trans.x = cursorPosTbl[0][0];
+    // temp_r30->trans.y = cursorPosTbl[0][1];
+    temp_r30->trans.x = cursorPosX;
+    temp_r30->trans.y = cursorPosYOffset;
     if (GWLanguageGet() != 0) {
         temp_r30->trans.x -= 24.0f;
     }
@@ -1213,8 +1265,10 @@ static void MoveShopItemChoice(OMOBJ *arg0, ItemChoiceWork *arg1) {
     s32 temp_r29;
 
     temp_r28 = arg1->unk02;
-    arg0->trans.x = cursorPosTbl[arg1->unk02][0];
-    arg0->trans.y = cursorPosTbl[arg1->unk02][1];
+    // arg0->trans.x = cursorPosTbl[arg1->unk02][0];
+    // arg0->trans.y = cursorPosTbl[arg1->unk02][1];
+    arg0->trans.x = cursorPosX;
+    arg0->trans.y = cursorPosYOffset + arg1->unk02 * cursorPosYInc;
     #if VERSION_NTSC
     if (GWLanguageGet() != 0) {
         arg0->trans.x -= 24.0f;
@@ -1231,7 +1285,7 @@ static void MoveShopItemChoice(OMOBJ *arg0, ItemChoiceWork *arg1) {
             HuAudFXPlay(4);
             return;
         }
-        if (arg1->unk02 != 5) {
+        if (arg1->unk02 != SHOP_ITEMS_COUNT) {
             itemChoice = arg1->unk02;
         }
         HuAudFXPlay(2);
@@ -1256,8 +1310,8 @@ static void MoveShopItemChoice(OMOBJ *arg0, ItemChoiceWork *arg1) {
     if (arg1->unk02 < 0) {
         arg1->unk02 = 0;
     }
-    if (arg1->unk02 >= 6) {
-        arg1->unk02 = 5;
+    if (arg1->unk02 >= SHOP_ITEMS_COUNT + 1) {
+        arg1->unk02 = SHOP_ITEMS_COUNT;
     }
     if (arg1->unk02 != temp_r28) {
         HuAudFXPlay(0);
