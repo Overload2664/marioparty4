@@ -1,4 +1,5 @@
 #include "game/gamework.h"
+#include "game/board/shop.h"
 #include "game/flag.h"
 #include "game/gamework_data.h"
 #include <string.h>
@@ -55,6 +56,12 @@ static inline void ResetBoardSettings(void)
 
 void GWInit(void)
 {
+    s32 i;
+    // Extra
+    for (i = 0; i < BOARD_ITEMS_END; i++) {
+        ExGameCfg.item_config.shop_probs[i] = ITEM_SHOP_PROBS_DEFAULT[i];
+    }
+
     GWGameStatReset();
     _InitFlag();
     GWErase();

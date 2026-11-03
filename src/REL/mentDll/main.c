@@ -4,6 +4,9 @@
 #include "dolphin/pad.h"
 #include "ext_math.h"
 #include "game/armem.h"
+#include "game/board/item.h"
+#include "game/board/player.h"
+#include "game/board/shop.h"
 #include "game/chrman.h"
 #include "game/gamework_data.h"
 #include "game/hsfex.h"
@@ -1671,7 +1674,7 @@ loop_4:
 #define EXTSET_COUNT(arr) ((s32)(sizeof(arr) / sizeof(arr[0])))
 
 typedef struct ExtSetEntry {
-    /* 0x00 */ char *label;
+    /* 0x00 */ const char *label;
     /* 0x04 */ s32 kind;
     /* 0x08 */ s32 min;
     /* 0x0C */ s32 max;
@@ -1718,22 +1721,12 @@ static ExtSetEntry ext_minigame_entries[] = {
     { "COIN GAME 4th GETS", EXTSET_KIND_NUM, 0, 99, 0 },
 };
 
-static ExtSetEntry ext_other_entries[] = {
-    { "MUSIC VOLUME", EXTSET_KIND_NUM, 0, 10, 8 },
-    { "SOUND FX VOL", EXTSET_KIND_NUM, 0, 10, 8 },
-    { "RUMBLE", EXTSET_KIND_ONOFF, 0, 0, 1 },
-    { "TEXT SPEED", EXTSET_KIND_NUM, 0, 2, 1 },
-    { "DEBUG INFO", EXTSET_KIND_ONOFF, 0, 0, 0 },
-    { "STAGE HAZARDS", EXTSET_KIND_ONOFF, 0, 0, 1 },
-    { "CPU ASSIST", EXTSET_KIND_NUM, 0, 3, 1 },
-    { "LUCKY SPACE", EXTSET_KIND_ONOFF, 0, 0, 1 },
-    { "UNLOCK ALL", EXTSET_KIND_ONOFF, 0, 0, 0 },
-};
+static ExtSetEntry ext_shop_probs[BOARD_ITEMS_END];
 
 static ExtSetTopic ext_topics[] = {
     { "BOARD SETTINGS", ext_board_entries, EXTSET_COUNT(ext_board_entries) },
     { "MINIGAME SETTINGS", ext_minigame_entries, EXTSET_COUNT(ext_minigame_entries) },
-    { "OTHER SETTINGS", ext_other_entries, EXTSET_COUNT(ext_other_entries) },
+    { "SHOP ITEMS PROBS", ext_shop_probs, EXTSET_COUNT(ext_shop_probs) },
 };
 
 #define EXTSET_TOPIC_COUNT EXTSET_COUNT(ext_topics)
@@ -1766,6 +1759,21 @@ u32 getEntryValue(const char* entry_name) {
     sprintf(error_msg, "getEntryValue: %s not found\n", entry_name);
     OSReport(error_msg);
     return -1;
+}
+
+// Preprocess Menu Options Methods
+void preprocessShopItemProbs(void) {
+    s32 i;
+    for(i = 0; i < BOARD_ITEMS_END; i++) {
+        ExtSetEntry entry;
+
+        entry.label = ITEM_BANK_NAMES[i];
+        entry.kind = EXTSET_KIND_NUM;
+        entry.value = ITEM_SHOP_PROBS_DEFAULT[i];
+        entry.min = 0;
+        entry.max = 127;
+        ext_shop_probs[i] = entry;
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -1817,6 +1825,9 @@ static void extSetCreateWindows(void)
 {
     s32 i;
     s16 win;
+    
+    // Preprocess
+    preprocessShopItemProbs();
 
     win = HuWinExCreateStyled(8.0f, 16.0f, 560, 40, -1, 1);
     extSetWins[EXTSET_TITLE_WIN] = win;
@@ -2277,6 +2288,8 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
     s32 mg_list;
     s32 has_team;
     s32 has_bonus_star;
+    // Extra
+    char msg[256];
 
     configure_section = 0xA;
     sub_section = 0;
@@ -2415,9 +2428,7 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
         }
     }
     {
-        // Extra settings
-        char msg[256];
-
+        // Extra
         ExGameCfg.mg_config.disable_1v3 = getEntryValue("DISABLE 1v3");
         sprintf(msg, "Extra Game Config: disable_1v3 set to %d\n", ExGameCfg.mg_config.disable_1v3);
         OSReport(msg);
@@ -2480,6 +2491,15 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
         ExGameCfg.mg_config.coin_mg_rew[3] = getEntryValue("COIN GAME 4th GETS");
         sprintf(msg, "Extra Game Config: coin_mg_rew set to %d and %d and %d and %d\n",
             ExGameCfg.mg_config.coin_mg_rew[0], ExGameCfg.mg_config.coin_mg_rew[1], ExGameCfg.mg_config.coin_mg_rew[2], ExGameCfg.mg_config.coin_mg_rew[3]);
+        OSReport(msg);
+    }
+    {
+        // Extra
+        // Items probs
+        for (i = 0; i < BOARD_ITEMS_END; i++) {
+            ExGameCfg.item_config.shop_probs[i] = getEntryValue(ITEM_BANK_NAMES[i]);
+        }
+        sprintf(msg, "Item probabilites set\n");
         OSReport(msg);
     }
     BoardSaveInit(gameConfigs[2]);

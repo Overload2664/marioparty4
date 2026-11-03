@@ -155,29 +155,6 @@ static s32 shopMotTbl[9][3] = {
     { DATA_MAKE_NUM(DATADIR_BGUEST, 0x2A), DATA_MAKE_NUM(DATADIR_BGUEST, 0x2C), DATA_MAKE_NUM(DATADIR_BGUEST, 0x2D) }
 };
 
-#define MESS_SMALL_SPACE "\20"
-
-// 0B 1E 02 XX XX XX XX XX XX XX XX XX 1E 08 0C 0C 0C 0C 0C 0C 0C 0E 13 3E YY YY 00
-static const char *bank_names[] = {
-    "Mini" MESS_SMALL_SPACE "Mushroom",
-    "Mega" MESS_SMALL_SPACE "Mushroom",
-    "Super" MESS_SMALL_SPACE "Mini" MESS_SMALL_SPACE "Mushroom",
-    "Super" MESS_SMALL_SPACE "Mega" MESS_SMALL_SPACE "Mushroom",
-    "MiniMega" MESS_SMALL_SPACE "Hammer",
-    "Warp" MESS_SMALL_SPACE "Pipe",
-    "Swap" MESS_SMALL_SPACE "Card",
-    "Sparky" MESS_SMALL_SPACE "Sticker",
-    "Gaddlight",
-    "Chomp" MESS_SMALL_SPACE "Call",
-    "Bowser" MESS_SMALL_SPACE "Suit",
-    "Boo's" MESS_SMALL_SPACE "Crystal" MESS_SMALL_SPACE "Ball",
-    "Magic" MESS_SMALL_SPACE "Lamp",
-    "Item" MESS_SMALL_SPACE "Bag",
-    "Bowser" MESS_SMALL_SPACE "Phone",
-    "Mushroom",
-    "Golden" MESS_SMALL_SPACE "Mushroom",
-};
-
 
 static char itemChoiceNamesTbl[BOARD_ITEMS_END][100];
 
@@ -208,8 +185,8 @@ static void setItemChoiceNames(void) {
         memcpy(dst + pos, prefix, sizeof prefix);
         pos += sizeof prefix;
 
-        nameLen = strlen(bank_names[i]);
-        memcpy(dst + pos, bank_names[i], nameLen);
+        nameLen = strlen(ITEM_BANK_NAMES[i]);
+        memcpy(dst + pos, ITEM_BANK_NAMES[i], nameLen);
         pos += nameLen;
 
         memcpy(dst + pos, middle, sizeof middle);
@@ -927,7 +904,7 @@ static void GetShopItemsEx(u32 itemSize) {
 
     candidPos = 0;
     for (i = 0; i < BOARD_ITEMS_END; i++) {
-        if(itemPrioTbl[0][0][itemCandids[i]] > 0) {
+        if(ExGameCfg.item_config.shop_probs[itemCandids[i]] > 0) {
             itemCandids[candidPos] = itemCandids[i];
             candidPos++;
         }
@@ -959,17 +936,17 @@ static void GetShopItemsEx(u32 itemSize) {
         newItem = 0;
         totalWeight = 0;
         for (j = 0; j < candidSize; j++) {
-            totalWeight += itemPrioTbl[0][0][itemCandids[j]];
+            totalWeight += ExGameCfg.item_config.shop_probs[itemCandids[j]];
         }
 
         randomWeight = BoardRandMod(totalWeight);
         for (j = 0; j < candidSize; j++) {
-            if (randomWeight < itemPrioTbl[0][0][itemCandids[j]]) {
+            if (randomWeight < ExGameCfg.item_config.shop_probs[itemCandids[j]]) {
                 newItem = itemCandids[j];
                 break;
             }
 
-            randomWeight -= itemPrioTbl[0][0][itemCandids[j]];
+            randomWeight -= ExGameCfg.item_config.shop_probs[itemCandids[j]];
         }
 
         activeItemTbl[i] = newItem;

@@ -2,6 +2,7 @@
 #define _GAMEWORK_DATA_H
 
 #include "dolphin.h"
+#include "game/board/item.h"
 #include "game/flag.h"
 #include "version.h"
 
@@ -160,7 +161,10 @@ typedef struct extra_game_config {
         u8 battle_turn;
         u8 battle_reverse_turn;
     } mg_config;
-    
+
+    struct ITEMConfig {
+        u32 shop_probs[BOARD_ITEMS_END];
+    } item_config;
 } ExtraGameConfig;
 
 extern s16 GwLanguage;

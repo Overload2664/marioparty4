@@ -1,4 +1,5 @@
 #include "REL/w02Dll.h"
+#include "game/board/item.h"
 #ifndef __MWERKS__
 #include "game/audio.h"
 #endif

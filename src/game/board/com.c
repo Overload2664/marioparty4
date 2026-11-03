@@ -1,4 +1,5 @@
 #include "game/board/com.h"
+#include "game/board/item.h"
 #include "game/gamework.h"
 #include "game/gamework_data.h"
 #include "game/board/com_path.h"
