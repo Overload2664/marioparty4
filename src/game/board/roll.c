@@ -108,16 +108,13 @@ s32 BoardRollExec(s32 arg0)
             numDice = 1;
             break;
         case BOARD_ITEM_SUPER_MINI_MUSHROOM:
-            numDice = 2;
-            break;
         case BOARD_ITEM_MEGA_MUSHROOM:
+        case BOARD_ITEM_MUSHROOM:
             numDice = 2;
             break;
         case BOARD_ITEM_SUPER_MEGA_MUSHROOM:
+        case BOARD_ITEM_GOLDEN_MUSHROOM:
             numDice = 3;
-            break;
-        case BOARD_ITEM_MUSHROOM: // Double Mushroom
-            numDice = 2;
             break;
     }
     if (BoardPlayerSizeGet(arg0) == 1) {
