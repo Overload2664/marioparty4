@@ -1722,11 +1722,13 @@ static ExtSetEntry ext_minigame_entries[] = {
 };
 
 static ExtSetEntry ext_shop_probs[BOARD_ITEMS_END];
+static ExtSetEntry ext_space_probs[BOARD_ITEMS_END];
 
 static ExtSetTopic ext_topics[] = {
     { "BOARD SETTINGS", ext_board_entries, EXTSET_COUNT(ext_board_entries) },
     { "MINIGAME SETTINGS", ext_minigame_entries, EXTSET_COUNT(ext_minigame_entries) },
     { "SHOP ITEMS PROBS", ext_shop_probs, EXTSET_COUNT(ext_shop_probs) },
+    { "SPACE ITEMS PROBS", ext_space_probs, EXTSET_COUNT(ext_space_probs) },
 };
 
 #define EXTSET_TOPIC_COUNT EXTSET_COUNT(ext_topics)
@@ -1761,6 +1763,35 @@ u32 getEntryValue(const char* entry_name) {
     return -1;
 }
 
+u32 getEntryValueTopic(const char* topic_name, const char* entry_name) {
+    u32 topic_idx;
+    u32 entry_idx;
+    ExtSetEntry* entries;
+    u32 entries_count;
+    char error_msg[256];
+    char *title;
+
+    for (topic_idx = 0; topic_idx < EXTSET_TOPIC_COUNT; topic_idx++) {
+        title = ext_topics[topic_idx].title;
+        if(strcmp(topic_name, title)) { // Check if same title
+            continue;
+        }
+
+        entries = ext_topics[topic_idx].entries;
+        entries_count = ext_topics[topic_idx].count;
+
+        for (entry_idx = 0; entry_idx < entries_count; entry_idx++) {
+            if(!strcmp(entry_name, entries[entry_idx].label)) {
+                return entries[entry_idx].value;
+            }
+        }
+    }
+
+    sprintf(error_msg, "getEntryValueTopic: %s not found\n", entry_name);
+    OSReport(error_msg);
+    return -1;
+}
+
 // Preprocess Menu Options Methods
 void preprocessShopItemProbs(void) {
     s32 i;
@@ -1773,6 +1804,21 @@ void preprocessShopItemProbs(void) {
         entry.min = 0;
         entry.max = 127;
         ext_shop_probs[i] = entry;
+    }
+}
+
+// Preprocess Menu Options Methods
+void preprocessSpaceItemProbs(void) {
+    s32 i;
+    for(i = 0; i < BOARD_ITEMS_END; i++) {
+        ExtSetEntry entry;
+
+        entry.label = ITEM_BANK_NAMES[i];
+        entry.kind = EXTSET_KIND_NUM;
+        entry.value = ITEM_SPACE_PROBS_DEFAULT[i];
+        entry.min = 0;
+        entry.max = 127;
+        ext_space_probs[i] = entry;
     }
 }
 
@@ -1828,6 +1874,7 @@ static void extSetCreateWindows(void)
     
     // Preprocess
     preprocessShopItemProbs();
+    preprocessSpaceItemProbs();
 
     win = HuWinExCreateStyled(8.0f, 16.0f, 560, 40, -1, 1);
     extSetWins[EXTSET_TITLE_WIN] = win;
@@ -2497,9 +2544,16 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
         // Extra
         // Items probs
         for (i = 0; i < BOARD_ITEMS_END; i++) {
-            ExGameCfg.item_config.shop_probs[i] = getEntryValue(ITEM_BANK_NAMES[i]);
+            ExGameCfg.item_config.shop_probs[i] = getEntryValueTopic("SHOP ITEMS PROBS", ITEM_BANK_NAMES[i]);
         }
-        sprintf(msg, "Item probabilites set\n");
+        sprintf(msg, "Shop probabilities set\n");
+        OSReport(msg);
+
+        // Items probs
+        for (i = 0; i < BOARD_ITEMS_END; i++) {
+            ExGameCfg.item_config.space_probs[i] = getEntryValueTopic("SPACE ITEMS PROBS", ITEM_BANK_NAMES[i]);
+        }
+        sprintf(msg, "Item space probabilities set\n");
         OSReport(msg);
     }
     BoardSaveInit(gameConfigs[2]);

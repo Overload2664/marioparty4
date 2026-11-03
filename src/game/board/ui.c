@@ -299,7 +299,7 @@ static s32 itemNameTbl[BOARD_ITEMS_END] = {
     14 + MAKE_MESSID(0x08, 0x0E),
     3604514,
     3604514 + 4,
-    3604518 + 4*2
+    3604514 + 4*2
 };
 
 s32 BoardItemDescriptionGet(s32 arg0) {

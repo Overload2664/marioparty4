@@ -93,7 +93,6 @@ static void UpdateShopItemChoice(OMOBJ *arg0);
 static void GetShopItemChoiceInput(ItemChoiceWork *arg0, OMOBJ *arg1, u32 *arg2);
 
 // Extra
-static void GetShopItemsEx(u32 itemSize);
 #define SHOP_ITEMS_COUNT 7
 static s32 activeItemTbl[SHOP_ITEMS_COUNT];
 static s32 choiceEnableTbl[SHOP_ITEMS_COUNT + 1];
@@ -381,7 +380,7 @@ static void ExecShop(void) {
     BoardStatusShowSetForce(shopPlayer);
     BoardStatusShowSet(shopPlayer, 1);
     // GetShopItems(shopPlayer);
-    GetShopItemsEx(SHOP_ITEMS_COUNT);
+    GetShopItemsEx(SHOP_ITEMS_COUNT,  ExGameCfg.item_config.shop_probs, activeItemTbl);
     SortShopItems();
     while (1) {
         BoardWinCreateChoice(1, hostMessTbl[temp_r27], temp_r26, 0);
@@ -885,9 +884,7 @@ static float cursorPosTbl[6][2] = {
 
 
 // Extra
-static u32 itemCandids[BOARD_ITEMS_END];
-
-static void GetShopItemsEx(u32 itemSize) {
+void GetShopItemsEx(u32 itemSize, u32* probs, s32* activeItemTbl) {
     u32 i;
     u32 j;
     u32 candidSize;
@@ -896,6 +893,7 @@ static void GetShopItemsEx(u32 itemSize) {
     u32 randomWeight;
     u32 newItem;
     u32 repeatItem;
+    u32 itemCandids[BOARD_ITEMS_END];
 
     candidSize = BOARD_ITEMS_END;
     for (i = 0; i < BOARD_ITEMS_END; i++) {
@@ -904,7 +902,7 @@ static void GetShopItemsEx(u32 itemSize) {
 
     candidPos = 0;
     for (i = 0; i < BOARD_ITEMS_END; i++) {
-        if(ExGameCfg.item_config.shop_probs[itemCandids[i]] > 0) {
+        if(probs[itemCandids[i]] > 0) {
             itemCandids[candidPos] = itemCandids[i];
             candidPos++;
         }
@@ -936,17 +934,17 @@ static void GetShopItemsEx(u32 itemSize) {
         newItem = 0;
         totalWeight = 0;
         for (j = 0; j < candidSize; j++) {
-            totalWeight += ExGameCfg.item_config.shop_probs[itemCandids[j]];
+            totalWeight += probs[itemCandids[j]];
         }
 
         randomWeight = BoardRandMod(totalWeight);
         for (j = 0; j < candidSize; j++) {
-            if (randomWeight < ExGameCfg.item_config.shop_probs[itemCandids[j]]) {
+            if (randomWeight < probs[itemCandids[j]]) {
                 newItem = itemCandids[j];
                 break;
             }
 
-            randomWeight -= ExGameCfg.item_config.shop_probs[itemCandids[j]];
+            randomWeight -= probs[itemCandids[j]];
         }
 
         activeItemTbl[i] = newItem;

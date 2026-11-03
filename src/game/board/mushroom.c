@@ -1,3 +1,4 @@
+#include "game/board/shop.h"
 #include "game/process.h"
 #include "game/gamework_data.h"
 #include "game/board/item.h"
@@ -33,6 +34,9 @@ static s8 itemResult;
 static u8 pickerChoice;
 static OMOBJ* itemGiveObj;
 static HUPROCESS* mushroomProc;
+
+// Extra
+static s32 activeItemTbl[2];
 
 void BoardMushroomExec(s32 arg0) {
     omVibrate(arg0, 0xC, 6, 6);
@@ -398,6 +402,8 @@ static void InitBox(s32 arg0) {
         itemResult = (boardTutorialData[0] ^ 1);
         var_r29 = 0;
     }
+    GetShopItemsEx(2,  ExGameCfg.item_config.space_probs, activeItemTbl);
+    itemResult = activeItemTbl[0];
     itemMdl = BoardModelCreate(BoardItemModelGet(itemResult), NULL, 0);
     BoardModelVisibilitySet(itemMdl, 0);
     temp_r31 = omObjGetWork(boxObj[var_r29], boxObjWork);
@@ -511,7 +517,8 @@ static void DoItemGive(OMOBJ* arg0) {
         if (sp10.y > sp28.y) {
             BoardModelVisibilitySet(itemMdl, 0);
             HuAudFXPlay(0x30D);
-            BoardPlayerItemAdd(temp_r31->unk00_field1, sp8[itemResult]);
+            // BoardPlayerItemAdd(temp_r31->unk00_field1, sp8[itemResult]);
+            BoardPlayerItemAdd(temp_r31->unk00_field1, itemResult);
             temp_r31->unk00_field2 = 1;
         }
         /* fallthrough */
