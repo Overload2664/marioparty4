@@ -169,6 +169,7 @@ typedef struct extra_game_config {
     struct ITEMConfig {
         u32 shop_probs[BOARD_ITEMS_END];
         u32 space_probs[BOARD_ITEMS_END];
+        u32 shop_price[BOARD_ITEMS_END];
     } item_config;
 } ExtraGameConfig;
 

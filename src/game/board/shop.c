@@ -189,7 +189,7 @@ static void setItemChoiceNames(void) {
         memcpy(dst + pos, middle, sizeof middle);
         pos += sizeof middle;
 
-        priceLen = sprintf(dst + pos, "%d", itemPriceTbl[i]);
+        priceLen = sprintf(dst + pos, "%d", ExGameCfg.item_config.shop_price[i]);
         pos += priceLen;
 
         dst[pos] = '\0';
@@ -404,7 +404,7 @@ static void ExecShop(void) {
             // var_r30 = MAKE_MESSID(15, activeItemTbl[i]); MAKE_MESSID_PTR(buf)
             // var_r30 += 0x16;
             BoardWinInsertMesSet(MAKE_MESSID_PTR(itemChoiceNamesTbl[activeItemTbl[i]]), i);
-            var_r29 = itemPriceTbl[activeItemTbl[i]];
+            var_r29 = ExGameCfg.item_config.shop_price[activeItemTbl[i]];
             if (var_r29 > BoardPlayerCoinsGet(shopPlayer)) {
                 BoardWinChoiceDisable(i);
                 choiceEnableTbl[i] = 0;
@@ -437,7 +437,7 @@ static void ExecShop(void) {
                 BoardWinKill();
                 break;
             }
-            temp_r24 = itemPriceTbl[activeItemTbl[itemCurChoice]];
+            temp_r24 = ExGameCfg.item_config.shop_price[activeItemTbl[itemCurChoice]];
             if (temp_r24 >= 20) {
                 var_r23 = 3;
             } else {
@@ -1002,7 +1002,7 @@ static void GetShopItems(s32 arg0) {
                             break;
                         }
                     }
-                    if (var_r24 == 0 && (temp_r20 >= itemPriceTbl[var_r30] || var_r23 != 0)) {
+                    if (var_r24 == 0 && (temp_r20 >= ExGameCfg.item_config.shop_price[var_r30] || var_r23 != 0)) {
                         var_r23 = 1;
                         activeItemTbl[var_r29] = var_r30;
                         break;
@@ -1041,7 +1041,7 @@ static void SortShopItems(void) {
     s32 j;
 
     for (i = 0; i < ExGameCfg.board_config.shop_count; i++) {
-        sp8[i] = itemPriceTbl[activeItemTbl[i]];
+        sp8[i] = ExGameCfg.item_config.shop_price[activeItemTbl[i]];
     }
     for (i = 0; i < ExGameCfg.board_config.shop_count - 1; i++) {
         for (j = ExGameCfg.board_config.shop_count - 1; j >= i + 1; j--) {
@@ -1132,7 +1132,7 @@ static s32 GetComItemChoice(s32 player) {
     _space = GWPlayer[player].space_curr;
     num_coins = BoardPlayerCoinsGet(player);
     for (max_desire = i = 0; i < ExGameCfg.board_config.shop_count; i++) {
-        if (num_coins >= itemPriceTbl[activeItemTbl[i]]) {
+        if (num_coins >= ExGameCfg.item_config.shop_price[activeItemTbl[i]]) {
             desire_for_item = BoardComItemWeightGet(player, activeItemTbl[i]);
         } else {
             desire_for_item = 0;

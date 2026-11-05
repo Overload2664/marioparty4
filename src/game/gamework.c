@@ -61,6 +61,7 @@ void GWInit(void)
     for (i = 0; i < BOARD_ITEMS_END; i++) {
         ExGameCfg.item_config.shop_probs[i] = ITEM_SHOP_PROBS_DEFAULT[i];
         ExGameCfg.item_config.space_probs[i] = ITEM_SPACE_PROBS_DEFAULT[i];
+        ExGameCfg.item_config.shop_price[i] = ITEM_SHOP_PRICE_DEFAULT[i];
     }
 
     GWGameStatReset();

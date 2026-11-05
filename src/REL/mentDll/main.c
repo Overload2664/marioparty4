@@ -1721,6 +1721,7 @@ static ExtSetEntry ext_minigame_entries[] = {
     { "COIN GAME 4th GETS", EXTSET_KIND_NUM, 0, 99, 0 },
 };
 
+static ExtSetEntry ext_shop_price[BOARD_ITEMS_END];
 static ExtSetEntry ext_shop_probs[BOARD_ITEMS_END];
 static ExtSetEntry ext_space_probs[BOARD_ITEMS_END];
 
@@ -1729,6 +1730,7 @@ static ExtSetTopic ext_topics[] = {
     { "MINIGAME SETTINGS", ext_minigame_entries, EXTSET_COUNT(ext_minigame_entries) },
     { "SHOP ITEMS PROBS", ext_shop_probs, EXTSET_COUNT(ext_shop_probs) },
     { "SPACE ITEMS PROBS", ext_space_probs, EXTSET_COUNT(ext_space_probs) },
+    { "SHOP ITEMS PRICE", ext_shop_price, EXTSET_COUNT(ext_shop_price) }
 };
 
 #define EXTSET_TOPIC_COUNT EXTSET_COUNT(ext_topics)
@@ -1807,7 +1809,6 @@ void preprocessShopItemProbs(void) {
     }
 }
 
-// Preprocess Menu Options Methods
 void preprocessSpaceItemProbs(void) {
     s32 i;
     for(i = 0; i < BOARD_ITEMS_END; i++) {
@@ -1819,6 +1820,20 @@ void preprocessSpaceItemProbs(void) {
         entry.min = 0;
         entry.max = 127;
         ext_space_probs[i] = entry;
+    }
+}
+
+void preprocessShopItemPrice(void) {
+    s32 i;
+    for(i = 0; i < BOARD_ITEMS_END; i++) {
+        ExtSetEntry entry;
+
+        entry.label = ITEM_BANK_NAMES[i];
+        entry.kind = EXTSET_KIND_NUM;
+        entry.value = ITEM_SHOP_PRICE_DEFAULT[i];
+        entry.min = 0;
+        entry.max = 127;
+        ext_shop_price[i] = entry;
     }
 }
 
@@ -1875,6 +1890,7 @@ static void extSetCreateWindows(void)
     // Preprocess
     preprocessShopItemProbs();
     preprocessSpaceItemProbs();
+    preprocessShopItemPrice();
 
     win = HuWinExCreateStyled(8.0f, 16.0f, 560, 40, -1, 1);
     extSetWins[EXTSET_TITLE_WIN] = win;
@@ -2548,16 +2564,23 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
     }
     {
         // Extra
-        // Items probs
+        // Items Shop probs
         for (i = 0; i < BOARD_ITEMS_END; i++) {
             ExGameCfg.item_config.shop_probs[i] = getEntryValueTopic("SHOP ITEMS PROBS", ITEM_BANK_NAMES[i]);
         }
         sprintf(msg, "Shop probabilities set\n");
         OSReport(msg);
 
-        // Items probs
+        // Items Space probs
         for (i = 0; i < BOARD_ITEMS_END; i++) {
             ExGameCfg.item_config.space_probs[i] = getEntryValueTopic("SPACE ITEMS PROBS", ITEM_BANK_NAMES[i]);
+        }
+        sprintf(msg, "Item space probabilities set\n");
+        OSReport(msg);
+
+        // Items Shop price
+        for (i = 0; i < BOARD_ITEMS_END; i++) {
+            ExGameCfg.item_config.shop_price[i] = getEntryValueTopic("SHOP ITEMS PRICE", ITEM_BANK_NAMES[i]);
         }
         sprintf(msg, "Item space probabilities set\n");
         OSReport(msg);

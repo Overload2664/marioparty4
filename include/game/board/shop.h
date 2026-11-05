@@ -50,6 +50,15 @@ static u32 ITEM_SPACE_PROBS_DEFAULT[BOARD_ITEMS_END] = {
     0x0F, 0x14
 };
 
+static s8 ITEM_SHOP_PRICE_DEFAULT[BOARD_ITEMS_END] = {
+     5,  5, 15, 15,
+    10, 10, 15, 15,
+    15, 15,  0, 25,
+    30, 30,  5,  3,
+    15
+};
+
+
 void GetShopItemsEx(u32 itemSize, u32* probs, s32* activeItemTbl);
 
 #endif
