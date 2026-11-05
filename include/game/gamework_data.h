@@ -147,6 +147,10 @@ typedef struct game_stat {
 } GameStat;
 
 typedef struct extra_game_config {
+    struct BoardConfig {
+        u8 shop_count;
+    } board_config;
+
     struct MGConfig {
         u8 disable_1v3;
         u8 norm_coin_mg;

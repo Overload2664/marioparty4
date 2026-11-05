@@ -13,7 +13,7 @@ void BoardShopExec(s32 player, s32 space);
 void BoardShopTutorialExec(s32 arg0);
 
 // Extra
-
+#define MAX_SHOP_ITEMS 8
 #define MESS_SMALL_SPACE "\20"
 // 0B 1E 02 XX XX XX XX XX XX XX XX XX 1E 08 0C 0C 0C 0C 0C 0C 0C 0E 13 3E YY YY 00
 static const char *ITEM_BANK_NAMES[] = {

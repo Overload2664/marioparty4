@@ -92,10 +92,8 @@ static void MoveShopItemChoice(OMOBJ *arg0, ItemChoiceWork *arg1);
 static void UpdateShopItemChoice(OMOBJ *arg0);
 static void GetShopItemChoiceInput(ItemChoiceWork *arg0, OMOBJ *arg1, u32 *arg2);
 
-// Extra
-#define SHOP_ITEMS_COUNT 7
-static s32 activeItemTbl[SHOP_ITEMS_COUNT];
-static s32 choiceEnableTbl[SHOP_ITEMS_COUNT + 1];
+static s32 activeItemTbl[MAX_SHOP_ITEMS];
+static s32 choiceEnableTbl[MAX_SHOP_ITEMS + 1];
 
 static s16 shopMdlIdx[2][1];
 static s16 *shopMdlPtr;
@@ -203,7 +201,7 @@ static u8 shopMessBuf[512];
 static u32 ShopMessExpand(u32 messId)
 {
     const u8 lastLength = 7;
-    const u8 extraIdx = SHOP_ITEMS_COUNT - 5;
+    const u8 extraIdx = ExGameCfg.board_config.shop_count - 5;
     u8 i;
     u8 j;
     u8 pos = 0;
@@ -380,7 +378,7 @@ static void ExecShop(void) {
     BoardStatusShowSetForce(shopPlayer);
     BoardStatusShowSet(shopPlayer, 1);
     // GetShopItems(shopPlayer);
-    GetShopItemsEx(SHOP_ITEMS_COUNT,  ExGameCfg.item_config.shop_probs, activeItemTbl);
+    GetShopItemsEx(ExGameCfg.board_config.shop_count,  ExGameCfg.item_config.shop_probs, activeItemTbl);
     SortShopItems();
     while (1) {
         BoardWinCreateChoice(1, hostMessTbl[temp_r27], temp_r26, 0);
@@ -402,7 +400,7 @@ static void ExecShop(void) {
         // BoardWinCreate(1, hostMessTbl[temp_r27] + 2, temp_r26);
         BoardWinCreate(1, ShopMessExpand(hostMessTbl[temp_r27] + 2), temp_r26);
         BoardWinPriSet(1000);
-        for (i = 0; i < SHOP_ITEMS_COUNT; i++) {
+        for (i = 0; i < ExGameCfg.board_config.shop_count; i++) {
             // var_r30 = MAKE_MESSID(15, activeItemTbl[i]); MAKE_MESSID_PTR(buf)
             // var_r30 += 0x16;
             BoardWinInsertMesSet(MAKE_MESSID_PTR(itemChoiceNamesTbl[activeItemTbl[i]]), i);
@@ -415,7 +413,7 @@ static void ExecShop(void) {
             }
         }
         // choiceEnableTbl[5] = 1;
-        choiceEnableTbl[SHOP_ITEMS_COUNT] = 1; // Return
+        choiceEnableTbl[ExGameCfg.board_config.shop_count] = 1; // Return
         BoardWinSpeedSet(0);
         BoardWinPause();
         BoardWinAttrSet(0x10);
@@ -426,14 +424,14 @@ static void ExecShop(void) {
         itemCurChoice = GetShopItemChoice();
         BoardWinKill();
         HuPrcSleep(0xF);
-        if (itemCurChoice == -1 || itemCurChoice == SHOP_ITEMS_COUNT || itemCurChoice == 0x7F) {
+        if (itemCurChoice == -1 || itemCurChoice == ExGameCfg.board_config.shop_count || itemCurChoice == 0x7F) {
             PauseShopWin();
         } else {
             PauseShopWin();
             while (!BoardStatusStopCheck(shopPlayer)) {
                 HuPrcVSleep();
             }
-            if (itemCurChoice == SHOP_ITEMS_COUNT) {
+            if (itemCurChoice == ExGameCfg.board_config.shop_count) {
                 BoardWinCreate(2, hostMessTbl[temp_r27] + 1, temp_r26);
                 BoardWinWait();
                 BoardWinKill();
@@ -608,7 +606,7 @@ static void UpdateShopWin(OMOBJ *arg0) {
     temp_r28->unk02 = GetShopItemWinChoice();
     if (temp_r28->unk02 != -1) {
         if (temp_r28->unk04 == 90 && temp_r28->unk03 != temp_r28->unk02) {
-            if (temp_r28->unk02 == SHOP_ITEMS_COUNT) {
+            if (temp_r28->unk02 == ExGameCfg.board_config.shop_count) {
                 HuWinDispOff(temp_r28->unk06);
                 if (temp_r28->unk00_field0 == 0) {
                     BoardModelVisibilitySet(itemMdl, 0);
@@ -1037,16 +1035,16 @@ static void GetDefaultShopItems(s32 _unused) {
 }
 
 static void SortShopItems(void) {
-    s32 sp8[SHOP_ITEMS_COUNT];
+    s32 sp8[MAX_SHOP_ITEMS];
     s32 var_r29;
     s32 i;
     s32 j;
 
-    for (i = 0; i < SHOP_ITEMS_COUNT; i++) {
+    for (i = 0; i < ExGameCfg.board_config.shop_count; i++) {
         sp8[i] = itemPriceTbl[activeItemTbl[i]];
     }
-    for (i = 0; i < SHOP_ITEMS_COUNT - 1; i++) {
-        for (j = SHOP_ITEMS_COUNT - 1; j >= i + 1; j--) {
+    for (i = 0; i < ExGameCfg.board_config.shop_count - 1; i++) {
+        for (j = ExGameCfg.board_config.shop_count - 1; j >= i + 1; j--) {
             if (sp8[j] < sp8[j - 1]) {
                 var_r29 = activeItemTbl[j];
                 activeItemTbl[j] = activeItemTbl[j - 1];
@@ -1133,7 +1131,7 @@ static s32 GetComItemChoice(s32 player) {
     }
     _space = GWPlayer[player].space_curr;
     num_coins = BoardPlayerCoinsGet(player);
-    for (max_desire = i = 0; i < SHOP_ITEMS_COUNT; i++) {
+    for (max_desire = i = 0; i < ExGameCfg.board_config.shop_count; i++) {
         if (num_coins >= itemPriceTbl[activeItemTbl[i]]) {
             desire_for_item = BoardComItemWeightGet(player, activeItemTbl[i]);
         } else {
@@ -1149,7 +1147,7 @@ static s32 GetComItemChoice(s32 player) {
     }
     if (max_desire == 0) {
         comF = 1;
-        choice = SHOP_ITEMS_COUNT;
+        choice = ExGameCfg.board_config.shop_count;
     } else {
         choice = i_most_desired;
     }
@@ -1168,7 +1166,7 @@ static void CreateShopItemChoice(s32 arg0, s32 arg1) {
     s16 spC;
     s16 i;
     #if VERSION_PAL
-    for(i=0; i<SHOP_ITEMS_COUNT+1; i++) {
+    for(i=0; i<ExGameCfg.board_config.shop_count+1; i++) {
         // cursorPosTbl[i][0] = 190;
         cursorPosX = 190.0f;
     }
@@ -1189,12 +1187,12 @@ static void CreateShopItemChoice(s32 arg0, s32 arg1) {
         s16 winId = BoardWinIDGet();
         if(winId != -1) {
             WindowData *winP = &winData[winId];
-            for(i=0; i<SHOP_ITEMS_COUNT+1; i++) {
+            for(i=0; i<ExGameCfg.board_config.shop_count+1; i++) {
                 // cursorPosTbl[i][0] = winP->pos_x+96;
                 cursorPosX = winP->pos_x+96;
             }
         } else {
-            for(i=0; i<SHOP_ITEMS_COUNT+1; i++) {
+            for(i=0; i<ExGameCfg.board_config.shop_count+1; i++) {
                 // cursorPosTbl[i][0] = 166;
                 cursorPosX = 166;
             }
@@ -1262,7 +1260,7 @@ static void MoveShopItemChoice(OMOBJ *arg0, ItemChoiceWork *arg1) {
             HuAudFXPlay(4);
             return;
         }
-        if (arg1->unk02 != SHOP_ITEMS_COUNT) {
+        if (arg1->unk02 != ExGameCfg.board_config.shop_count) {
             itemChoice = arg1->unk02;
         }
         HuAudFXPlay(2);
@@ -1287,8 +1285,8 @@ static void MoveShopItemChoice(OMOBJ *arg0, ItemChoiceWork *arg1) {
     if (arg1->unk02 < 0) {
         arg1->unk02 = 0;
     }
-    if (arg1->unk02 >= SHOP_ITEMS_COUNT + 1) {
-        arg1->unk02 = SHOP_ITEMS_COUNT;
+    if (arg1->unk02 >= ExGameCfg.board_config.shop_count + 1) {
+        arg1->unk02 = ExGameCfg.board_config.shop_count;
     }
     if (arg1->unk02 != temp_r28) {
         HuAudFXPlay(0);
