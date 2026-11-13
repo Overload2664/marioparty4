@@ -815,58 +815,58 @@ void BoardPlayerPostTurnHookSet(s32 arg0, s32 (*arg1)())
     postTurnHook[arg0] = arg1;
 }
 
-void BoardPlayerTurnExec(s32 arg0)
+void BoardPlayerTurnExec(s32 player_idx)
 {
     BoardPauseDisableSet(1);
-    BoardComUseItemSet(arg0, -1);
+    BoardComUseItemSet(player_idx, -1);
     GWSystem.bowser_event = 0xF;
     _ClearFlag(FLAG_ID_MAKE(1, 22));
     _ClearFlag(FLAG_ID_MAKE(1, 14));
     BoardCameraMoveSet(1);
     if (_CheckFlag(FLAG_ID_MAKE(1, 6)) == 0) {
         BoardCameraViewSet(2);
-        omVibrate((s16)arg0, 0xC, 4, 2);
+        omVibrate((s16)player_idx, 0xC, 4, 2);
         BoardItemPrevSet(-1);
-        BoardYourTurnExec(arg0);
+        BoardYourTurnExec(player_idx);
         megaDoubleDiceF = 0;
-        SetPlayerSizeAuto(arg0);
-        if (preTurnHook[arg0] != 0U) {
-            if (preTurnHook[arg0]() != 0) {
-                preTurnHook[arg0] = 0;
+        SetPlayerSizeAuto(player_idx);
+        if (preTurnHook[player_idx] != 0U) {
+            if (preTurnHook[player_idx]() != 0) {
+                preTurnHook[player_idx] = 0;
             }
         }
         if (_CheckFlag(FLAG_ID_MAKE(1, 11)) != 0) {
             BoardTutorialHookExec(5, 0);
         }
-        BoardPlayerTurnRollExec(arg0);
+        BoardPlayerTurnRollExec(player_idx);
     }
     else {
         BoardCameraViewSet(1);
         BoardCameraMotionWait();
     }
-    BoardPlayerTurnMoveExec(arg0);
+    BoardPlayerTurnMoveExec(player_idx);
 }
 
-void BoardPlayerTurnRollExec(s32 arg0)
+void BoardPlayerTurnRollExec(s32 player_idx)
 {
     s32 temp_r28;
     s32 temp_r30;
 
-    GWPlayer[arg0].roll = 0;
-    GWPlayer[arg0].num_dice = 1;
+    GWPlayer[player_idx].roll = 0;
+    GWPlayer[player_idx].num_dice = 1;
     BoardPauseDisableSet(0);
     do {
-        temp_r30 = BoardRollExec(arg0);
+        temp_r30 = BoardRollExec(player_idx);
         switch (temp_r30) {
             case -2:
                 BoardPauseDisableSet(1);
                 BoardRollKill();
-                BoardCameraTargetPlayerSet(arg0);
+                BoardCameraTargetPlayerSet(player_idx);
                 BoardCameraMotionWait();
-                BoardItemPrevSet(BoardItemUseExec(arg0));
+                BoardItemPrevSet(BoardItemUseExec(player_idx));
                 if (BoardItemPrevGet() == 0xC) {
                     _SetFlag(0x10016);
-                    BoardSpaceLandExec(arg0, GWPlayer[arg0].space_curr);
+                    BoardSpaceLandExec(player_idx, GWPlayer[player_idx].space_curr);
                     BoardCameraMoveSet(1);
                     BoardCameraViewSet(2);
                     _ClearFlag(0x10016);
@@ -875,17 +875,18 @@ void BoardPlayerTurnRollExec(s32 arg0)
                 break;
             case -3:
                 BoardRollKill();
-                BoardViewMapExec(arg0);
+                BoardViewMapExec(player_idx);
                 break;
             case -4:
                 BoardRollKill();
-                BoardViewOverheadExec(arg0);
+                BoardViewOverheadExec(player_idx);
                 break;
         }
-    } while (temp_r30 <= 0);
+    } while (temp_r30 < 0);
+    // } while (temp_r30 <= 0);
 }
 
-void BoardPlayerTurnMoveExec(s32 arg0)
+void BoardPlayerTurnMoveExec(s32 player_idx)
 {
     s16 sp8;
     u32 temp_r27;
@@ -903,8 +904,8 @@ void BoardPlayerTurnMoveExec(s32 arg0)
         BoardCameraViewSet(1);
         BoardCameraMotionWait();
         sp8 = -1;
-        GWPlayer[arg0].space_next = -1;
-        if (GWPlayer[arg0].bowser_suit != 0) {
+        GWPlayer[player_idx].space_next = -1;
+        if (GWPlayer[player_idx].bowser_suit != 0) {
             BoardCameraTargetModelSet(suitMdl);
             BoardCameraOffsetSet(0.0f, 100.0f, 0.0f);
         }
@@ -914,39 +915,46 @@ void BoardPlayerTurnMoveExec(s32 arg0)
         var_r28 = 1;
         _ClearFlag(FLAG_ID_MAKE(1, 6));
         _ClearFlag(FLAG_ID_MAKE(1, 7));
-        sp8 = GWPlayer[arg0].space_next;
+        sp8 = GWPlayer[player_idx].space_next;
         goto block_14;
     }
     do {
         BoardPauseDisableSet(1);
-        GWPlayer[arg0].space_prev = GWPlayer[arg0].space_curr;
+
+        // Extra
+        if (GWPlayer[player_idx].roll == 0) {
+            sp8 = GWPlayer[player_idx].space_curr;
+            GWPlayer[player_idx].space_next = GWPlayer[player_idx].space_curr;
+            break;
+        }
+        GWPlayer[player_idx].space_prev = GWPlayer[player_idx].space_curr;
         if (_CheckFlag(FLAG_ID_MAKE(2, 1)) == 0) {
-            if (ExecJunction(arg0, &sp8) != 0) {
+            if (ExecJunction(player_idx, &sp8) != 0) {
                 break;
             }
         }
-        else if (DoDebugMove(arg0, &sp8) != 0) {
+        else if (DoDebugMove(player_idx, &sp8) != 0) {
             break;
         }
 
-        GWPlayer[arg0].space_next = sp8;
+        GWPlayer[player_idx].space_next = sp8;
         StopJunctionPlayer(0);
-        if (MegaPlayerPassFunc(arg0, sp8) == 0) {
+        if (MegaPlayerPassFunc(player_idx, sp8) == 0) {
             BoardPauseDisableSet(0);
-            BoardPlayerMoveTo(arg0, sp8);
+            BoardPlayerMoveTo(player_idx, sp8);
             BoardPauseDisableSet(1);
         }
-        GWPlayer[arg0].space_prev = GWPlayer[arg0].space_curr;
-        GWPlayer[arg0].space_curr = sp8;
+        GWPlayer[player_idx].space_prev = GWPlayer[player_idx].space_curr;
+        GWPlayer[player_idx].space_curr = sp8;
         if (var_r29 != 0) {
-            BoardPlayerMoveAwayStartCurr(GWPlayer[arg0].space_prev, 0);
+            BoardPlayerMoveAwayStartCurr(GWPlayer[player_idx].space_prev, 0);
             var_r29 = 0;
         }
-        DoSparkSpace(arg0, 0);
+        DoSparkSpace(player_idx, 0);
         if (BoardSpaceWalkEventExec() != 0) {
             continue;
         }
-        if (BoardSpaceWalkExec(arg0, sp8) != 0) {
+        if (BoardSpaceWalkExec(player_idx, sp8) != 0) {
             continue;
         }
     block_14:
@@ -958,32 +966,32 @@ void BoardPlayerTurnMoveExec(s32 arg0)
         }
         HuAudFXPlay(0x301);
 
-        if (--GWPlayer[arg0].roll == 0)
+        if (--GWPlayer[player_idx].roll == 0)
             break;
     } while (1);
     BoardPauseDisableSet(1);
-    BoardRollUpdateSet(arg0);
-    BoardPlayerIdleSet(arg0);
-    if (GWPlayer[arg0].bowser_suit != 0) {
-        BoardCameraTargetPlayerSet(arg0);
+    BoardRollUpdateSet(player_idx);
+    BoardPlayerIdleSet(player_idx);
+    if (GWPlayer[player_idx].bowser_suit != 0) {
+        BoardCameraTargetPlayerSet(player_idx);
     }
     if (_CheckFlag(FLAG_ID_MAKE(1, 11)) != 0) {
         BoardTutorialHookExec(7, 0);
     }
     if (BoardItemPrevGet() != -1) {
-        BoardItemPlayerRestore(arg0, BoardItemPrevGet());
+        BoardItemPlayerRestore(player_idx, BoardItemPrevGet());
         while (BoardItemDoneCheck() == 0) {
             HuPrcVSleep();
         }
         BoardItemPrevSet(-1);
     }
-    BoardPlayerSizeRestore(arg0);
+    BoardPlayerSizeRestore(player_idx);
     megaDoubleDiceF = 0;
     if (_CheckFlag(FLAG_ID_MAKE(1, 11)) != 0) {
         BoardTutorialHookExec(8, 0);
     }
-    BoardSpaceBlockExec(arg0, sp8);
-    BoardSpaceLandExec(arg0, sp8);
+    BoardSpaceBlockExec(player_idx, sp8);
+    BoardSpaceLandExec(player_idx, sp8);
     _SetFlag(FLAG_ID_MAKE(1, 14));
     if (GWSystem.bowser_event != 1) {
         BoardCameraViewSet(2);
@@ -992,7 +1000,7 @@ void BoardPlayerTurnMoveExec(s32 arg0)
     else {
         GWSystem.bowser_event = 0xF;
     }
-    BoardPlayerZoomRestore(arg0);
+    BoardPlayerZoomRestore(player_idx);
     return;
 }
 
@@ -2164,17 +2172,22 @@ static void UpdateRollSprite(OMOBJ *arg0)
     s32 sp14[2];
     f32 spC[2] = { HU_DISP_CENTERX + 32, HU_DISP_CENTERX - 32 };
     s32 var_r30;
-    s32 temp_r29;
+    s32 roll;
     bitcopy3 *temp_r31;
 
     temp_r31 = omObjGetWork(arg0, bitcopy3);
-    temp_r29 = GWPlayer[temp_r31->unk_02].roll;
-    if (temp_r29 != 0) {
-        sp14[0] = temp_r29 % 10;
-        sp14[1] = temp_r29 / 10;
+    roll = GWPlayer[temp_r31->unk_02].roll;
+    if (roll != 0) {
+        sp14[0] = roll % 10;
+        sp14[1] = roll / 10;
     }
     else {
         temp_r31->field00_bit0 = 1;
+    }
+
+    // Extra
+    if(roll == 0) {
+        return; // The rest of the function doesn't handle rolling 0
     }
 
     for (var_r30 = 0; var_r30 < 2; var_r30++) {

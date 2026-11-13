@@ -1689,8 +1689,8 @@ typedef struct ExtSetTopic {
 
 static ExtSetEntry ext_board_entries[] = {
     { "SHOP ITEM COUNT", EXTSET_KIND_NUM, 5, MAX_SHOP_ITEMS, 7 },
-    { "MIN ROLL", EXTSET_KIND_NUM, 1, 99, 1 },
-    { "MAX ROLL", EXTSET_KIND_NUM, 1, 99, 10 },
+    { "MIN ROLL", EXTSET_KIND_NUM, 0, 99, 1 },
+    { "MAX ROLL", EXTSET_KIND_NUM, 0, 99, 10 },
     { "HANDICAP P1", EXTSET_KIND_NUM, 0, 3, 0 },
     { "HANDICAP P2", EXTSET_KIND_NUM, 0, 3, 0 },
     { "HANDICAP P3", EXTSET_KIND_NUM, 0, 3, 0 },
