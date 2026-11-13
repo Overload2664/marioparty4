@@ -1689,8 +1689,8 @@ typedef struct ExtSetTopic {
 
 static ExtSetEntry ext_board_entries[] = {
     { "SHOP ITEM COUNT", EXTSET_KIND_NUM, 5, MAX_SHOP_ITEMS, 7 },
-    { "BONUS STAR", EXTSET_KIND_ONOFF, 0, 0, 1 },
-    { "TURN COUNT", EXTSET_KIND_NUM, 5, 99, 10 },
+    { "MIN ROLL", EXTSET_KIND_NUM, 1, 99, 1 },
+    { "MAX ROLL", EXTSET_KIND_NUM, 1, 99, 10 },
     { "HANDICAP P1", EXTSET_KIND_NUM, 0, 3, 0 },
     { "HANDICAP P2", EXTSET_KIND_NUM, 0, 3, 0 },
     { "HANDICAP P3", EXTSET_KIND_NUM, 0, 3, 0 },
@@ -2494,6 +2494,14 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
         // Extra Board
         ExGameCfg.board_config.shop_count = getEntryValue("SHOP ITEM COUNT");
         sprintf(msg, "Extra Game Config: Shop Item Count set to %d\n", ExGameCfg.board_config.shop_count);
+        OSReport(msg);
+
+        ExGameCfg.board_config.min_roll = getEntryValue("MIN ROLL");
+        sprintf(msg, "Extra Game Config: Min Roll set to %d\n", ExGameCfg.board_config.min_roll);
+        OSReport(msg);
+
+        ExGameCfg.board_config.max_roll = getEntryValue("MAX ROLL");
+        sprintf(msg, "Extra Game Config: Max Roll set to %d\n", ExGameCfg.board_config.max_roll);
         OSReport(msg);
     }
     {

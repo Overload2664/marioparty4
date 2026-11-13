@@ -149,6 +149,8 @@ typedef struct game_stat {
 typedef struct extra_game_config {
     struct BoardConfig {
         u8 shop_count;
+        u8 min_roll;
+        u8 max_roll;
     } board_config;
 
     struct MGConfig {
@@ -398,5 +400,13 @@ static inline void GWPlayerCoinWinSet(s32 player, s16 value)
 
 #define GWPlayerCoinWinAdd(player, value) GWPlayerCoinWinSet((player), GWPlayerCoinWinGet((player))+(value))
 #define GWPlayerCoinCollectAdd(player, value) GWPlayerCoinCollectSet((player), (s32)GWPlayerCoinCollectGet((player))+(value))
+
+// Extra
+#ifndef MAX
+#define MAX(a, b) ((a) < (b) ? (b) : (a))
+#endif
+#ifndef MIN
+#define MIN(a, b) ((a) > (b) ? (b) : (a))
+#endif
 
 #endif

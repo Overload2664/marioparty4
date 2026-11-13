@@ -300,7 +300,7 @@ void Hu3DMotionTimeSet(s16 arg0, float arg1) {
     if (arg1 < 0.0f) {
         arg1 = 0.0f;
     }
-    temp_r31->motWork.time = arg1;
+    temp_r31->motWork.time = arg1; // Important, what sets the player's dice
     if (temp_r31->hsf != (HSFDATA*) -1 && temp_r31->hsf->cenvNum != 0 && (temp_r31->motAttr & HU3D_MOTATTR_PAUSE)) {
         Hu3DMotionExec(arg0, temp_r31->motId, arg1, 0);
         if (temp_r31->motIdShift != -1) {

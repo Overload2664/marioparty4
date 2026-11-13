@@ -71,6 +71,8 @@ static s8 diceValue[3];
 static s8 rollPlayer;
 static s8 numDice;
 static s8 inputTimer;
+static s8 minExRoll;
+static s8 maxExRoll;
 static s8 maxRoll;
 static s8 destMode;
 static s8 diceSize;
@@ -103,6 +105,10 @@ s32 BoardRollExec(s32 arg0)
     numDice = 1; // Dice rolls
     diceSize = 0;
     maxRoll = 0xA;
+
+    // Extra
+    minExRoll = ExGameCfg.board_config.min_roll;
+    maxExRoll = ExGameCfg.board_config.max_roll;
     switch (BoardItemPrevGet()) {
         case BOARD_ITEM_MINI_MUSHROOM:
             numDice = 1;
@@ -120,6 +126,7 @@ s32 BoardRollExec(s32 arg0)
     if (BoardPlayerSizeGet(arg0) == 1) {
         diceSize = 1;
         maxRoll = 5;
+        maxExRoll = MAX(minExRoll, maxExRoll / 2);
     }
     else if (BoardPlayerSizeGet(arg0) == 2) {
         diceSize = 2;
@@ -249,7 +256,7 @@ static void RollMain(void)
     
     s32 var_r28;
     
-    s32 var_r30;
+    s32 dice_sum;
     
     s32 i;
 
@@ -280,9 +287,13 @@ static void RollMain(void)
             HuPrcVSleep();
         }
     }
-    for (var_r30 = i = 0; i < numDice; i++) {
-        var_r30 += diceValue[i];
+    for (dice_sum = i = 0; i < numDice; i++) {
+        dice_sum += diceValue[i];
     }
+    
+    // Extra
+    dice_sum = MIN(dice_sum, 99); // Rolls higher than 99 give an error
+
     var_r28 = 0;
     switch (numDice) {
         case 2:
@@ -306,8 +317,8 @@ static void RollMain(void)
     for (i = 0; i < numDice; i++) {
         BoardDiceStop(i);
     }
-    destMode = var_r30;
-    GWPlayer[rollPlayer].roll = var_r30;
+    destMode = dice_sum;
+    GWPlayer[rollPlayer].roll = dice_sum;
     BoardRollCreate(rollPlayer, 1);
     if (_CheckFlag(FLAG_ID_MAKE(1, 11))) {
         BoardTutorialHookExec(6, 0);
@@ -424,17 +435,18 @@ static void DiceWaitFull(s32 arg0)
     }
 }
 
-static void DiceSetHit(s32 arg0)
+static void DiceSetHit(s32 dice_idx)
 {
-    DiceWork *temp_r30 = omObjGetWork(diceObj[arg0], DiceWork);
+    DiceWork *temp_r30 = omObjGetWork(diceObj[dice_idx], DiceWork);
 
     temp_r30->unk00_field2 = 2;
     temp_r30->unk04 = 0;
-    BoardModelMotionSpeedSet(diceMdl[arg0], 0.0f);
-    diceValue[arg0] = (s32)BoardModelMotionTimeGet(diceMdl[arg0]) + 1;
-    if (tutorialRollF != 0 && tutorialRoll[arg0] != -1) {
-        BoardModelMotionTimeSet(diceMdl[arg0], tutorialRoll[arg0] - 1);
-        diceValue[arg0] = tutorialRoll[arg0];
+    BoardModelMotionSpeedSet(diceMdl[dice_idx], 0.0f);
+    // diceValue[dice_idx] = (s32)BoardModelMotionTimeGet(diceMdl[dice_idx]) + 1;
+    diceValue[dice_idx] = (s32)BoardRandMod(maxExRoll - minExRoll) + minExRoll;
+    if (tutorialRollF != 0 && tutorialRoll[dice_idx] != -1) {
+        BoardModelMotionTimeSet(diceMdl[dice_idx], tutorialRoll[dice_idx] - 1);
+        diceValue[dice_idx] = tutorialRoll[dice_idx];
     }
 }
 
@@ -567,7 +579,7 @@ static void DiceMain(OMOBJ *arg0)
             temp_r29->unk02 = 0;
             temp_r26 = BoardModelMotionTimeGet(diceMdl[temp_r29->unk00_field3]);
             do {
-                temp_r27 = BoardRandMod(maxRoll);
+                temp_r27 = BoardRandMod(maxRoll); // Important
             } while (temp_r27 == temp_r26);
             BoardModelMotionTimeSet(diceMdl[temp_r29->unk00_field3], temp_r27 + 0.5f);
         }
