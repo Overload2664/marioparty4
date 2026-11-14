@@ -187,7 +187,7 @@ static UseCheckFunc comItemUseCheckFuncTbl[] = {
     CheckBooUse,
     CheckLampUse,
     NULL,
-    // Extra
+    // Extra (TODO: Make the checks for new items more sophisticated maybe)
     CheckMiniUse,
     CheckMiniUse,
     CheckMiniUse,
