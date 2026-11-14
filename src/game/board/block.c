@@ -9,6 +9,7 @@
 #include "game/objsub.h"
 #include "game/process.h"
 
+#include "game/board/block.h"
 #include "game/board/audio.h"
 #include "game/board/tutorial.h"
 
@@ -72,9 +73,9 @@ static HUPROCESS *blockProc;
 static s16 coinMdl[10] = { -1, -1, -1, -1 };
 static s32 coinF[10];
 
-s32 BoardBlockExec(s32 arg0)
+s32 BoardBlockExec(s32 player_idx)
 {
-    if (BoardPlayerSizeGet(arg0) == 2) {
+    if (BoardPlayerSizeGet(player_idx) == 2) {
         return 0;
     }
 

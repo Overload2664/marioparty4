@@ -34,20 +34,21 @@ static const char *ITEM_BANK_NAMES[] = {
     "Bowser" MESS_SMALL_SPACE "Phone",
     "Mushroom",
     "Golden" MESS_SMALL_SPACE "Mushroom",
+    "Hidden" MESS_SMALL_SPACE "Block" MESS_SMALL_SPACE "Card",
 };
 
 static u32 ITEM_SHOP_PROBS_DEFAULT[BOARD_ITEMS_END] = {
     0x14, 0x14, 0x0F, 0x0F, 0x05,
     0x07, 0x05, 0x05, 0x00, 0x05,
     0x00, 0x03, 0x00, 0x00, 0x14,
-    0x0F, 0x14
+    0x0F, 0x14, 0x4
 };
 
 static u32 ITEM_SPACE_PROBS_DEFAULT[BOARD_ITEMS_END] = {
     0x4, 0x14, 0x0F, 0x0F, 0x05,
     0x07, 0x05, 0x05, 0x00, 0x05,
     0x00, 0x03, 0x00, 0x00, 0x20,
-    0x0F, 0x14
+    0x0F, 0x14, 0x4
 };
 
 static s8 ITEM_SHOP_PRICE_DEFAULT[BOARD_ITEMS_END] = {
@@ -55,7 +56,7 @@ static s8 ITEM_SHOP_PRICE_DEFAULT[BOARD_ITEMS_END] = {
     10, 10, 15, 15,
     15, 15,  0, 25,
     30, 30,  5,  3,
-    15
+    15, 20
 };
 
 

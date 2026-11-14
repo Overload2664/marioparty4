@@ -250,7 +250,8 @@ static s32 itemMdlTbl[BOARD_ITEMS_END] = {
     DATA_MAKE_NUM(DATADIR_BOARD, 0x90),
     DATA_MAKE_NUM(DATADIR_BOARD, 163),
     DATA_MAKE_NUM(DATADIR_BOARD, 165),
-    DATA_MAKE_NUM(DATADIR_BOARD, 167)
+    DATA_MAKE_NUM(DATADIR_BOARD, 167),
+    DATA_MAKE_NUM(DATADIR_BOARD, 169)
 };
 
 static Vec teamItemStatusPosTbl[2] = {
@@ -276,7 +277,8 @@ s32 BoardItemModelGet(s32 arg0) {
         DATA_MAKE_NUM(DATADIR_BOARD, 0x7B),
         DATA_MAKE_NUM(DATADIR_BOARD, 164),
         DATA_MAKE_NUM(DATADIR_BOARD, 166),
-        DATA_MAKE_NUM(DATADIR_BOARD, 168)
+        DATA_MAKE_NUM(DATADIR_BOARD, 168),
+        DATA_MAKE_NUM(DATADIR_BOARD, 170)
     };
 
     return sp8[arg0];
@@ -299,7 +301,8 @@ static s32 itemNameTbl[BOARD_ITEMS_END] = {
     14 + MAKE_MESSID(0x08, 0x0E),
     3604514,
     3604514 + 4,
-    3604514 + 4*2
+    3604514 + 4*2,
+    3604514 + 4*3
 };
 
 s32 BoardItemDescriptionGet(s32 arg0) {
@@ -320,7 +323,8 @@ s32 BoardItemDescriptionGet(s32 arg0) {
         DATA_MAKE_NUM(DATADIR_EFFECT, 0x0D),
         3604515,
         3604515 + 4,
-        3604515 + 4 * 2
+        3604515 + 4 * 2,
+        3604515 + 4 * 3
     };
 
     return sp8[arg0];
