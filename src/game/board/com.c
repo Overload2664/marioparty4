@@ -171,7 +171,7 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
         BOARD_ITEM_GOLDEN_MUSHROOM
     }
 };
-
+// Important
 static UseCheckFunc comItemUseCheckFuncTbl[] = {
     CheckMiniUse,
     CheckMegaUse,
@@ -186,7 +186,12 @@ static UseCheckFunc comItemUseCheckFuncTbl[] = {
     NULL,
     CheckBooUse,
     CheckLampUse,
-    NULL
+    NULL,
+    // Extra
+    CheckMiniUse,
+    CheckMiniUse,
+    CheckMiniUse,
+    
 };
 
 static Vec comJunctionDirTbl[] = {
