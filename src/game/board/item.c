@@ -1926,8 +1926,16 @@ static void ExecItemBowserPhone(void)
     for (i = 0; i < 4; i++) {
         BoardWinInsertMesSet(BoardPlayerGetCharMess(i), i);
     }
+
+    if (GWPlayer[currItemRestore].com) {
+        // For now we select a random player
+        player_idx = BoardRandMod(4);
+        ComSetStealPlayerInput(currItemRestore, player_idx);
+    }
+
     BoardWinWait();
     BoardWinKill();
+
     player_idx = BoardWinChoiceGet();
 
     BoardCameraTargetPlayerSet(player_idx);

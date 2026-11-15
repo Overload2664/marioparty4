@@ -100,7 +100,7 @@ typedef struct {
 static BOOL CheckBallCoinDone(void);
 static void TakeBallStar(void);
 static void ComSetupStealPlayer(s32 arg0);
-static void ComSetStealPlayerInput(s32 arg0, s32 arg1);
+void ComSetStealPlayerInput(s32 cur_player, s32 player_to_steal);
 static void ExecCoinSteal(void);
 static void ExecStarSteal(void);
 static void ExecLightSteal(void);
@@ -305,85 +305,85 @@ s32 BoardBooStealTypeSet(s32 arg0) {
     SetBallView(1);
 }
 
-static void ComSetupStealPlayer(s32 arg0) {
-    s32 var_r25;
-    s32 var_r26;
-    s32 var_r29;
-    s32 temp_r28;
-    s32 var_r27;
-    s32 var_r30;
-    s32 var_r24;
-    s32 var_r22;
+static void ComSetupStealPlayer(s32 player_idx) {
+    s32 max_resource;
+    s32 cur_player_to_steal;
+    s32 random_chance;
+    s32 cur_player_idx;
+    s32 player_to_steal;
+    s32 resource; // Like coins/stars
+    s32 is_random;
+    s32 random_percent;
     s32 i;
-    s16 sp8[3];
+    s16 resources[3];
 
-    switch (GWPlayer[arg0].diff) {
+    switch (GWPlayer[player_idx].diff) {
         case 0:
-            var_r29 = 95;
+            random_chance = 95;
             break;
         case 1:
-            var_r29 = 50;
+            random_chance = 50;
             break;
         case 2:
-            var_r29 = 5;
+            random_chance = 5;
             break;
         case 3:
-            var_r29 = 0;
+            random_chance = 0;
             break;
     }
-    var_r22 = BoardRandMod(100);
-    if (var_r22 >= var_r29) {
-        var_r24 = 1;
+    random_percent = BoardRandMod(100);
+    if (random_percent >= random_chance) {
+        is_random = 1;
     } else {
-        var_r24 = 0;
+        is_random = 0;
     }
     for (i = 0; i < 3; i++) {
-        temp_r28 = stealAvail[i];
+        cur_player_idx = stealAvail[i];
         if (stealType == 1) {
-            var_r30 = GWStarsGet(temp_r28);
+            resource = GWStarsGet(cur_player_idx);
         } else {
-            var_r30 = BoardPlayerCoinsGet(temp_r28);
+            resource = BoardPlayerCoinsGet(cur_player_idx);
         }
         if (starChoiceEnable[i] == 0) {
-            var_r30 = -1;
+            resource = -1;
         }
-        if ((s32) GWSystem.team != 0 && temp_r28 == BoardPlayerSameTeamFind(arg0)) {
-            var_r30 = 0;
+        if ((s32) GWSystem.team != 0 && cur_player_idx == BoardPlayerSameTeamFind(player_idx)) {
+            resource = 0;
         }
-        if (BoardPlayerItemFind(temp_r28, 8) != -1 && var_r24 != 0) {
-            var_r30 = 0;
+        if (BoardPlayerItemFind(cur_player_idx, 8) != -1 && is_random != 0) {
+            resource = 0;
         }
-        sp8[i] = var_r30;
+        resources[i] = resource;
     }
-    var_r25 = var_r27 = -1;
-    for (var_r26 = i = 0; i < 3; i++) {
-        var_r30 = sp8[i];
-        if (var_r30 != -1) {
-            if (var_r30 > 0 && var_r30 >= var_r25) {
-                var_r25 = var_r30;
-                var_r27 = var_r26;
+    max_resource = player_to_steal = -1;
+    for (cur_player_to_steal = i = 0; i < 3; i++) {
+        resource = resources[i];
+        if (resource != -1) {
+            if (resource > 0 && resource >= max_resource) {
+                max_resource = resource;
+                player_to_steal = cur_player_to_steal;
             }
-            var_r26++;
+            cur_player_to_steal++;
         }
     }
-    if (var_r27 == -1) {
-        var_r27 = 0;
+    if (player_to_steal == -1) {
+        player_to_steal = 0;
     }
-    ComSetStealPlayerInput(arg0, var_r27);
+    ComSetStealPlayerInput(player_idx, player_to_steal);
 }
 
-static void ComSetStealPlayerInput(s32 arg0, s32 arg1) {
+void ComSetStealPlayerInput(s32 cur_player, s32 player_to_steal) {
     s32 spC[4];
     s32 temp_r30;
     s32 i;
     s16 temp_r29;
 
     spC[0] = spC[1] = spC[2] = spC[3] = 0;
-    temp_r30 = GWPlayer[arg0].port;
+    temp_r30 = GWPlayer[cur_player].port;
     temp_r29 = GWMessDelayGet();
     spC[temp_r30] = 4;
-    if (arg1 != 0) {
-        for (i = 0; i < arg1; i++) {
+    if (player_to_steal != 0) {
+        for (i = 0; i < player_to_steal; i++) {
             HuWinComKeyWait(spC[0], spC[1], spC[2], spC[3], temp_r29);
         }
     }

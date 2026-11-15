@@ -10,5 +10,6 @@ s32 BoardBooStealTypeSet(s32 arg0);
 s32 BoardBooStealMain(void);
 s32 BoardBooStealValueGet(s16 *arg0, s16 *arg1);
 BOOL BoardBooStealLightCheck(void);
+void ComSetStealPlayerInput(s32 cur_player, s32 player_to_steal);
 
 #endif
