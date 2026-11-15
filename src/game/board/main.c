@@ -432,8 +432,8 @@ static void MainFunc(void)
     } else {
         fade_enable = 0;
     }
-    if(ExecTurnStart() && !BoardIsBowserItem()) {
-        // BoardIsBowserItem() is a fix related to bowser phone item
+    if(ExecTurnStart() && !BoardBowserItemTurn()) {
+        // BoardIsBowserItem() is a fix related to bowser phone itemdd
         turn_cont = 1;
     }
     if(CHECK_LAST5_TURN() && GWSystem.player_curr == 0 && !turn_cont) {

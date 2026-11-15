@@ -65,6 +65,7 @@ static s16 bowserMdl = -1;
 
 // Extra
 static u8 is_item = 0; 
+static u8 is_item_turn = 0; // Prevents skipping turn after bowser minigame with item
 
 static void ExecBowser(void);
 static void ExecBowserMain(void);
@@ -108,8 +109,13 @@ static void KillBowserFire(void);
 static s32 ExecMiniBowserEvent(void);
 
 // Extra
-BOOL BoardIsBowserItem(void) {
-    return is_item;
+BOOL BoardBowserItemTurn(void) {
+    if (is_item_turn) {
+        is_item_turn = FALSE;
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
 void BoardItemBowserExec(s32 player, s32 space)
@@ -130,7 +136,7 @@ s32 BoardBowserExec(s32 player, s32 space)
 {
     if(is_item) {
         BoardItemBowserExec(eventPlayer, eventSpace);
-        is_item = 0; // Just to be sure lmao
+        is_item_turn = TRUE;
         return 0;
     }
 

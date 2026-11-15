@@ -109,7 +109,7 @@ static void RestoreItemMegaSuper(void);
 static void RestoreItemBowser(void);
 
 // Extra
-BOOL BoardIsBowserItem(void);
+BOOL BoardBowserItemTurn(void);
 
 static Vec booBallScale;
 static Vec booBallPos;
