@@ -443,7 +443,7 @@ static void DiceSetHit(s32 dice_idx)
     temp_r30->unk04 = 0;
     BoardModelMotionSpeedSet(diceMdl[dice_idx], 0.0f);
     // diceValue[dice_idx] = (s32)BoardModelMotionTimeGet(diceMdl[dice_idx]) + 1;
-    diceValue[dice_idx] = (s32)BoardRandMod(maxExRoll - minExRoll) + minExRoll;
+    diceValue[dice_idx] = (s32)BoardRandMod(maxExRoll - minExRoll + 1) + minExRoll;
     if (tutorialRollF != 0 && tutorialRoll[dice_idx] != -1) {
         BoardModelMotionTimeSet(diceMdl[dice_idx], tutorialRoll[dice_idx] - 1);
         diceValue[dice_idx] = tutorialRoll[dice_idx];
