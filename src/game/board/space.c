@@ -627,6 +627,12 @@ void BoardSpaceLandExec(s32 player, s32 space)
         case STAR_SPACE:
             BoardStarExec(player, space);
             break;
+        
+        // Extra
+        // default:
+        //     // Make sure the player has a color before the end of the turn
+        //     GWPlayer[player].color = 3;
+        //     break;
     }
 }
 

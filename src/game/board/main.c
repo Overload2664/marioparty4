@@ -533,6 +533,15 @@ static void MainFunc(void)
             }
             BoardPlayerPostTurnHookExec(i);
         }
+
+        // Extra
+        for(i=0; i<4; i++) {
+            // Make sure players have a space color before end turn
+            if (GWPlayer[i].color == 0) {
+                GWPlayer[i].color = 3;
+            }
+        }
+
         if(GWBoardGet() == BOARD_ID_EXTRA1 || GWBoardGet() == BOARD_ID_EXTRA2) {
             GWSystem.player_curr = 0;
             if(BoardTurnNext()) {
