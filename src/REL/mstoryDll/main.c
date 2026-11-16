@@ -19,7 +19,7 @@ s32 lbl_1_bss_68;
 s32 lbl_1_bss_58[4];
 char lbl_1_bss_48[0x10]; // unused
 StructBss4 lbl_1_bss_4;
-HUPROCESS* lbl_1_bss_0;
+HUPROCESS* objman_process;
 
 s32 lbl_1_data_0[][4] = {
     { 0x37, 0x38, 0x36, 0x39 },
@@ -66,7 +66,7 @@ void fn_1_A4(void) {
     sp10 = 1;
     spC = 1;
     sp8 = 1;
-    omAddObjEx(lbl_1_bss_0, 0x2000, 0, 0, -1, fn_1_4C);
+    omAddObjEx(objman_process, 0x2000, 0, 0, -1, fn_1_4C);
     WipeCreate(WIPE_MODE_IN, WIPE_TYPE_NORMAL, -1);
     while (TRUE) {
         if (WipeStatGet() == 0) {
@@ -126,16 +126,16 @@ void fn_1_A4(void) {
     GWSystem.board = var_r31;
     switch (var_r30) {
         case 0:
-            fn_1_79B8(lbl_1_bss_0, var_r31, 0);
+            fn_1_79B8(objman_process, var_r31, 0);
             break;
         case 1:
-            fn_1_ACFC(lbl_1_bss_0, var_r31, 0);
+            fn_1_ACFC(objman_process, var_r31, 0);
             break;
         case 2:
-            fn_1_E710(lbl_1_bss_0, var_r31, 0);
+            fn_1_E710(objman_process, var_r31, 0);
             break;
         case 3:
-            fn_1_11624(lbl_1_bss_0, var_r31, 0);
+            fn_1_11624(objman_process, var_r31, 0);
             break;
     }
     while (TRUE) {
@@ -150,7 +150,7 @@ void fn_1_A4(void) {
 void fn_1_488(void) {
     s32 i;
 
-    lbl_1_bss_0 = omInitObjMan(62, 0x2000);
+    objman_process = omInitObjMan(62, 0x2000);
     switch (omovlevtno) {
         case 0:
             for (i = 0; i < 4; i++) {
@@ -158,7 +158,7 @@ void fn_1_488(void) {
                     break;
                 }
             }
-            fn_1_79B8(lbl_1_bss_0, GWSystem.board, i);
+            fn_1_79B8(objman_process, GWSystem.board, i);
             break;
         case 1:
             for (i = 0; i < 4; i++) {
@@ -166,17 +166,17 @@ void fn_1_488(void) {
                     break;
                 }
             }
-            fn_1_ACFC(lbl_1_bss_0, GWSystem.board, i);
+            fn_1_ACFC(objman_process, GWSystem.board, i);
             break;
         case 2:
             if (GWPlayerCoinWinGet(0) >= 10) {
-                fn_1_E710(lbl_1_bss_0, GWSystem.board, 0);
+                fn_1_E710(objman_process, GWSystem.board, 0);
             } else {
-                fn_1_11624(lbl_1_bss_0, GWSystem.board, 0);
+                fn_1_11624(objman_process, GWSystem.board, 0);
             }
             break;
         case 20:
-            fn_1_14150(lbl_1_bss_0);
+            fn_1_14150(objman_process);
             break;
     }
 }

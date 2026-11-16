@@ -30,7 +30,7 @@ typedef struct {
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
     /* 0x18 */ s32 unk18;
-    /* 0x1C */ char unk1C[0x18];
+    /* 0x1C */ char coins[0x18];
 } StructFn352C; // Size 0x34
 
 typedef struct {

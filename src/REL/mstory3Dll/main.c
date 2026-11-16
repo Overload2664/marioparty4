@@ -16,7 +16,7 @@
 
 u8 lbl_1_bss_48[0x10]; // unused
 StructBss4 lbl_1_bss_4;
-HUPROCESS* lbl_1_bss_0;
+HUPROCESS* objman_process;
 
 s32 lbl_1_data_0[][4] = {
     { 0x37, 0x38, 0x36, 0x39 },
@@ -54,15 +54,15 @@ void fn_1_A4(void) {
     s32 sp8;
     s32 var_r29;
     s32 var_r30;
-    s32 var_r31;
+    s32 map_number;
 
     sp14 = 0;
     var_r30 = 0;
-    var_r31 = 0;
+    map_number = 0;
     sp10 = 1;
     spC = 1;
     sp8 = 1;
-    omAddObjEx(lbl_1_bss_0, 0x2000, 0, 0, -1, fn_1_4C);
+    omAddObjEx(objman_process, 0x2000, 0, 0, -1, fn_1_4C);
     WipeCreate(WIPE_MODE_IN, WIPE_TYPE_NORMAL, -1);
     while (TRUE) {
         if (WipeStatGet() == 0) {
@@ -87,20 +87,20 @@ void fn_1_A4(void) {
             }
         }
         if (HuPadStkX[0] <= -30) {
-            var_r31++;
-            if (var_r31 > 6) {
-                var_r31 = 0;
+            map_number++;
+            if (map_number > 6) {
+                map_number = 0;
             }
         }
         if (HuPadStkX[0] >= 30) {
-            var_r31--;
-            if (var_r31 < 0) {
-                var_r31 = 5;
+            map_number--;
+            if (map_number < 0) {
+                map_number = 5;
             }
         }
         fontcolor = FONT_COLOR_WHITE;
         print8(24, 100, 1.5f, ">>>>> MPGC STORY 3 - EVENT SELECT <<<<<");
-        print8(24, 130, 1.5f, "MAP NUMBER : %d", var_r31 + 1);
+        print8(24, 130, 1.5f, "MAP NUMBER : %d", map_number + 1);
         for (var_r29 = 0; var_r29 < 2; var_r29++) {
             fontcolor = FONT_COLOR_WHITE;
             if (var_r30 == var_r29) {
@@ -117,13 +117,13 @@ void fn_1_A4(void) {
         }
         fn_1_938();
     }
-    GWSystem.board = var_r31;
+    GWSystem.board = map_number;
     switch (var_r30) {         
         case 0:
-            fn_1_6E34(lbl_1_bss_0, var_r31, 1, 0, 0);
+            fn_1_6E34(objman_process, map_number, 1, 0, 0);
             break;
         case 1:
-            fn_1_157F0(lbl_1_bss_0, var_r31, 0, 0);
+            fn_1_157F0(objman_process, map_number, 0, 0);
             break;
     }
     while (TRUE) {
@@ -136,14 +136,14 @@ void fn_1_A4(void) {
 #endif
 
 void fn_1_40C(void) {
-    lbl_1_bss_0 = omInitObjMan(62, 0x2000);
-    omGameSysInit(lbl_1_bss_0);
+    objman_process = omInitObjMan(62, 0x2000);
+    omGameSysInit(objman_process);
     switch (omovlevtno) {
         case 0:
-            fn_1_6E34(lbl_1_bss_0, GWSystem.board, GWSystem.bonus_star, GWSystem.party, 0);
+            fn_1_6E34(objman_process, GWSystem.board, GWSystem.bonus_star, GWSystem.party, 0);
             break;
         case 1:
-            fn_1_157F0(lbl_1_bss_0, GWSystem.board, GWSystem.party, 0);
+            fn_1_157F0(objman_process, GWSystem.board, GWSystem.party, 0);
             break;
     }
 }
@@ -433,8 +433,8 @@ s32 fn_1_1C88(s32 arg0) {
     return fn_1_1BC4(arg0, 0);
 }
 
-void fn_1_1D44(s32 arg0, s32 arg1) {
-    HuWinMesSet(arg0, arg1);
+void fn_1_1D44(s32 window, s32 mess) {
+    HuWinMesSet(window, mess);
 }
 
 void fn_1_1D78(s32 arg0, s32 arg1, s32 arg2) {

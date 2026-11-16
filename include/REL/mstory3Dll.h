@@ -15,11 +15,11 @@ typedef struct {
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
     /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s32 unk2C;
+    /* 0x1C */ s32 coins;
+    /* 0x20 */ s32 stars;
+    /* 0x24 */ s32 coins_mg;
+    /* 0x28 */ s32 coins_max;
+    /* 0x2C */ s32 question_count;
     /* 0x30 */ char unk30[4];
 } StructFn352C; // Size 0x34
 
@@ -68,7 +68,7 @@ s32 fn_1_1834(u32 arg0, s32 arg1);
 void fn_1_1A24(s32 arg0);
 void fn_1_1AB0(s32 arg0);
 void fn_1_1B18(s32 arg0, s32 arg1);
-void fn_1_1D44(s32 arg0, s32 arg1);
+void fn_1_1D44(s32 window, s32 mess);
 void fn_1_1E28(OMOBJ* arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void fn_1_2280(OMOBJ* arg0, s32 arg1, s32 arg2, s32 arg3);
 void fn_1_2310(OMOBJ* arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -88,12 +88,22 @@ void fn_1_4CC0(StructBss4* arg0, StructBss4* arg1, float arg2, float arg3);
 void fn_1_514C(StructBss4* arg0, StructBss4* arg1, float arg2, float arg3, float arg4);
 
 // result_seq.c
-void fn_1_6E34(HUPROCESS* arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+void fn_1_6E34(HUPROCESS* objman_process, s32 map_number, s32 bonus_star, s32 party, s32 arg4);
 
 // result.c
-void fn_1_157F0(HUPROCESS* arg0, s32 arg1, s32 arg2, s32 arg3);
+void fn_1_157F0(HUPROCESS* objman_process, s32 map_number, s32 party, s32 arg3);
 
 extern StructBss4 lbl_1_bss_4;
 extern s32 lbl_1_data_0[][4];
+
+// Extra
+#define MESS_SMALL_SPACE "\20"
+
+static const char *EX_BONUS_STAR_NAMES[] = {
+    "Minigame" MESS_SMALL_SPACE "Star",
+    "Coin" MESS_SMALL_SPACE "Star",
+    "Happening" MESS_SMALL_SPACE "Star",
+    "Red" MESS_SMALL_SPACE "Star"
+};
 
 #endif

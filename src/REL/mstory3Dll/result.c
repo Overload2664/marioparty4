@@ -51,9 +51,9 @@ typedef struct {
 } StructUnk38Bss1A0C; // Size 0x94
 
 typedef struct {
-    /* 0x000 */ s32 unk00;
+    /* 0x000 */ s32 map_number;
     /* 0x004 */ s32 unk04;
-    /* 0x008 */ s32 unk08;
+    /* 0x008 */ s32 max_turn;
     /* 0x00C */ s32 unk0C;
     /* 0x010 */ s32 unk10;
     /* 0x014 */ s32 unk14;
@@ -65,9 +65,9 @@ typedef struct {
     /* 0x288 */ Vec unk288[5];
     /* 0x2C4 */ s32 unk2C4;
     /* 0x2C8 */ s32 unk2C8;
-    /* 0x2CC */ s32 unk2CC;
+    /* 0x2CC */ s32 team;
     /* 0x2D0 */ s32 unk2D0;
-    /* 0x2D4 */ s32 unk2D4;
+    /* 0x2D4 */ s32 party;
 } StructBss1A0C; // Size 0x2D8
 
 void fn_1_15C0C(void);
@@ -104,15 +104,15 @@ ANIMDATA* lbl_1_bss_18D8[3];
 s32 lbl_1_bss_18D4;
 HUPROCESS* lbl_1_bss_18D0;
 
-void fn_1_157F0(HUPROCESS* arg0, s32 arg1, s32 arg2, s32 arg3) {
+void fn_1_157F0(HUPROCESS* objman_process, s32 map_number, s32 party, s32 arg3) {
     s32 var_r31;
 
-    lbl_1_bss_18D0 = arg0;
-    lbl_1_bss_1A0C.unk00 = arg1;
-    lbl_1_bss_1A0C.unk08 = GWSystem.max_turn;
+    lbl_1_bss_18D0 = objman_process;
+    lbl_1_bss_1A0C.map_number = map_number;
+    lbl_1_bss_1A0C.max_turn = GWSystem.max_turn;
     arg3 = lbl_1_bss_1A0C.unk14 = fn_1_373C();
-    lbl_1_bss_1A0C.unk2D4 = arg2;
-    lbl_1_bss_1A0C.unk2CC = GWSystem.team;
+    lbl_1_bss_1A0C.party = party;
+    lbl_1_bss_1A0C.team = GWSystem.team;
     if (_CheckFlag(FLAG_ID_MAKE(1, 29))) {
         lbl_1_bss_1A0C.unk2D0 = 0;
     } else {
@@ -144,29 +144,29 @@ void fn_1_159A4(void) {
         }
         GWTotalStarsAdd(var_r29);
     }
-    GWBoardPlayCountAdd(lbl_1_bss_1A0C.unk00, 1);
-    if (lbl_1_bss_1A0C.unk2CC == 1) {
+    GWBoardPlayCountAdd(lbl_1_bss_1A0C.map_number, 1);
+    if (lbl_1_bss_1A0C.team == 1) {
         if (lbl_1_bss_1A0C.unk38[0].unk08 == 0) {
-            GWBoardWinCountInc(lbl_1_bss_1A0C.unk38[0].unk10, lbl_1_bss_1A0C.unk00);
+            GWBoardWinCountInc(lbl_1_bss_1A0C.unk38[0].unk10, lbl_1_bss_1A0C.map_number);
         }
         if (lbl_1_bss_1A0C.unk38[1].unk08 == 0) {
-            GWBoardWinCountInc(lbl_1_bss_1A0C.unk38[1].unk10, lbl_1_bss_1A0C.unk00);
+            GWBoardWinCountInc(lbl_1_bss_1A0C.unk38[1].unk10, lbl_1_bss_1A0C.map_number);
         }
     } else if (lbl_1_bss_1A0C.unk38[0].unk08 == 0) {
-        GWBoardWinCountInc(lbl_1_bss_1A0C.unk38[0].unk10, lbl_1_bss_1A0C.unk00);
+        GWBoardWinCountInc(lbl_1_bss_1A0C.unk38[0].unk10, lbl_1_bss_1A0C.map_number);
     }
     for (i = 0; i < 4; i++) {
         var_r30 = GWPlayer[i].stars_max - GWPlayerHandicapGet(i);
         if (var_r30 <= 0) {
             var_r30 = 0;
         }
-        if (GWBoardMaxStarsGet(lbl_1_bss_1A0C.unk00) <= var_r30 && !GWPlayer[i].com) {
-            GWBoardMaxStarsSet(lbl_1_bss_1A0C.unk00, var_r30);
+        if (GWBoardMaxStarsGet(lbl_1_bss_1A0C.map_number) <= var_r30 && !GWPlayer[i].com) {
+            GWBoardMaxStarsSet(lbl_1_bss_1A0C.map_number, var_r30);
         }
     }
     for (i = 0; i < 4; i++) {
-        if (GWBoardMaxCoinsGet(lbl_1_bss_1A0C.unk00) <= GWPlayer[i].coins_max && !GWPlayer[i].com) {
-            GWBoardMaxCoinsSet(lbl_1_bss_1A0C.unk00, GWPlayer[i].coins_max);
+        if (GWBoardMaxCoinsGet(lbl_1_bss_1A0C.map_number) <= GWPlayer[i].coins_max && !GWPlayer[i].com) {
+            GWBoardMaxCoinsSet(lbl_1_bss_1A0C.map_number, GWPlayer[i].coins_max);
         }
     }
 }
@@ -261,7 +261,7 @@ void fn_1_161B8(void) {
                 print8(var_r30, var_r29 + 30 + i * 10, 1.0f, "PROC_PLAYER%d -> TRUE", i);
             }
         }
-        print8(var_r30, var_r29 + 80, 1.0f, "M:%d P:%d W:%d", lbl_1_bss_1A0C.unk00, lbl_1_bss_1A0C.unk04, lbl_1_bss_1A0C.unk14);
+        print8(var_r30, var_r29 + 80, 1.0f, "M:%d P:%d W:%d", lbl_1_bss_1A0C.map_number, lbl_1_bss_1A0C.unk04, lbl_1_bss_1A0C.unk14);
         print8(var_r30, var_r29 + 100, 1.0f, "NO) IDX:GRP:COM:DIF:PAD:CHR");
         for (i = 0; i < 4; i++) {
             print8(var_r30, var_r29 + 110 + i * 10, 1.0f, "%2d) %3d:%3d:%3d:%3d:%3d:%3d", i,
@@ -454,7 +454,7 @@ void fn_1_16ED4(void) {
         if (i == 0) {
             lbl_1_bss_1A0C.unk288[i].x = 1800.0f;
             lbl_1_bss_1A0C.unk288[i].y = 157.5f;
-        } else if (lbl_1_bss_1A0C.unk2CC == 1) {
+        } else if (lbl_1_bss_1A0C.team == 1) {
             if (i <= 2) {
                 var_r30 = 0;
             } else {
@@ -630,7 +630,7 @@ void fn_1_17570(void) {
                 continue;
             }
             _SetFlag(9);
-            switch (lbl_1_bss_1A0C.unk00) {
+            switch (lbl_1_bss_1A0C.map_number) {
                 case 0:
                     if (_CheckFlag(2) == 0) {
                         _SetFlag(2);
@@ -670,7 +670,7 @@ void fn_1_17570(void) {
             }
             if (var_r30 == 1) {
                 if (lbl_1_bss_1A0C.unk38[i].unk18 == 0) {
-                    if (lbl_1_bss_1A0C.unk00 == 5) {
+                    if (lbl_1_bss_1A0C.map_number == 5) {
                         GWGameStat.open_w06 = 1;
                     }
                     _ClearFlag(9);
@@ -680,13 +680,13 @@ void fn_1_17570(void) {
                     do {
                         fn_1_938();
                     } while (lbl_1_bss_18D4 != 1);
-                    if (lbl_1_bss_1A0C.unk00 != 5) {
+                    if (lbl_1_bss_1A0C.map_number != 5) {
                         omOvlGotoEx(DLL_mstorydll, 1, 0, 0);
                     } else {
                         omOvlGotoEx(DLL_mstory2dll, 1, 1, 0);
                     }
                 } else {
-                    switch (lbl_1_bss_1A0C.unk00) {
+                    switch (lbl_1_bss_1A0C.map_number) {
                         case 0:
                             _ClearFlag(2);
                             break;
@@ -712,7 +712,7 @@ void fn_1_17570(void) {
                     do {
                         fn_1_938();
                     } while (lbl_1_bss_18D4 != 1);
-                    if (lbl_1_bss_1A0C.unk00 != 5) {
+                    if (lbl_1_bss_1A0C.map_number != 5) {
                         omOvlGotoEx(DLL_mstorydll, 1, 1, 0);
                     } else {
                         omOvlGotoEx(DLL_mstory2dll, 1, 2, 0);
@@ -871,7 +871,7 @@ void fn_1_18668(OMOBJ* arg0, s32 arg1) {
         HuSprGrpMemberSet(arg0->work[1], i + 6, var_r30);
     }
     // TODO: figure out the actual value of arg7. It will match as long as arg7 >= 2.
-    fn_1_15DC8(arg0->work[1], 6, lbl_1_bss_1A0C.unk08, 293, 19, 36, 36, 2);
+    fn_1_15DC8(arg0->work[1], 6, lbl_1_bss_1A0C.max_turn, 293, 19, 36, 36, 2);
     arg0->work[2] = HuSprGrpCreate(2);
     var_r30 = HuSprCreate(HuSprAnimRead(HuDataReadNum(DATA_MAKE_NUM(DATADIR_MSTORY3, 120), HU_MEMNUM_OVL)), 800, 0);
     HuSprGrpMemberSet(arg0->work[2], 0, var_r30);
@@ -982,8 +982,8 @@ void fn_1_19214(void) {
     temp_r3 = omAddObjEx(lbl_1_bss_18D0, 0x100, 0x10, 0x10, -1, NULL);
     lbl_1_bss_19BC.unk00 = temp_r3;
     lbl_1_bss_19BC.unk04 = NULL;
-    fn_1_1811C(temp_r3, lbl_1_bss_1A0C.unk00);
-    fn_1_18668(temp_r3, lbl_1_bss_1A0C.unk00);
+    fn_1_1811C(temp_r3, lbl_1_bss_1A0C.map_number);
+    fn_1_18668(temp_r3, lbl_1_bss_1A0C.map_number);
     while (TRUE) {
         fn_1_938();
         if (lbl_1_bss_19BC.unk04 != NULL) {
@@ -1067,7 +1067,7 @@ void fn_1_197B4(s32 arg0) {
             }
         }
     }
-    if (lbl_1_bss_1A0C.unk2CC == 1) {
+    if (lbl_1_bss_1A0C.team == 1) {
         var_r29 = lbl_1_bss_1A0C.unk2D0;
         for (i = 0; i < 4; i++) {
             sp24[0] = GWPlayer[sp74[0][0]].team;
@@ -1120,7 +1120,7 @@ void fn_1_1A008(OMOBJ* arg0, s32 arg1) {
     // TODO: figure out the actual args of fn_1_15D08 calls.
     // It will match as long as the values (arg2 + arg4 / 2) and (arg3 + arg5 / 2) are preserved.
     temp_r27 = &lbl_1_bss_1A0C.unk38[arg1];
-    if (lbl_1_bss_1A0C.unk2CC == 1) {
+    if (lbl_1_bss_1A0C.team == 1) {
         spD4 = lbl_1_bss_1A0C.unk2D0;
         if (arg1 > 1) {
             spD4++;
@@ -1144,7 +1144,7 @@ void fn_1_1A008(OMOBJ* arg0, s32 arg1) {
         Hu3DModelHookSet(arg0->mdlId[1], "results_flag04-hook_cubes", arg0->mdlId[3]);
     }
     arg0->work[0] = HuSprGrpCreate(12);
-    if (lbl_1_bss_1A0C.unk2CC == 1) {
+    if (lbl_1_bss_1A0C.team == 1) {
         spD0 = 35;
         spCC = 10;
         spC8 = 65;
@@ -1276,7 +1276,7 @@ void fn_1_1BEFC(OMOBJ* arg0, StructBss1530* arg1) {
     Vec sp8;
     s32 var_r29;
 
-    if (lbl_1_bss_1A0C.unk2CC == 1) {
+    if (lbl_1_bss_1A0C.team == 1) {
         if (arg1->unk08 % 2 == 1) {
             Hu3DModelAttrSet(arg0->mdlId[1], HU3D_ATTR_DISPOFF);
             Hu3DModelAttrSet(arg0->mdlId[2], HU3D_ATTR_DISPOFF);
@@ -1322,7 +1322,7 @@ void fn_1_1C2F4(void) {
         for (var_r31 = 0; var_r31 < 3; var_r31++) {
             Hu3DModelAttrReset(lbl_1_bss_18F4[var_r30].unk00->mdlId[var_r31 + 1], HU3D_ATTR_DISPOFF);
         }
-        if (lbl_1_bss_1A0C.unk2CC == 1) {
+        if (lbl_1_bss_1A0C.team == 1) {
             if (var_r30 % 2 == 0) {
                 for (var_r31 = 0; var_r31 < 12; var_r31++) {
                     HuSprAttrReset(lbl_1_bss_18F4[var_r30].unk00->work[0], var_r31, HUSPR_ATTR_DISPOFF);

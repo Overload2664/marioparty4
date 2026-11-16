@@ -19,7 +19,7 @@
 s32 lbl_1_bss_68[3]; // unused
 StructBss24 lbl_1_bss_24;
 s32 lbl_1_bss_4[8];
-HUPROCESS* lbl_1_bss_0;
+HUPROCESS* objman_process;
 
 s32 lbl_1_data_0[][4] = {
     { 0x37, 0x38, 0x36, 0x39 },
@@ -64,7 +64,7 @@ void fn_1_A4(void) {
     s32 i;
 
     var_r30 = 0;
-    omAddObjEx(lbl_1_bss_0, 0x2000, 0, 0, -1, fn_1_4C);
+    omAddObjEx(objman_process, 0x2000, 0, 0, -1, fn_1_4C);
     WipeCreate(WIPE_MODE_IN, WIPE_TYPE_NORMAL, -1);
     while (TRUE) {
         if (WipeStatGet() == 0) {
@@ -112,22 +112,22 @@ void fn_1_A4(void) {
     GWSystem.board = 5;
     switch (var_r30) {
         case 0:
-            fn_1_7F54(lbl_1_bss_0, 0);
+            fn_1_7F54(objman_process, 0);
             break;
         case 1:
-            fn_1_B3E4(lbl_1_bss_0, 0);
+            fn_1_B3E4(objman_process, 0);
             break;
         case 2:
-            fn_1_EA2C(lbl_1_bss_0, 0);
+            fn_1_EA2C(objman_process, 0);
             break;
         case 3:
-            fn_1_1256C(lbl_1_bss_0, 0);
+            fn_1_1256C(objman_process, 0);
             break;
         case 4:
-            fn_1_16060(lbl_1_bss_0, 0);
+            fn_1_16060(objman_process, 0);
             break;
         case 5:
-            fn_1_188F0(lbl_1_bss_0, 0);
+            fn_1_188F0(objman_process, 0);
             break;
     }
     while (TRUE) {
@@ -170,10 +170,10 @@ void fn_1_3E4(void)
 void fn_1_4F4(void) {
     s32 i;
 
-    lbl_1_bss_0 = omInitObjMan(62, 0x2000);
+    objman_process = omInitObjMan(62, 0x2000);
     switch (omovlevtno) {
         case 0:
-            fn_1_7F54(lbl_1_bss_0, 0);
+            fn_1_7F54(objman_process, 0);
             break;
             
         case 1:
@@ -182,7 +182,7 @@ void fn_1_4F4(void) {
                     break;
                 }
             }
-            fn_1_B3E4(lbl_1_bss_0, i);
+            fn_1_B3E4(objman_process, i);
             break;
         case 2:
             for (i = 0; i < 4; i++) {
@@ -190,21 +190,21 @@ void fn_1_4F4(void) {
                     break;
                 }
             }
-            fn_1_EA2C(lbl_1_bss_0, i);
+            fn_1_EA2C(objman_process, i);
             break;
         case 3:
             if (GWPlayerCoinWinGet(0) >= 10) {
-                fn_1_1256C(lbl_1_bss_0, 0);
+                fn_1_1256C(objman_process, 0);
             } else {
-                fn_1_16060(lbl_1_bss_0, 0);
+                fn_1_16060(objman_process, 0);
             }
             break;
         case 4:
-            fn_1_188F0(lbl_1_bss_0, 0);
+            fn_1_188F0(objman_process, 0);
             break;
             
         case 20:
-            fn_1_1B90C(lbl_1_bss_0);
+            fn_1_1B90C(objman_process);
             break;
     }
 }
