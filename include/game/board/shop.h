@@ -13,6 +13,9 @@ void BoardShopExec(s32 player, s32 space);
 void BoardShopTutorialExec(s32 arg0);
 
 // Extra
+void BoardItemShopExec(s32 player, s32 space);
+
+// Extra
 #define MAX_SHOP_ITEMS 8
 #define MESS_SMALL_SPACE "\20"
 // 0B 1E 02 XX XX XX XX XX XX XX XX XX 1E 08 0C 0C 0C 0C 0C 0C 0C 0E 13 3E YY YY 00
@@ -35,20 +38,21 @@ static const char *ITEM_BANK_NAMES[] = {
     "Mushroom",
     "Golden" MESS_SMALL_SPACE "Mushroom",
     "Hidden" MESS_SMALL_SPACE "Block" MESS_SMALL_SPACE "Card",
+    "Cellular" MESS_SMALL_SPACE "Shopper",
 };
 
 static u32 ITEM_SHOP_PROBS_DEFAULT[BOARD_ITEMS_END] = {
     0x14, 0x14, 0x0F, 0x0F, 0x05,
     0x07, 0x05, 0x05, 0x00, 0x05,
     0x00, 0x03, 0x00, 0x00, 0x14,
-    0x0F, 0x14, 0x4
+    0x0F, 0x14, 0x4, 0x8
 };
 
 static u32 ITEM_SPACE_PROBS_DEFAULT[BOARD_ITEMS_END] = {
     0x4, 0x14, 0x0F, 0x0F, 0x05,
     0x07, 0x05, 0x05, 0x00, 0x05,
     0x00, 0x03, 0x00, 0x00, 0x20,
-    0x0F, 0x14, 0x4
+    0x0F, 0x14, 0x4, 0x8
 };
 
 static s8 ITEM_SHOP_PRICE_DEFAULT[BOARD_ITEMS_END] = {
@@ -56,7 +60,7 @@ static s8 ITEM_SHOP_PRICE_DEFAULT[BOARD_ITEMS_END] = {
     10, 10, 15, 15,
     15, 15,  0, 25,
     30, 30,  5,  3,
-    15, 20
+    15, 20, 15
 };
 
 

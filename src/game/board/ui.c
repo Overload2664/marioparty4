@@ -123,7 +123,7 @@ static void TeamItemPosSet(s32 arg0, s32 arg1, Vec *arg2);
 static void ExecItemPick(void);
 static void UpdateItemPick(OMOBJ *arg0);
 static void MakeItemPickSpace(UnkUiWork03 *arg0);
-static void SetItemUIStatus(s32 arg0);
+void SetItemUIStatus(s32 arg0);
 static void ItemGetPos(s32 arg0, Vec *arg1);
 static void UpdateItemPickGfx(OMOBJ *arg0);
 static void UpdateItemPickup(OMOBJ *arg0);
@@ -251,7 +251,8 @@ static s32 itemMdlTbl[BOARD_ITEMS_END] = {
     DATA_MAKE_NUM(DATADIR_BOARD, 163),
     DATA_MAKE_NUM(DATADIR_BOARD, 165),
     DATA_MAKE_NUM(DATADIR_BOARD, 167),
-    DATA_MAKE_NUM(DATADIR_BOARD, 169)
+    DATA_MAKE_NUM(DATADIR_BOARD, 169),
+    DATA_MAKE_NUM(DATADIR_BOARD, 171)
 };
 
 static Vec teamItemStatusPosTbl[2] = {
@@ -278,7 +279,8 @@ s32 BoardItemModelGet(s32 arg0) {
         DATA_MAKE_NUM(DATADIR_BOARD, 164),
         DATA_MAKE_NUM(DATADIR_BOARD, 166),
         DATA_MAKE_NUM(DATADIR_BOARD, 168),
-        DATA_MAKE_NUM(DATADIR_BOARD, 170)
+        DATA_MAKE_NUM(DATADIR_BOARD, 170),
+        DATA_MAKE_NUM(DATADIR_BOARD, 172)
     };
 
     return sp8[arg0];
@@ -302,7 +304,8 @@ static s32 itemNameTbl[BOARD_ITEMS_END] = {
     3604514,
     3604514 + 4,
     3604514 + 4*2,
-    3604514 + 4*3
+    3604514 + 4*3,
+    3604514 + 4*4
 };
 
 s32 BoardItemDescriptionGet(s32 arg0) {
@@ -324,7 +327,8 @@ s32 BoardItemDescriptionGet(s32 arg0) {
         3604515,
         3604515 + 4,
         3604515 + 4 * 2,
-        3604515 + 4 * 3
+        3604515 + 4 * 3,
+        3604515 + 4 * 4
     };
 
     return sp8[arg0];
@@ -1134,18 +1138,22 @@ static void ItemUseProc(void) {
     BoardItemPrevSet(itemUsed);
     if (itemUsed != BOARD_ITEM_NONE) {
         switch (itemUsed) {
-            case 13:
+            case BOARD_ITEM_ITEM_BAG:
                 BoardMakeRandomItem();
                 break;
-            case 11:
+            case BOARD_ITEM_BOOS_CRYSTAL_BALL:
                 SetItemUIStatus(3);
                 break;
-            case 12:
+            case BOARD_ITEM_MAGIC_LAMP:
                 SetItemUIStatus(3);
                 HuPrcSleep(0xA);
                 BoardStatusShowSetAll(0);
                 _SetFlag(0x1001C);
                 _SetFlag(0x1000E);
+                break;
+            // Extra
+            case BOARD_ITEM_CELLULAR_SHOPPER:
+                SetItemUIStatus(3); // Make UI normal again after item usage
                 break;
         }
         BoardItemStart(itemPlayer, itemUsed);
@@ -1157,7 +1165,7 @@ static void ItemUseProc(void) {
         }
         FinishItemUse(temp_r23, var_r25);
     }
-    if (itemUsed != BOARD_ITEM_BOOS_CRYSTAL_BALL && itemUsed != BOARD_ITEM_MAGIC_LAMP) {
+    if (itemUsed != BOARD_ITEM_BOOS_CRYSTAL_BALL && itemUsed != BOARD_ITEM_MAGIC_LAMP  && itemUsed != BOARD_ITEM_CELLULAR_SHOPPER) {
         SetItemUIStatus(3);
     }
     while (itemPickObj) {
@@ -1496,7 +1504,7 @@ static void MakeItemPickSpace(UnkUiWork03 *arg0) {
     }
 }
 
-static void SetItemUIStatus(s32 arg0) {
+void SetItemUIStatus(s32 arg0) {
     UnkUiWork03 *temp_r27 = omObjGetWork(itemPickObj, UnkUiWork03);
     Vec (*temp_r28)[6] = (void*) temp_r27->unk04;
     float var_f31;

@@ -33,6 +33,7 @@ s32 BoardItemUseExec(s32 arg0);
 void BoardMakeRandomItem(void);
 void BoardItemGetDestPos(s32 arg0, Vec *arg1);
 void BoardItemStatusKill(s32 arg0);
+void SetItemUIStatus(s32 arg0);
 
 extern s8 boardItemUser;
 

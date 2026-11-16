@@ -50,7 +50,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
         BOARD_ITEM_MUSHROOM,
         BOARD_ITEM_BOWSER_PHONE,
         BOARD_ITEM_GOLDEN_MUSHROOM,
-        BOARD_ITEM_HIDDEN_BLOCK_CARD
+        BOARD_ITEM_HIDDEN_BLOCK_CARD,
+        BOARD_ITEM_CELLULAR_SHOPPER
     },
     {   //Luigi
         BOARD_ITEM_MAGIC_LAMP,
@@ -68,7 +69,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
         BOARD_ITEM_MUSHROOM,
         BOARD_ITEM_BOWSER_PHONE,
         BOARD_ITEM_GOLDEN_MUSHROOM,
-        BOARD_ITEM_HIDDEN_BLOCK_CARD
+        BOARD_ITEM_HIDDEN_BLOCK_CARD,
+        BOARD_ITEM_CELLULAR_SHOPPER
     },   
     {   //Peach
         BOARD_ITEM_MAGIC_LAMP,
@@ -86,7 +88,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
         BOARD_ITEM_MUSHROOM,
         BOARD_ITEM_BOWSER_PHONE,
         BOARD_ITEM_GOLDEN_MUSHROOM,
-        BOARD_ITEM_HIDDEN_BLOCK_CARD
+        BOARD_ITEM_HIDDEN_BLOCK_CARD,
+        BOARD_ITEM_CELLULAR_SHOPPER
     },   
     {   //Yoshi
         BOARD_ITEM_MAGIC_LAMP,
@@ -104,7 +107,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
         BOARD_ITEM_MUSHROOM,
         BOARD_ITEM_BOWSER_PHONE,
         BOARD_ITEM_GOLDEN_MUSHROOM,
-        BOARD_ITEM_HIDDEN_BLOCK_CARD
+        BOARD_ITEM_HIDDEN_BLOCK_CARD,
+        BOARD_ITEM_CELLULAR_SHOPPER
     },    
     {   //Wario
         BOARD_ITEM_MAGIC_LAMP,
@@ -122,7 +126,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
         BOARD_ITEM_MUSHROOM,
         BOARD_ITEM_BOWSER_PHONE,
         BOARD_ITEM_GOLDEN_MUSHROOM,
-        BOARD_ITEM_HIDDEN_BLOCK_CARD
+        BOARD_ITEM_HIDDEN_BLOCK_CARD,
+        BOARD_ITEM_CELLULAR_SHOPPER
     },   
     {   //DK
         BOARD_ITEM_MAGIC_LAMP,
@@ -140,7 +145,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
         BOARD_ITEM_MUSHROOM,
         BOARD_ITEM_BOWSER_PHONE,
         BOARD_ITEM_GOLDEN_MUSHROOM,
-        BOARD_ITEM_HIDDEN_BLOCK_CARD
+        BOARD_ITEM_HIDDEN_BLOCK_CARD,
+        BOARD_ITEM_CELLULAR_SHOPPER
     },   
     {   //Daisy
         BOARD_ITEM_MAGIC_LAMP,
@@ -158,7 +164,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
         BOARD_ITEM_MUSHROOM,
         BOARD_ITEM_BOWSER_PHONE,
         BOARD_ITEM_GOLDEN_MUSHROOM,
-        BOARD_ITEM_HIDDEN_BLOCK_CARD
+        BOARD_ITEM_HIDDEN_BLOCK_CARD,
+        BOARD_ITEM_CELLULAR_SHOPPER
     },   
     {   //Waluigi
         BOARD_ITEM_MAGIC_LAMP,
@@ -176,7 +183,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
         BOARD_ITEM_MUSHROOM,
         BOARD_ITEM_BOWSER_PHONE,
         BOARD_ITEM_GOLDEN_MUSHROOM,
-        BOARD_ITEM_HIDDEN_BLOCK_CARD
+        BOARD_ITEM_HIDDEN_BLOCK_CARD,
+        BOARD_ITEM_CELLULAR_SHOPPER
     }
 };
 // Important
@@ -196,6 +204,7 @@ static UseCheckFunc comItemUseCheckFuncTbl[] = {
     CheckLampUse,
     NULL,
     // Extra (TODO: Make the checks for new items more sophisticated maybe)
+    CheckMiniUse,
     CheckMiniUse,
     CheckMiniUse,
     CheckMiniUse,

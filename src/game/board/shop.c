@@ -278,6 +278,26 @@ void BoardShopKill(void) {
     }
 }
 
+// Extra
+static u8 is_item = 0; 
+void BoardItemShopExec(s32 player, s32 space)
+{
+    is_item = 1;
+    if (BoardPlayerSizeGet(GWSystem.player_curr) == 2) {
+        is_item = 0;
+        return;
+    }
+    shopPlayer = player;
+    BoardRollDispSet(0);
+    shopProc = HuPrcChildCreate(ExecShop, 0x2003, 0x3800, 0, boardMainProc);
+    HuPrcDestructorSet2(shopProc, DestroyShop);
+    while (shopProc) {
+        HuPrcVSleep();
+    }
+    BoardRollDispSet(1);
+    is_item = 0;
+}
+
 void BoardShopExec(s32 player, s32 space) {
     if (BoardPlayerSizeGet(GWSystem.player_curr) == 2) {
         return;
@@ -349,26 +369,30 @@ static void ExecShop(void) {
     BoardWinKill();
     BoardAudSeqPause(0, 1, 1000);
     BoardStatusShowSetAll(0);
-    temp_r25 = BoardSpaceLinkFlagSearch(0, temp_r28, 0x02000000);
-    BoardSpacePosGet(0, temp_r28, &sp38);
-    BoardSpacePosGet(0, temp_r25, &sp2C);
-    VECSubtract(&sp2C, &sp38, &sp20);
-    VECNormalize(&sp20, &sp20);
-    temp_f31 = atan2d(-sp20.x, -sp20.z);
-    sp14.x = -10.0f;
-    sp14.y = temp_f31;
-    sp14.z = 0.0f;
-    sp8.x = 0.0f;
-    sp8.y = 170.0f;
-    sp8.z = 0.0f;
-    BoardCameraMotionStartEx(shopMdlPtr[0], &sp14, &sp8, 1360.0f, -1.0f, 27);
+    if (!is_item) {
+        temp_r25 = BoardSpaceLinkFlagSearch(0, temp_r28, 0x02000000);
+        BoardSpacePosGet(0, temp_r28, &sp38);
+        BoardSpacePosGet(0, temp_r25, &sp2C);
+        VECSubtract(&sp2C, &sp38, &sp20);
+        VECNormalize(&sp20, &sp20);
+        temp_f31 = atan2d(-sp20.x, -sp20.z);
+        sp14.x = -10.0f;
+        sp14.y = temp_f31;
+        sp14.z = 0.0f;
+        sp8.x = 0.0f;
+        sp8.y = 170.0f;
+        sp8.z = 0.0f;
+        BoardCameraMotionStartEx(shopMdlPtr[0], &sp14, &sp8, 1360.0f, -1.0f, 27);
+    }
     HuAudFXPlay(0x330);
     HuAudFXPlay(0x32D);
     PopupShop();
     BoardModelMotionShiftSet(BoardShopHostGet(), shopMot[2], 0.0f, 4.0f, HU3D_MOTATTR_NONE);
     HuPrcSleep(4);
-    BoardPlayerRotSet(shopPlayer, 0.0f, temp_f31, 0.0f);
-    BoardPlayerMoveBetween(shopPlayer, temp_r28, temp_r25);
+    if (!is_item) {
+        BoardPlayerRotSet(shopPlayer, 0.0f, temp_f31, 0.0f);
+        BoardPlayerMoveBetween(shopPlayer, temp_r28, temp_r25);
+    }
     BoardPlayerIdleSet(shopPlayer);
     BoardMusStart(1, 3, 0x7F, 0);
     while (!BoardModelMotionEndCheck(BoardShopHostGet())) {
@@ -444,7 +468,9 @@ static void ExecShop(void) {
                 var_r23 = 6;
             }
             var_f30 = BoardDAngleCalc(180.0f + BoardPlayerRotYGet(shopPlayer));
-            BoardPlayerMotBlendSet(shopPlayer, var_f30, 0xF);
+            if (!is_item) {
+                BoardPlayerMotBlendSet(shopPlayer, var_f30, 0xF);
+            }
             for (i = 0; i < temp_r24; i++) {
                 BoardPlayerCoinsAdd(shopPlayer, -1);
                 HuAudFXPlay(0xE);
@@ -474,9 +500,11 @@ static void ExecShop(void) {
     BoardStatusShowSet(shopPlayer, 0);
     BoardCameraTargetPlayerSet(shopPlayer);
     BoardCameraMotionWait();
-    BoardCameraViewSet(1);
-    BoardPlayerRotSet(shopPlayer, 0.0f, temp_f31, 0.0f);
-    BoardPlayerMoveBetween(shopPlayer, temp_r25, temp_r28);
+    if (!is_item) {
+        BoardCameraViewSet(1);
+        BoardPlayerRotSet(shopPlayer, 0.0f, temp_f31, 0.0f);
+        BoardPlayerMoveBetween(shopPlayer, temp_r25, temp_r28);
+    }
     BoardPlayerIdleSet(shopPlayer);
     BoardStatusShowSetAll(1);
     BoardCameraMotionWait();
