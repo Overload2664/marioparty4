@@ -440,6 +440,12 @@ static void MainFunc(void)
         if(!_CheckFlag(FLAG_ID_MAKE(0, 8))) {
             BoardLast5Exec();
             _SetFlag(FLAG_ID_MAKE(0, 8));
+
+            // Extra
+            if (GWSystem.max_turn <= 5) {
+                // Remove the fade that happens on player 1's turn 
+                fade_enable = 0;
+            }
         } else {
             BoardLast5GfxInit();
         }
