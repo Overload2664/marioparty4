@@ -1402,16 +1402,18 @@ void fn_1_C060(float arg8) {
 void fn_1_CE6C(OMOBJ* arg0) {
     StructBss1530* sp8 = arg0->data;
     s32 var_r31;
+    s32 i;
 
     fn_1_91C8();
     fn_1_9220();
     fn_1_9488();
     fn_1_9768();
     if (lbl_1_bss_1580.bonus_stars != 0) {
-        handleBonusStar(BONUS_STAR_MINIGAME);
-        handleBonusStar(BONUS_STAR_COIN);
-        handleBonusStar(BONUS_STAR_HAPPENING);
-        handleBonusStar(BONUS_STAR_RED);
+        for (i = 0; i < ARRAY_COUNT(EX_BONUS_STAR_NAMES); i++) {
+            if (ExGameCfg.bonus_stars.is_on[i]) {
+                handleBonusStar(i);
+            }
+        }
     }
     var_r31 = fn_1_A314();
     if (lbl_1_bss_1580.team == 1) {

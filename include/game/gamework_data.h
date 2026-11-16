@@ -4,6 +4,7 @@
 #include "dolphin.h"
 #include "game/board/item.h"
 #include "game/flag.h"
+#include "types.h"
 #include "version.h"
 
 //HACK: to prevent prototype errors
@@ -167,6 +168,10 @@ typedef struct extra_game_config {
         u8 battle_turn;
         u8 battle_reverse_turn;
     } mg_config;
+
+    struct BonusStars {
+        u8 is_on[ARRAY_COUNT(EX_BONUS_STAR_NAMES)];
+    } bonus_stars;
 
     struct ITEMConfig {
         u32 shop_probs[BOARD_ITEMS_END];

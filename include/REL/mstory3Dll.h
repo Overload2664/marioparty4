@@ -96,14 +96,4 @@ void fn_1_157F0(HUPROCESS* objman_process, s32 map_number, s32 party, s32 arg3);
 extern StructBss4 lbl_1_bss_4;
 extern s32 lbl_1_data_0[][4];
 
-// Extra
-#define MESS_SMALL_SPACE "\20"
-
-static const char *EX_BONUS_STAR_NAMES[] = {
-    "Minigame" MESS_SMALL_SPACE "Star",
-    "Coin" MESS_SMALL_SPACE "Star",
-    "Happening" MESS_SMALL_SPACE "Star",
-    "Red" MESS_SMALL_SPACE "Star"
-};
-
 #endif

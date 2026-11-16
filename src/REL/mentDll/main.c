@@ -19,6 +19,7 @@
 #include "game/sprite.h"
 #include "game/window.h"
 #include "game/wipe.h"
+#include "types.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -1721,6 +1722,7 @@ static ExtSetEntry ext_minigame_entries[] = {
     { "COIN GAME 4th GETS", EXTSET_KIND_NUM, 0, 99, 0 },
 };
 
+static ExtSetEntry ext_bonus_stars[ARRAY_COUNT(EX_BONUS_STAR_NAMES)];
 static ExtSetEntry ext_shop_price[BOARD_ITEMS_END];
 static ExtSetEntry ext_shop_probs[BOARD_ITEMS_END];
 static ExtSetEntry ext_space_probs[BOARD_ITEMS_END];
@@ -1728,6 +1730,7 @@ static ExtSetEntry ext_space_probs[BOARD_ITEMS_END];
 static ExtSetTopic ext_topics[] = {
     { "BOARD SETTINGS", ext_board_entries, EXTSET_COUNT(ext_board_entries) },
     { "MINIGAME SETTINGS", ext_minigame_entries, EXTSET_COUNT(ext_minigame_entries) },
+    { "BONUS STARS", ext_bonus_stars, EXTSET_COUNT(ext_bonus_stars) },
     { "SHOP ITEMS PROBS", ext_shop_probs, EXTSET_COUNT(ext_shop_probs) },
     { "SPACE ITEMS PROBS", ext_space_probs, EXTSET_COUNT(ext_space_probs) },
     { "SHOP ITEMS PRICE", ext_shop_price, EXTSET_COUNT(ext_shop_price) }
@@ -1795,6 +1798,22 @@ u32 getEntryValueTopic(const char* topic_name, const char* entry_name) {
 }
 
 // Preprocess Menu Options Methods
+void preprocessBonusStars(void) {
+    s32 i;
+    for(i = 0; i < ARRAY_COUNT(EX_BONUS_STAR_NAMES); i++) {
+        ExtSetEntry entry;
+
+        entry.label = EX_BONUS_STAR_NAMES[i];
+        entry.kind = EXTSET_KIND_ONOFF;
+        if(i < 5) {
+            entry.value = 1;
+        } else {
+            entry.value = 0;
+        }
+        ext_bonus_stars[i] = entry;
+    }
+}
+
 void preprocessShopItemProbs(void) {
     s32 i;
     for(i = 0; i < BOARD_ITEMS_END; i++) {
@@ -1888,6 +1907,7 @@ static void extSetCreateWindows(void)
     s16 win;
     
     // Preprocess
+    preprocessBonusStars();
     preprocessShopItemProbs();
     preprocessSpaceItemProbs();
     preprocessShopItemPrice();
@@ -2572,6 +2592,14 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
     }
     {
         // Extra
+        // Bonus Stars
+        for (i = 0; i < ARRAY_COUNT(EX_BONUS_STAR_NAMES); i++) {
+            ExGameCfg.bonus_stars.is_on[i] = getEntryValueTopic("BONUS STARS", EX_BONUS_STAR_NAMES[i]);
+        }
+        sprintf(msg, "Bonus Stars flags set\n");
+        OSReport(msg);
+
+
         // Items Shop probs
         for (i = 0; i < BOARD_ITEMS_END; i++) {
             ExGameCfg.item_config.shop_probs[i] = getEntryValueTopic("SHOP ITEMS PROBS", ITEM_BANK_NAMES[i]);

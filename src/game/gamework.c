@@ -3,6 +3,7 @@
 #include "game/flag.h"
 #include "game/gamework_data.h"
 #include <string.h>
+#include "types.h"
 #include "version.h"
 
 #ifndef __MWERKS__
@@ -62,6 +63,14 @@ void GWInit(void)
         ExGameCfg.item_config.shop_probs[i] = ITEM_SHOP_PROBS_DEFAULT[i];
         ExGameCfg.item_config.space_probs[i] = ITEM_SPACE_PROBS_DEFAULT[i];
         ExGameCfg.item_config.shop_price[i] = ITEM_SHOP_PRICE_DEFAULT[i];
+    }
+
+    for (i = 0; i < ARRAY_COUNT(EX_BONUS_STAR_NAMES); i++) {
+        if (i < 3) {
+            ExGameCfg.bonus_stars.is_on[i] = 1;
+        } else {
+            ExGameCfg.bonus_stars.is_on[i] = 0;
+        }
     }
 
     GWGameStatReset();
