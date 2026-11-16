@@ -322,7 +322,7 @@ s32 BoardComItemWeightGet(s32 player, s32 item) {
             break;
         }
     }
-    weight = 12-1-i;
+    weight = BOARD_ITEMS_END - 1 - 1 - i;
     return weight;
 }
 
