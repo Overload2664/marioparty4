@@ -87,6 +87,7 @@ enum {
     BONUS_STAR_COIN,
     BONUS_STAR_HAPPENING,
     BONUS_STAR_RED,
+    BONUS_STAR_BLUE,
 };
 
 void fn_1_7E88(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -2344,6 +2345,9 @@ void determineBonusStarWinners(s32 bonus_star_type) {
                 // Indices could be shifted because of team play (so teammates are adjacent)
                 // so use "lbl_1_bss_1580.players[i].ranking_stats.unk00" instead of "i"
                 counts[i] = GWPlayer[lbl_1_bss_1580.players[i].ranking_stats.unk00].red_count;
+                break;
+            case BONUS_STAR_BLUE:
+                counts[i] = GWPlayer[lbl_1_bss_1580.players[i].ranking_stats.unk00].blue_count;
                 break;
         }
     }

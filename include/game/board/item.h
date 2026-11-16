@@ -42,7 +42,8 @@ static const char *EX_BONUS_STAR_NAMES[] = {
     "Minigame" MESS_SMALL_SPACE "Star",
     "Coin" MESS_SMALL_SPACE "Star",
     "Happening" MESS_SMALL_SPACE "Star",
-    "Red" MESS_SMALL_SPACE "Star"
+    "Red" MESS_SMALL_SPACE "Star",
+	"Blue" MESS_SMALL_SPACE "Star"
 };
 
 #endif
