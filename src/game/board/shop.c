@@ -476,6 +476,9 @@ static void ExecShop(void) {
             GWPlayer[shopPlayer].ex_state.items_bought += 1;
             GWPlayer[shopPlayer].ex_state.shop_spent += price;
 
+            GWPlayer[shopPlayer].ex_state.items_bought = MIN(GWPlayer[shopPlayer].ex_state.items_bought, 999);
+            GWPlayer[shopPlayer].ex_state.shop_spent = MIN(GWPlayer[shopPlayer].ex_state.shop_spent, 999);
+
             for (i = 0; i < price; i++) {
                 BoardPlayerCoinsAdd(shopPlayer, -1);
                 HuAudFXPlay(0xE);

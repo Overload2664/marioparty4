@@ -1167,6 +1167,7 @@ static void ItemUseProc(void) {
 
         // Extra
         GWPlayer[itemPlayer].ex_state.items_used += 1;
+        GWPlayer[itemPlayer].ex_state.items_used = MIN(GWPlayer[itemPlayer].ex_state.items_used, 999);
     }
     if (itemUsed != BOARD_ITEM_BOOS_CRYSTAL_BALL && itemUsed != BOARD_ITEM_MAGIC_LAMP  && itemUsed != BOARD_ITEM_CELLULAR_SHOPPER) {
         SetItemUIStatus(3);

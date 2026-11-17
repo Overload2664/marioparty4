@@ -322,6 +322,7 @@ static void RollMain(void)
 
     // Extra
     GWPlayer[rollPlayer].ex_state.roll_count += dice_sum;
+    GWPlayer[rollPlayer].ex_state.roll_count = MIN(GWPlayer[rollPlayer].ex_state.roll_count, 999);
 
     BoardRollCreate(rollPlayer, 1);
     if (_CheckFlag(FLAG_ID_MAKE(1, 11))) {

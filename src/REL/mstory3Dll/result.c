@@ -1,7 +1,9 @@
 #include "REL/mstory3Dll.h"
+#include "dolphin/types.h"
 #include "game/audio.h"
 #include "game/chrman.h"
 #include "game/data.h"
+#include "types.h"
 
 #ifndef __MWERKS__
 #include "game/hsfex.h"
@@ -23,32 +25,32 @@
 extern s32 rand8(void);
 
 typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
+    /* 0x00 */ s32 player_idx;
+    /* 0x04 */ s32 group;
+    /* 0x08 */ s32 iscom;
+    /* 0x0C */ s32 diff;
+    /* 0x10 */ s32 character;
+    /* 0x14 */ s32 pad_idx;
+    /* 0x18 */ s32 rank;
     /* 0x1C */ char unk1C[0x18];
-    /* 0x34 */ s32 unk34[4][2];
-    /* 0x54 */ s32 unk54;
+    /* 0x34 */ s32 stars1coins1coins_mg1coins_max[4][2];
+    /* 0x54 */ s32 blue_count;
     /* 0x58 */ char unk58[4];
-    /* 0x5C */ s32 unk5C;
+    /* 0x5C */ s32 red_count;
     /* 0x60 */ char unk60[4];
-    /* 0x64 */ s32 unk64;
+    /* 0x64 */ s32 question_count;
     /* 0x68 */ char unk68[4];
-    /* 0x6C */ s32 unk6C;
+    /* 0x6C */ s32 fortune_count;
     /* 0x70 */ char unk70[4];
-    /* 0x74 */ s32 unk74;
+    /* 0x74 */ s32 bowser_count;
     /* 0x78 */ char unk78[4];
-    /* 0x7C */ s32 unk7C;
+    /* 0x7C */ s32 battle_count;
     /* 0x80 */ char unk80[4];
-    /* 0x84 */ s32 unk84;
+    /* 0x84 */ s32 mushroom_count;
     /* 0x88 */ char unk88[4];
-    /* 0x8C */ s32 unk8C;
+    /* 0x8C */ s32 warp_count;
     /* 0x90 */ char unk90[4];
-} StructUnk38Bss1A0C; // Size 0x94
+} PlayerStats; // Size 0x94
 
 typedef struct {
     /* 0x000 */ s32 map_number;
@@ -61,14 +63,14 @@ typedef struct {
     /* 0x01C */ char unk1C[8];
     /* 0x024 */ s32 unk24;
     /* 0x028 */ char unk28[0x10];
-    /* 0x038 */ StructUnk38Bss1A0C unk38[4];
+    /* 0x038 */ PlayerStats player_stats[4];
     /* 0x288 */ Vec unk288[5];
     /* 0x2C4 */ s32 unk2C4;
     /* 0x2C8 */ s32 unk2C8;
     /* 0x2CC */ s32 team;
     /* 0x2D0 */ s32 unk2D0;
     /* 0x2D4 */ s32 party;
-} StructBss1A0C; // Size 0x2D8
+} GameInfo; // Size 0x2D8
 
 void fn_1_15C0C(void);
 void fn_1_16ED4(void);
@@ -93,7 +95,7 @@ void fn_1_1DA64(void);
 void fn_1_1DAAC(void);
 void fn_1_1DE4C(void);
 
-StructBss1A0C lbl_1_bss_1A0C;
+GameInfo lbl_1_bss_1A0C;
 StructBss1530 lbl_1_bss_19E4;
 StructBss1530 lbl_1_bss_19BC;
 StructBss1530 lbl_1_bss_1994;
@@ -102,12 +104,52 @@ ANIMDATA* lbl_1_bss_18EC[2];
 ANIMDATA* lbl_1_bss_18E4[2];
 ANIMDATA* lbl_1_bss_18D8[3];
 s32 lbl_1_bss_18D4;
-HUPROCESS* lbl_1_bss_18D0;
+HUPROCESS* objman;
+
+// Extra
+enum {
+    STAT_ROLLS = 12,
+    STAT_ITEMS_USED,
+    STAT_ITEMS_BOUGHT,
+    STAT_SHOP_SPENT,
+    STAT_END
+};
+
+static const u32 STATS_COUNT = STAT_END;
+static BOOL stats_most[ARRAY_COUNT(GWPlayer)][STAT_END];
+
+u32 getExtraStat(u32 stat_num, u32 player_idx) {
+    // player_idx in display is different from the game
+    player_idx = lbl_1_bss_1A0C.player_stats[player_idx].player_idx;
+
+    switch (stat_num) {
+        case STAT_ROLLS:
+            return GWPlayer[player_idx].ex_state.roll_count;
+        case STAT_ITEMS_USED:
+            return GWPlayer[player_idx].ex_state.items_used;
+        case STAT_ITEMS_BOUGHT:
+            return GWPlayer[player_idx].ex_state.items_bought;
+        case STAT_SHOP_SPENT:
+            return GWPlayer[player_idx].ex_state.shop_spent;
+        default:
+            return 0;
+    }
+}
+
+void handleDescriptionMess(s32 window, s32 mess) {
+    // New entries are in bank 57
+    if (mess >= MAKE_MESSID(38, 12)) {
+        mess = mess % MAKE_MESSID(38, 0);
+        mess -= STAT_ROLLS;
+        mess += MAKE_MESSID(57, 0);
+    }
+    HuWinMesSet(window, mess);
+}
 
 void fn_1_157F0(HUPROCESS* objman_process, s32 map_number, s32 party, s32 arg3) {
     s32 var_r31;
 
-    lbl_1_bss_18D0 = objman_process;
+    objman = objman_process;
     lbl_1_bss_1A0C.map_number = map_number;
     lbl_1_bss_1A0C.max_turn = GWSystem.max_turn;
     arg3 = lbl_1_bss_1A0C.unk14 = fn_1_373C();
@@ -120,7 +162,7 @@ void fn_1_157F0(HUPROCESS* objman_process, s32 map_number, s32 party, s32 arg3) 
     }
     fn_1_9A0();
     fn_1_37C8(0xFF);
-    fn_1_290C(lbl_1_bss_18D0, fn_1_1DE4C);
+    fn_1_290C(objman, fn_1_1DE4C);
     fn_1_15C0C();
     fn_1_197B4(arg3);
     fn_1_194A0();
@@ -146,14 +188,14 @@ void fn_1_159A4(void) {
     }
     GWBoardPlayCountAdd(lbl_1_bss_1A0C.map_number, 1);
     if (lbl_1_bss_1A0C.team == 1) {
-        if (lbl_1_bss_1A0C.unk38[0].unk08 == 0) {
-            GWBoardWinCountInc(lbl_1_bss_1A0C.unk38[0].unk10, lbl_1_bss_1A0C.map_number);
+        if (lbl_1_bss_1A0C.player_stats[0].iscom == 0) {
+            GWBoardWinCountInc(lbl_1_bss_1A0C.player_stats[0].character, lbl_1_bss_1A0C.map_number);
         }
-        if (lbl_1_bss_1A0C.unk38[1].unk08 == 0) {
-            GWBoardWinCountInc(lbl_1_bss_1A0C.unk38[1].unk10, lbl_1_bss_1A0C.map_number);
+        if (lbl_1_bss_1A0C.player_stats[1].iscom == 0) {
+            GWBoardWinCountInc(lbl_1_bss_1A0C.player_stats[1].character, lbl_1_bss_1A0C.map_number);
         }
-    } else if (lbl_1_bss_1A0C.unk38[0].unk08 == 0) {
-        GWBoardWinCountInc(lbl_1_bss_1A0C.unk38[0].unk10, lbl_1_bss_1A0C.map_number);
+    } else if (lbl_1_bss_1A0C.player_stats[0].iscom == 0) {
+        GWBoardWinCountInc(lbl_1_bss_1A0C.player_stats[0].character, lbl_1_bss_1A0C.map_number);
     }
     for (i = 0; i < 4; i++) {
         var_r30 = GWPlayer[i].stars_max - GWPlayerHandicapGet(i);
@@ -185,7 +227,7 @@ void fn_1_15D08(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     HuSprPosSet(arg0, arg1, arg2 + arg4 / 2, arg3 + arg5 / 2);
 }
 
-void fn_1_15DC8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+void showDigits(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
     s32 var_r31;
     s32 temp_r28;
 
@@ -265,8 +307,8 @@ void fn_1_161B8(void) {
         print8(var_r30, var_r29 + 100, 1.0f, "NO) IDX:GRP:COM:DIF:PAD:CHR");
         for (i = 0; i < 4; i++) {
             print8(var_r30, var_r29 + 110 + i * 10, 1.0f, "%2d) %3d:%3d:%3d:%3d:%3d:%3d", i,
-                lbl_1_bss_1A0C.unk38[i].unk00, lbl_1_bss_1A0C.unk38[i].unk04, lbl_1_bss_1A0C.unk38[i].unk08,
-                lbl_1_bss_1A0C.unk38[i].unk0C, lbl_1_bss_1A0C.unk38[i].unk14, lbl_1_bss_1A0C.unk38[i].unk10);
+                lbl_1_bss_1A0C.player_stats[i].player_idx, lbl_1_bss_1A0C.player_stats[i].group, lbl_1_bss_1A0C.player_stats[i].iscom,
+                lbl_1_bss_1A0C.player_stats[i].diff, lbl_1_bss_1A0C.player_stats[i].pad_idx, lbl_1_bss_1A0C.player_stats[i].character);
         }
     }
 }
@@ -333,10 +375,10 @@ s32 fn_1_16924(void) {
     while (TRUE) {
         fn_1_938();
         if (lbl_1_bss_1A0C.unk14 != -1) {
-            if (HuPadBtnDown[lbl_1_bss_1A0C.unk38[lbl_1_bss_1A0C.unk04].unk14] & PAD_BUTTON_A) {
+            if (HuPadBtnDown[lbl_1_bss_1A0C.player_stats[lbl_1_bss_1A0C.unk04].pad_idx] & PAD_BUTTON_A) {
                 HuAudFXPlay(0x1C);
                 break;
-            } else if (HuPadBtnDown[lbl_1_bss_1A0C.unk38[lbl_1_bss_1A0C.unk04].unk14] & PAD_BUTTON_MENU) {
+            } else if (HuPadBtnDown[lbl_1_bss_1A0C.player_stats[lbl_1_bss_1A0C.unk04].pad_idx] & PAD_BUTTON_MENU) {
                 HuAudFXPlay(1);
                 var_r31 = 1;
                 break;
@@ -376,15 +418,15 @@ s32 fn_1_16924(void) {
 
 void fn_1_16AD4(void) {
     lbl_1_bss_1A0C.unk24 = 1;
-    fn_1_1D44(lbl_1_bss_1A0C.unk10, MAKE_MESSID(38, lbl_1_bss_1A0C.unk2C8));
+    handleDescriptionMess(lbl_1_bss_1A0C.unk10, MAKE_MESSID(38, lbl_1_bss_1A0C.unk2C8));
     while (TRUE) {
         fn_1_938();
-        if (lbl_1_bss_1A0C.unk24++ > 5 && (HuPadBtnDown[lbl_1_bss_1A0C.unk38[lbl_1_bss_1A0C.unk04].unk14] & PAD_BUTTON_B)) {
+        if (lbl_1_bss_1A0C.unk24++ > 5 && (HuPadBtnDown[lbl_1_bss_1A0C.player_stats[lbl_1_bss_1A0C.unk04].pad_idx] & PAD_BUTTON_B)) {
             HuAudFXPlay(3);
             break;
         }
-        if (HuPadStkX[lbl_1_bss_1A0C.unk38[lbl_1_bss_1A0C.unk04].unk14] >= 5 || (HuPadBtn[lbl_1_bss_1A0C.unk38[lbl_1_bss_1A0C.unk04].unk14] & PAD_BUTTON_RIGHT)) {
-            if (lbl_1_bss_1A0C.unk2C8 != 11) {
+        if (HuPadStkX[lbl_1_bss_1A0C.player_stats[lbl_1_bss_1A0C.unk04].pad_idx] >= 5 || (HuPadBtn[lbl_1_bss_1A0C.player_stats[lbl_1_bss_1A0C.unk04].pad_idx] & PAD_BUTTON_RIGHT)) {
+            if (lbl_1_bss_1A0C.unk2C8 != STATS_COUNT - 1) {
                 lbl_1_bss_1A0C.unk24 = 0;
             }
             lbl_1_bss_1A0C.unk2C4++;
@@ -392,16 +434,16 @@ void fn_1_16AD4(void) {
                 lbl_1_bss_1A0C.unk2C4 = 5;
             }
             lbl_1_bss_1A0C.unk2C8++;
-            if (lbl_1_bss_1A0C.unk2C8 >= 12) {
-                lbl_1_bss_1A0C.unk2C8 = 11;
+            if (lbl_1_bss_1A0C.unk2C8 >= STATS_COUNT) {
+                lbl_1_bss_1A0C.unk2C8 = STATS_COUNT - 1;
             } else {
                 fn_1_1CD60();
-                fn_1_1D44(lbl_1_bss_1A0C.unk10, MAKE_MESSID(38, lbl_1_bss_1A0C.unk2C8));
+                handleDescriptionMess(lbl_1_bss_1A0C.unk10, MAKE_MESSID(38, lbl_1_bss_1A0C.unk2C8));
                 HuAudFXPlay(0);
                 fn_1_958(10);
             }
         }
-        if (HuPadStkX[lbl_1_bss_1A0C.unk38[lbl_1_bss_1A0C.unk04].unk14] <= -5 || (HuPadBtn[lbl_1_bss_1A0C.unk38[lbl_1_bss_1A0C.unk04].unk14] & PAD_BUTTON_LEFT)) {
+        if (HuPadStkX[lbl_1_bss_1A0C.player_stats[lbl_1_bss_1A0C.unk04].pad_idx] <= -5 || (HuPadBtn[lbl_1_bss_1A0C.player_stats[lbl_1_bss_1A0C.unk04].pad_idx] & PAD_BUTTON_LEFT)) {
             if (lbl_1_bss_1A0C.unk2C8 != 0) {
                 lbl_1_bss_1A0C.unk24 = 0;
             }
@@ -414,7 +456,7 @@ void fn_1_16AD4(void) {
                 lbl_1_bss_1A0C.unk2C8 = 0;
             } else {
                 fn_1_1CD60();
-                fn_1_1D44(lbl_1_bss_1A0C.unk10, MAKE_MESSID(38, lbl_1_bss_1A0C.unk2C8));
+                handleDescriptionMess(lbl_1_bss_1A0C.unk10, MAKE_MESSID(38, lbl_1_bss_1A0C.unk2C8));
                 HuAudFXPlay(0);
                 fn_1_958(10);
             }
@@ -626,7 +668,7 @@ void fn_1_17570(void) {
     } else {
         fn_1_159A4();
         for (i = 0; i < 4; i++) {
-            if (lbl_1_bss_1A0C.unk38[i].unk10 != GWStoryCharGet()) {
+            if (lbl_1_bss_1A0C.player_stats[i].character != GWStoryCharGet()) {
                 continue;
             }
             _SetFlag(9);
@@ -669,7 +711,7 @@ void fn_1_17570(void) {
                     break;
             }
             if (var_r30 == 1) {
-                if (lbl_1_bss_1A0C.unk38[i].unk18 == 0) {
+                if (lbl_1_bss_1A0C.player_stats[i].rank == 0) {
                     if (lbl_1_bss_1A0C.map_number == 5) {
                         GWGameStat.open_w06 = 1;
                     }
@@ -720,8 +762,8 @@ void fn_1_17570(void) {
                 }
             } else {
                 GWPlayerCfg->group = 0;
-                GWPlayerCfg->character = lbl_1_bss_1A0C.unk38[lbl_1_bss_1A0C.unk04].unk10;
-                GWPlayerCfg->pad_idx = lbl_1_bss_1A0C.unk38[lbl_1_bss_1A0C.unk04].unk14;
+                GWPlayerCfg->character = lbl_1_bss_1A0C.player_stats[lbl_1_bss_1A0C.unk04].character;
+                GWPlayerCfg->pad_idx = lbl_1_bss_1A0C.player_stats[lbl_1_bss_1A0C.unk04].pad_idx;
                 GWPlayerCfg->iscom = 0;
                 for (i = 0; i < 4; i++) {
                     GWPlayer[i].character = GWPlayerCfg[i].character;
@@ -761,7 +803,7 @@ void fn_1_17DC0(OMOBJ* arg0, StructBss1530* arg1) {
 void fn_1_18080(void) {
     OMOBJ* temp_r3;
 
-    temp_r3 = omAddObjEx(lbl_1_bss_18D0, 0x100, 0x10, 0x10, -1, NULL);
+    temp_r3 = omAddObjEx(objman, 0x100, 0x10, 0x10, -1, NULL);
     lbl_1_bss_19E4.unk00 = temp_r3;
     lbl_1_bss_19E4.unk04 = (void*) fn_1_17DC0;
     while (TRUE) {
@@ -871,7 +913,7 @@ void fn_1_18668(OMOBJ* arg0, s32 arg1) {
         HuSprGrpMemberSet(arg0->work[1], i + 6, var_r30);
     }
     // TODO: figure out the actual value of arg7. It will match as long as arg7 >= 2.
-    fn_1_15DC8(arg0->work[1], 6, lbl_1_bss_1A0C.max_turn, 293, 19, 36, 36, 2);
+    showDigits(arg0->work[1], 6, lbl_1_bss_1A0C.max_turn, 293, 19, 36, 36, 2);
     arg0->work[2] = HuSprGrpCreate(2);
     var_r30 = HuSprCreate(HuSprAnimRead(HuDataReadNum(DATA_MAKE_NUM(DATADIR_MSTORY3, 120), HU_MEMNUM_OVL)), 800, 0);
     HuSprGrpMemberSet(arg0->work[2], 0, var_r30);
@@ -879,11 +921,17 @@ void fn_1_18668(OMOBJ* arg0, s32 arg1) {
     var_r30 = HuSprCreate(HuSprAnimRead(HuDataReadNum(DATA_MAKE_NUM(DATADIR_MSTORY3, 121), HU_MEMNUM_OVL)), 400, 0);
     HuSprGrpMemberSet(arg0->work[2], 1, var_r30);
     fn_1_15D08(arg0->work[2], 1, 36, 121, 0, 0);
-    arg0->work[3] = HuSprGrpCreate(12);
-    for (i = 0; i < 12; i++) {
-        var_r30 = HuSprCreate(HuSprAnimRead(HuDataReadNum(i + DATA_MAKE_NUM(DATADIR_MSTORY3, 124), HU_MEMNUM_OVL)), 700, 0);
-        HuSprGrpMemberSet(arg0->work[3], i, var_r30);
-        fn_1_15D08(arg0->work[3], i, i * 66, 16, 58, 0);
+    arg0->work[3] = HuSprGrpCreate(STATS_COUNT);
+    for (i = 0; i < STATS_COUNT; i++) {
+        if (i < STAT_ROLLS) {
+            var_r30 = HuSprCreate(HuSprAnimRead(HuDataReadNum(i + DATA_MAKE_NUM(DATADIR_MSTORY3, 124), HU_MEMNUM_OVL)), 700, 0);
+            HuSprGrpMemberSet(arg0->work[3], i, var_r30);
+            fn_1_15D08(arg0->work[3], i, i * 66, 16, 58, 0);
+        } else { // TODO: Give new categories a new icon
+            var_r30 = HuSprCreate(HuSprAnimRead(HuDataReadNum(11 + DATA_MAKE_NUM(DATADIR_MSTORY3, 124), HU_MEMNUM_OVL)), 700, 0);
+            HuSprGrpMemberSet(arg0->work[3], i, var_r30);
+            fn_1_15D08(arg0->work[3], i, i * 66, 16, 58, 0);
+        }
     }
     HuSprGrpPosSet(arg0->work[2], 164 + lbl_1_bss_1A0C.unk2C4 * 66, 78.0f);
     HuSprGrpDrawNoSet(arg0->work[1], 0x7F);
@@ -908,7 +956,7 @@ void fn_1_18CFC(OMOBJ* arg0) {
     HuSprGrpPosSet(arg0->work[1], -5.0f, 25.0f);
     HuSprGrpPosSet(arg0->work[2], temp_f31, 78.0f);
     HuSprGrpPosSet(arg0->work[3], 169 - var_r28 * 66, 82.0f);
-    for (var_r30 = 0; var_r30 < 12; var_r30++) {
+    for (var_r30 = 0; var_r30 < STATS_COUNT; var_r30++) {
         if (var_r30 < var_r28 || var_r30 > var_r28 + 5) {
             HuSprAttrSet(arg0->work[3], var_r30, HUSPR_ATTR_DISPOFF);
         } else {
@@ -924,9 +972,9 @@ void fn_1_18CFC(OMOBJ* arg0) {
     } else if (var_r29 == 1) {
         HuSprBankSet(lbl_1_bss_19BC.unk00->work[1], 2, 0);
     }
-    if (var_r29 == 6) {
+    if (var_r29 == STATS_COUNT - 6) {
         HuSprBankSet(lbl_1_bss_19BC.unk00->work[1], 3, 2);
-    } else if (var_r29 == 5) {
+    } else if (var_r29 == STATS_COUNT - 7) {
         HuSprBankSet(lbl_1_bss_19BC.unk00->work[1], 3, 0);
     }
 }
@@ -941,7 +989,7 @@ void fn_1_18F98(void) {
     for (i = 0; i < 2; i++) {
         HuSprAttrReset(lbl_1_bss_19BC.unk00->work[2], i, HUSPR_ATTR_DISPOFF);
     }
-    for (i = 0; i < 12; i++) {
+    for (i = 0; i < STATS_COUNT; i++) {
         HuSprAttrReset(lbl_1_bss_19BC.unk00->work[3], i, HUSPR_ATTR_DISPOFF);
     }
     var_r30 = lbl_1_bss_1A0C.unk2C8 - lbl_1_bss_1A0C.unk2C4;
@@ -953,9 +1001,9 @@ void fn_1_18F98(void) {
     } else if (var_r30 == 1) {
         HuSprBankSet(lbl_1_bss_19BC.unk00->work[1], 2, 0);
     }
-    if (var_r30 == 6) {
+    if (var_r30 == STATS_COUNT - 6) {
         HuSprBankSet(lbl_1_bss_19BC.unk00->work[1], 3, 2);
-    } else if (var_r30 == 5) {
+    } else if (var_r30 == STATS_COUNT - 7) {
         HuSprBankSet(lbl_1_bss_19BC.unk00->work[1], 3, 0);
     }
     lbl_1_bss_19BC.unk04 = (void*) fn_1_18CFC;
@@ -970,7 +1018,7 @@ void fn_1_19144(void) {
     for (i = 0; i < 2; i++) {
         HuSprAttrSet(lbl_1_bss_19BC.unk00->work[2], i, HUSPR_ATTR_DISPOFF);
     }
-    for (i = 0; i < 12; i++) {
+    for (i = 0; i < STATS_COUNT; i++) {
         HuSprAttrSet(lbl_1_bss_19BC.unk00->work[3], i, HUSPR_ATTR_DISPOFF);
     }
     lbl_1_bss_19BC.unk04 = NULL;
@@ -979,7 +1027,7 @@ void fn_1_19144(void) {
 void fn_1_19214(void) {
     OMOBJ* temp_r3;
 
-    temp_r3 = omAddObjEx(lbl_1_bss_18D0, 0x100, 0x10, 0x10, -1, NULL);
+    temp_r3 = omAddObjEx(objman, 0x100, 0x10, 0x10, -1, NULL);
     lbl_1_bss_19BC.unk00 = temp_r3;
     lbl_1_bss_19BC.unk04 = NULL;
     fn_1_1811C(temp_r3, lbl_1_bss_1A0C.map_number);
@@ -993,47 +1041,61 @@ void fn_1_19214(void) {
 }
 
 void fn_1_194A0(void) {
-    s32 var_r29;
+    s32 max_count;
     s32 i;
     s32 j;
 
-    for (i = 0; i < 12; i++) {
-        var_r29 = 0;
+    for (i = 0; i < STATS_COUNT; i++) {
+        max_count = 0;
         for (j = 0; j < 4; j++) {
-            if (var_r29 <= lbl_1_bss_1A0C.unk38[j].unk34[i][0]) {
-                var_r29 = lbl_1_bss_1A0C.unk38[j].unk34[i][0];
+            if (i < STAT_ROLLS) {
+                if (max_count <= lbl_1_bss_1A0C.player_stats[j].stars1coins1coins_mg1coins_max[i][0]) {
+                    max_count = lbl_1_bss_1A0C.player_stats[j].stars1coins1coins_mg1coins_max[i][0];
+                }
+            } else {
+                if (max_count <= getExtraStat(i, j)) {
+                    max_count = getExtraStat(i, j);
+                }
             }
         }
-        if (var_r29 > 0) {
+        if (max_count > 0) {
             for (j = 0; j < 4; j++) {
-                if (var_r29 == lbl_1_bss_1A0C.unk38[j].unk34[i][0]) {
-                    lbl_1_bss_1A0C.unk38[j].unk34[i][1] = 1;
+                if (i < STAT_ROLLS) {
+                    if (max_count == lbl_1_bss_1A0C.player_stats[j].stars1coins1coins_mg1coins_max[i][0]) {
+                        lbl_1_bss_1A0C.player_stats[j].stars1coins1coins_mg1coins_max[i][1] = 1;
+                    }
+                } else {
+                    if (max_count == getExtraStat(i, j)) {
+                        stats_most[j][i] = 1;
+                    } else {
+                        stats_most[j][i] = 0;
+                    }
                 }
             }
         }
     }
 }
 
-void fn_1_19590(StructUnk38Bss1A0C* arg0, s32 arg1, s32 arg2) {
-    arg0->unk00 = arg1;
-    arg0->unk04 = GWPlayerCfg[arg0->unk00].group;
-    arg0->unk08 = GWPlayerCfg[arg0->unk00].iscom;
-    arg0->unk0C = GWPlayerCfg[arg0->unk00].diff;
-    arg0->unk10 = GWPlayerCfg[arg0->unk00].character;
-    arg0->unk14 = GWPlayerCfg[arg0->unk00].pad_idx;
-    arg0->unk18 = GWPlayer[arg0->unk00].rank;
-    arg0->unk34[0][0] = GWPlayer[arg0->unk00].stars;
-    arg0->unk34[1][0] = GWPlayer[arg0->unk00].coins;
-    arg0->unk34[2][0] = GWPlayer[arg0->unk00].coins_mg;
-    arg0->unk34[3][0] = GWPlayer[arg0->unk00].coins_max;
-    arg0->unk54 = GWPlayer[arg0->unk00].blue_count;
-    arg0->unk5C = GWPlayer[arg0->unk00].red_count;
-    arg0->unk64 = GWPlayer[arg0->unk00].question_count;
-    arg0->unk6C = GWPlayer[arg0->unk00].fortune_count;
-    arg0->unk74 = GWPlayer[arg0->unk00].bowser_count;
-    arg0->unk7C = GWPlayer[arg0->unk00].battle_count;
-    arg0->unk84 = GWPlayer[arg0->unk00].mushroom_count;
-    arg0->unk8C = GWPlayer[arg0->unk00].warp_count;
+void fn_1_19590(PlayerStats* player_stats, s32 player_idx, s32 arg2) {
+    player_stats->player_idx = player_idx;
+    player_stats->group = GWPlayerCfg[player_stats->player_idx].group;
+    player_stats->iscom = GWPlayerCfg[player_stats->player_idx].iscom;
+    player_stats->diff = GWPlayerCfg[player_stats->player_idx].diff;
+    player_stats->character = GWPlayerCfg[player_stats->player_idx].character;
+    player_stats->pad_idx = GWPlayerCfg[player_stats->player_idx].pad_idx;
+    player_stats->rank = GWPlayer[player_stats->player_idx].rank;
+    player_stats->stars1coins1coins_mg1coins_max[0][0] = GWPlayer[player_stats->player_idx].stars;
+    player_stats->stars1coins1coins_mg1coins_max[1][0] = GWPlayer[player_stats->player_idx].coins;
+    player_stats->stars1coins1coins_mg1coins_max[2][0] = GWPlayer[player_stats->player_idx].coins_mg;
+    player_stats->stars1coins1coins_mg1coins_max[3][0] = GWPlayer[player_stats->player_idx].coins_max;
+    player_stats->blue_count = GWPlayer[player_stats->player_idx].blue_count;
+    player_stats->red_count = GWPlayer[player_stats->player_idx].red_count;
+    player_stats->question_count = GWPlayer[player_stats->player_idx].question_count;
+    player_stats->fortune_count = GWPlayer[player_stats->player_idx].fortune_count;
+    player_stats->bowser_count = GWPlayer[player_stats->player_idx].bowser_count;
+    player_stats->battle_count = GWPlayer[player_stats->player_idx].battle_count;
+    player_stats->mushroom_count = GWPlayer[player_stats->player_idx].mushroom_count;
+    player_stats->warp_count = GWPlayer[player_stats->player_idx].warp_count;
 }
 
 void fn_1_197B4(s32 arg0) {
@@ -1098,38 +1160,38 @@ void fn_1_197B4(s32 arg0) {
         OSReport("########## Sort End RANK %d, %d, %d, %d,\n", sp74[0][1], sp74[1][1], sp74[2][1], sp74[3][1]);
     }
     for (i = 0; i < 4; i++) {
-        fn_1_19590(&lbl_1_bss_1A0C.unk38[i], sp74[i][0], sp74[i][1]);
+        fn_1_19590(&lbl_1_bss_1A0C.player_stats[i], sp74[i][0], sp74[i][1]);
         if (arg0 == sp74[i][0]) {
             lbl_1_bss_1A0C.unk04 = i;
         }
     }
 }
 
-void fn_1_1A008(OMOBJ* arg0, s32 arg1) {
+void fn_1_1A008(OMOBJ* arg0, s32 player_idx) {
     s32 spDC;
     s32 spD8;
     s32 spD4;
     s32 spD0;
     s32 spCC;
     s32 spC8;
-    StructUnk38Bss1A0C* temp_r27;
+    PlayerStats* player_stats;
     s32 var_r30;
     s32 var_r29;
     s32 var_r28;
 
     // TODO: figure out the actual args of fn_1_15D08 calls.
     // It will match as long as the values (arg2 + arg4 / 2) and (arg3 + arg5 / 2) are preserved.
-    temp_r27 = &lbl_1_bss_1A0C.unk38[arg1];
+    player_stats = &lbl_1_bss_1A0C.player_stats[player_idx];
     if (lbl_1_bss_1A0C.team == 1) {
         spD4 = lbl_1_bss_1A0C.unk2D0;
-        if (arg1 > 1) {
+        if (player_idx > 1) {
             spD4++;
             spD4 %= 2;
         }
         arg0->mdlId[1] = Hu3DModelCreateFile(DATA_MAKE_NUM(DATADIR_MSTORY3, 140) + spD4);
         arg0->mdlId[2] = Hu3DModelCreateFile(DATA_MAKE_NUM(DATADIR_MSTORY3, 142) + spD4);
         arg0->mtnId[2] = Hu3DMotionIDGet(arg0->mdlId[2]);
-        if (arg1 <= 1) {
+        if (player_idx <= 1) {
             spD4 = 0;
         } else {
             spD4 = 1;
@@ -1140,24 +1202,24 @@ void fn_1_1A008(OMOBJ* arg0, s32 arg1) {
         arg0->mdlId[1] = Hu3DModelCreateFile(DATA_MAKE_NUM(DATADIR_MSTORY3, 98));
         arg0->mdlId[2] = Hu3DModelCreateFile(DATA_MAKE_NUM(DATADIR_MSTORY3, 99));
         arg0->mtnId[2] = Hu3DMotionIDGet(arg0->mdlId[2]);
-        arg0->mdlId[3] = Hu3DModelCreateFile(DATA_MAKE_NUM(DATADIR_MSTORY3, 100) + temp_r27->unk18);
+        arg0->mdlId[3] = Hu3DModelCreateFile(DATA_MAKE_NUM(DATADIR_MSTORY3, 100) + player_stats->rank);
         Hu3DModelHookSet(arg0->mdlId[1], "results_flag04-hook_cubes", arg0->mdlId[3]);
     }
-    arg0->work[0] = HuSprGrpCreate(12);
+    arg0->work[0] = HuSprGrpCreate(STATS_COUNT);
     if (lbl_1_bss_1A0C.team == 1) {
         spD0 = 35;
         spCC = 10;
         spC8 = 65;
-        if (arg1 <= 1) {
+        if (player_idx <= 1) {
             var_r30 = HuSprCreate(HuSprAnimRead(HuDataReadNum(DATA_MAKE_NUM(DATADIR_MSTORY3, 81), HU_MEMNUM_OVL)), 900, 0);
         } else {
             var_r30 = HuSprCreate(HuSprAnimRead(HuDataReadNum(DATA_MAKE_NUM(DATADIR_MSTORY3, 82), HU_MEMNUM_OVL)), 900, 0);
         }
         HuSprGrpMemberSet(arg0->work[0], 0, var_r30);
         fn_1_15D08(arg0->work[0], 0, 40, spD0 + 36, 0, 0);
-        var_r30 = HuSprCreate(HuSprAnimRead(HuDataReadNum(DATA_MAKE_NUM(DATADIR_MSTORY3, 85) + temp_r27->unk10, HU_MEMNUM_OVL)), 900, 0);
+        var_r30 = HuSprCreate(HuSprAnimRead(HuDataReadNum(DATA_MAKE_NUM(DATADIR_MSTORY3, 85) + player_stats->character, HU_MEMNUM_OVL)), 900, 0);
         HuSprGrpMemberSet(arg0->work[0], 1, var_r30);
-        if (arg1 % 2 == 0) {
+        if (player_idx % 2 == 0) {
             fn_1_15D08(arg0->work[0], 1, 119, spD0 + 34, 0, 0);
         } else {
             fn_1_15D08(arg0->work[0], 1, 189, -spD0 + 24, 0, 0);
@@ -1169,9 +1231,9 @@ void fn_1_1A008(OMOBJ* arg0, s32 arg1) {
         HuSprGrpMemberSet(arg0->work[0], 3, var_r30);
         fn_1_15D08(arg0->work[0], 3, 312, spCC + 29, 0, 0);
         for (var_r28 = 0; var_r28 < 3; var_r28++) {
-            spDC = lbl_1_bss_1A0C.unk38[0].unk34[0][0] + lbl_1_bss_1A0C.unk38[1].unk34[0][0];
-            spD8 = lbl_1_bss_1A0C.unk38[2].unk34[0][0] + lbl_1_bss_1A0C.unk38[3].unk34[0][0];
-            if (arg1 <= 1) {
+            spDC = lbl_1_bss_1A0C.player_stats[0].stars1coins1coins_mg1coins_max[0][0] + lbl_1_bss_1A0C.player_stats[1].stars1coins1coins_mg1coins_max[0][0];
+            spD8 = lbl_1_bss_1A0C.player_stats[2].stars1coins1coins_mg1coins_max[0][0] + lbl_1_bss_1A0C.player_stats[3].stars1coins1coins_mg1coins_max[0][0];
+            if (player_idx <= 1) {
                 if (spDC >= spD8) {
                     var_r30 = HuSprCreate(lbl_1_bss_18EC[1], 900, 0);
                 } else {
@@ -1186,18 +1248,18 @@ void fn_1_1A008(OMOBJ* arg0, s32 arg1) {
             }
             HuSprGrpMemberSet(arg0->work[0], var_r28 + 4, var_r30);
         }
-        if (arg1 <= 1) {
-            var_r29 = lbl_1_bss_1A0C.unk38[0].unk34[0][0] + lbl_1_bss_1A0C.unk38[1].unk34[0][0];
+        if (player_idx <= 1) {
+            var_r29 = lbl_1_bss_1A0C.player_stats[0].stars1coins1coins_mg1coins_max[0][0] + lbl_1_bss_1A0C.player_stats[1].stars1coins1coins_mg1coins_max[0][0];
             if (var_r29 >= 999) {
                 var_r29 = 999;
             }
-            fn_1_15DC8(arg0->work[0], 4, var_r29, 340, spCC + 11, 26, 36, 0);
+            showDigits(arg0->work[0], 4, var_r29, 340, spCC + 11, 26, 36, 0);
         } else {
-            var_r29 = lbl_1_bss_1A0C.unk38[2].unk34[0][0] + lbl_1_bss_1A0C.unk38[3].unk34[0][0];
+            var_r29 = lbl_1_bss_1A0C.player_stats[2].stars1coins1coins_mg1coins_max[0][0] + lbl_1_bss_1A0C.player_stats[3].stars1coins1coins_mg1coins_max[0][0];
             if (var_r29 >= 999) {
                 var_r29 = 999;
             }
-            fn_1_15DC8(arg0->work[0], 4, var_r29, 340, spCC + 11, 26, 36, 0);
+            showDigits(arg0->work[0], 4, var_r29, 340, spCC + 11, 26, 36, 0);
         }
         var_r30 = HuSprCreate(lbl_1_bss_18D8[1], 900, 0);
         HuSprGrpMemberSet(arg0->work[0], 7, var_r30);
@@ -1206,9 +1268,9 @@ void fn_1_1A008(OMOBJ* arg0, s32 arg1) {
         HuSprGrpMemberSet(arg0->work[0], 8, var_r30);
         fn_1_15D08(arg0->work[0], 8, 312, spC8 + 29, 0, 0);
         for (var_r28 = 0; var_r28 < 3; var_r28++) {
-            spDC = lbl_1_bss_1A0C.unk38[0].unk34[1][0] + lbl_1_bss_1A0C.unk38[1].unk34[1][0];
-            spD8 = lbl_1_bss_1A0C.unk38[2].unk34[1][0] + lbl_1_bss_1A0C.unk38[3].unk34[1][0];
-            if (arg1 <= 1) {
+            spDC = lbl_1_bss_1A0C.player_stats[0].stars1coins1coins_mg1coins_max[1][0] + lbl_1_bss_1A0C.player_stats[1].stars1coins1coins_mg1coins_max[1][0];
+            spD8 = lbl_1_bss_1A0C.player_stats[2].stars1coins1coins_mg1coins_max[1][0] + lbl_1_bss_1A0C.player_stats[3].stars1coins1coins_mg1coins_max[1][0];
+            if (player_idx <= 1) {
                 if (spDC >= spD8) {
                     var_r30 = HuSprCreate(lbl_1_bss_18EC[1], 900, 0);
                 } else {
@@ -1223,24 +1285,24 @@ void fn_1_1A008(OMOBJ* arg0, s32 arg1) {
             }
             HuSprGrpMemberSet(arg0->work[0], var_r28 + 9, var_r30);
         }
-        if (arg1 <= 1) {
-            var_r29 = lbl_1_bss_1A0C.unk38[0].unk34[1][0] + lbl_1_bss_1A0C.unk38[1].unk34[1][0];
+        if (player_idx <= 1) {
+            var_r29 = lbl_1_bss_1A0C.player_stats[0].stars1coins1coins_mg1coins_max[1][0] + lbl_1_bss_1A0C.player_stats[1].stars1coins1coins_mg1coins_max[1][0];
             if (var_r29 >= 999) {
                 var_r29 = 999;
             }
-            fn_1_15DC8(arg0->work[0], 9, var_r29, 340, spC8 + 11, 26, 36, 0);
+            showDigits(arg0->work[0], 9, var_r29, 340, spC8 + 11, 26, 36, 0);
         } else {
-            var_r29 = lbl_1_bss_1A0C.unk38[2].unk34[1][0] + lbl_1_bss_1A0C.unk38[3].unk34[1][0];
+            var_r29 = lbl_1_bss_1A0C.player_stats[2].stars1coins1coins_mg1coins_max[1][0] + lbl_1_bss_1A0C.player_stats[3].stars1coins1coins_mg1coins_max[1][0];
             if (var_r29 >= 999) {
                 var_r29 = 999;
             }
-            fn_1_15DC8(arg0->work[0], 9, var_r29, 340, spC8 + 11, 26, 36, 0);
+            showDigits(arg0->work[0], 9, var_r29, 340, spC8 + 11, 26, 36, 0);
         }
     } else {
-        var_r30 = HuSprCreate(HuSprAnimRead(HuDataReadNum(DATA_MAKE_NUM(DATADIR_MSTORY3, 81) + temp_r27->unk18, HU_MEMNUM_OVL)), 900, 0);
+        var_r30 = HuSprCreate(HuSprAnimRead(HuDataReadNum(DATA_MAKE_NUM(DATADIR_MSTORY3, 81) + player_stats->rank, HU_MEMNUM_OVL)), 900, 0);
         HuSprGrpMemberSet(arg0->work[0], 0, var_r30);
         fn_1_15D08(arg0->work[0], 0, 25, 37, 0, 0);
-        var_r30 = HuSprCreate(HuSprAnimRead(HuDataReadNum(DATA_MAKE_NUM(DATADIR_MSTORY3, 85) + temp_r27->unk10, HU_MEMNUM_OVL)), 900, 0);
+        var_r30 = HuSprCreate(HuSprAnimRead(HuDataReadNum(DATA_MAKE_NUM(DATADIR_MSTORY3, 85) + player_stats->character, HU_MEMNUM_OVL)), 900, 0);
         HuSprGrpMemberSet(arg0->work[0], 1, var_r30);
         fn_1_15D08(arg0->work[0], 1, 87, 29, 0, 0);
         var_r30 = HuSprCreate(lbl_1_bss_18D8[0], 900, 0);
@@ -1250,10 +1312,10 @@ void fn_1_1A008(OMOBJ* arg0, s32 arg1) {
         HuSprGrpMemberSet(arg0->work[0], 3, var_r30);
         fn_1_15D08(arg0->work[0], 3, 178, 29, 0, 0);
         for (var_r28 = 0; var_r28 < 3; var_r28++) {
-            var_r30 = HuSprCreate(lbl_1_bss_18EC[temp_r27->unk34[0][1]], 900, 0);
+            var_r30 = HuSprCreate(lbl_1_bss_18EC[player_stats->stars1coins1coins_mg1coins_max[0][1]], 900, 0);
             HuSprGrpMemberSet(arg0->work[0], (var_r28 + 4), var_r30);
         }
-        fn_1_15DC8(arg0->work[0], 4, temp_r27->unk34[0][0], 190, 11, 26, 36, 0);
+        showDigits(arg0->work[0], 4, player_stats->stars1coins1coins_mg1coins_max[0][0], 190, 11, 26, 36, 0);
         var_r30 = HuSprCreate(lbl_1_bss_18D8[1], 900, 0);
         HuSprGrpMemberSet(arg0->work[0], 7, var_r30);
         fn_1_15D08(arg0->work[0], 7, 304, 29, 0, 0);
@@ -1261,10 +1323,10 @@ void fn_1_1A008(OMOBJ* arg0, s32 arg1) {
         HuSprGrpMemberSet(arg0->work[0], 8, var_r30);
         fn_1_15D08(arg0->work[0], 8, 338, 29, 0, 0);
         for (var_r28 = 0; var_r28 < 3; var_r28++) {
-            var_r30 = HuSprCreate(lbl_1_bss_18EC[temp_r27->unk34[1][1]], 900, 0);
+            var_r30 = HuSprCreate(lbl_1_bss_18EC[player_stats->stars1coins1coins_mg1coins_max[1][1]], 900, 0);
             HuSprGrpMemberSet(arg0->work[0], var_r28 + 9, var_r30);
         }
-        fn_1_15DC8(arg0->work[0], 9, temp_r27->unk34[1][0], 350, 11, 26, 36, 0);
+        showDigits(arg0->work[0], 9, player_stats->stars1coins1coins_mg1coins_max[1][0], 350, 11, 26, 36, 0);
     }
     lbl_1_bss_18F4[var_r28].unk14 = 1000 + rand8() * 5;
 }
@@ -1281,7 +1343,7 @@ void fn_1_1BEFC(OMOBJ* arg0, StructBss1530* arg1) {
             Hu3DModelAttrSet(arg0->mdlId[1], HU3D_ATTR_DISPOFF);
             Hu3DModelAttrSet(arg0->mdlId[2], HU3D_ATTR_DISPOFF);
             Hu3DModelAttrSet(arg0->mdlId[3], HU3D_ATTR_DISPOFF);
-            for (var_r29 = 0; var_r29 < 12; var_r29++) {
+            for (var_r29 = 0; var_r29 < STATS_COUNT; var_r29++) {
                 HuSprAttrSet(arg0->work[0], var_r29, 4);
             }
         }
@@ -1324,13 +1386,13 @@ void fn_1_1C2F4(void) {
         }
         if (lbl_1_bss_1A0C.team == 1) {
             if (var_r30 % 2 == 0) {
-                for (var_r31 = 0; var_r31 < 12; var_r31++) {
+                for (var_r31 = 0; var_r31 < STATS_COUNT; var_r31++) {
                     HuSprAttrReset(lbl_1_bss_18F4[var_r30].unk00->work[0], var_r31, HUSPR_ATTR_DISPOFF);
                 }
             }
             HuSprAttrReset(lbl_1_bss_18F4[var_r30].unk00->work[0], 1, HUSPR_ATTR_DISPOFF);
         } else {
-            for (var_r31 = 0; var_r31 < 12; var_r31++) {
+            for (var_r31 = 0; var_r31 < STATS_COUNT; var_r31++) {
                 HuSprAttrReset(lbl_1_bss_18F4[var_r30].unk00->work[0], var_r31, HUSPR_ATTR_DISPOFF);
             }
         }
@@ -1346,37 +1408,45 @@ void fn_1_1C460(void) {
         for (var_r31 = 0; var_r31 < 3; var_r31++) {
             Hu3DModelAttrSet(lbl_1_bss_18F4[var_r30].unk00->mdlId[var_r31 + 1], HU3D_ATTR_DISPOFF);
         }
-        for (var_r31 = 0; var_r31 < 12; var_r31++) {
+        for (var_r31 = 0; var_r31 < STATS_COUNT; var_r31++) {
             HuSprAttrSet(lbl_1_bss_18F4[var_r30].unk00->work[0], var_r31, HUSPR_ATTR_DISPOFF);
         }
         lbl_1_bss_18F4[var_r30].unk04 = NULL;
     }
 }
-
-void fn_1_1C534(OMOBJ* arg0, s32 arg1) {
-    StructUnk38Bss1A0C* temp_r25;
+// Important
+void fn_1_1C534(OMOBJ* objman, s32 player_idx) {
+    PlayerStats* player_stats;
     s32 var_r22;
     s32 i;
     s32 j;
 
-    temp_r25 = &lbl_1_bss_1A0C.unk38[arg1];
-    arg0->work[1] = HuSprGrpCreate(1);
+    player_stats = &lbl_1_bss_1A0C.player_stats[player_idx];
+    objman->work[1] = HuSprGrpCreate(1);
     var_r22 = HuSprCreate(HuSprAnimRead(HuDataReadNum(DATA_MAKE_NUM(DATADIR_MSTORY3, 122), HU_MEMNUM_OVL)), 700, 0);
-    HuSprGrpMemberSet(arg0->work[1], 0, var_r22);
-    HuSprBankSet(arg0->work[1], 0, temp_r25->unk10);
+    HuSprGrpMemberSet(objman->work[1], 0, var_r22);
+    HuSprBankSet(objman->work[1], 0, player_stats->character);
     // TODO: figure out the actual args of this fn_1_15D08 call.
     // It will match as long as the values (arg2 + arg4 / 2) and (arg3 + arg5 / 2) are preserved. 
-    fn_1_15D08(arg0->work[1], 0, 66, 21, 0, 0);
-    arg0->work[2] = HuSprGrpCreate(0x24);
-    for (i = 0; i < 12; i++) {
-        for (j = 0; j < 3; j++) {
-            var_r22 = HuSprCreate(lbl_1_bss_18E4[temp_r25->unk34[i][1]], 700, 0);
-            HuSprGrpMemberSet(arg0->work[2], j + i * 3, var_r22);
+    fn_1_15D08(objman->work[1], 0, 66, 21, 0, 0);
+    objman->work[2] = HuSprGrpCreate(STATS_COUNT * 3);
+    for (i = 0; i < STATS_COUNT; i++) {
+        if (i < STAT_ROLLS) {
+            for (j = 0; j < 3; j++) {
+                var_r22 = HuSprCreate(lbl_1_bss_18E4[player_stats->stars1coins1coins_mg1coins_max[i][1]], 700, 0);
+                HuSprGrpMemberSet(objman->work[2], j + i * 3, var_r22);
+            }
+            showDigits(objman->work[2], i * 3, player_stats->stars1coins1coins_mg1coins_max[i][0], i * 66, 0, 20, 32, 1);
+        } else {
+            for (j = 0; j < 3; j++) {
+                var_r22 = HuSprCreate(lbl_1_bss_18E4[stats_most[player_idx][i]], 700, 0);
+                HuSprGrpMemberSet(objman->work[2], j + i * 3, var_r22);
+            }
+            showDigits(objman->work[2], i * 3, getExtraStat(i, player_idx), i * 66, 0, 20, 32, 1);
         }
-        fn_1_15DC8(arg0->work[2], i * 3, temp_r25->unk34[i][0], i * 66, 0, 20, 32, 1);
     }
-    HuSprGrpDrawNoSet(arg0->work[1], 0x7F);
-    HuSprGrpDrawNoSet(arg0->work[2], 0x7F);
+    HuSprGrpDrawNoSet(objman->work[1], 0x7F);
+    HuSprGrpDrawNoSet(objman->work[2], 0x7F);
 }
 
 void fn_1_1C914(OMOBJ* arg0, StructBss1530* arg1) {
@@ -1390,7 +1460,7 @@ void fn_1_1C914(OMOBJ* arg0, StructBss1530* arg1) {
     }
     HuSprGrpPosSet(arg0->work[1], 17.0f, arg1->unk08 * 48 + 118);
     HuSprGrpPosSet(arg0->work[2], 169 - var_r28 * 66, arg1->unk08 * 48 + 123);
-    for (i = 0; i < 12; i++) {
+    for (i = 0; i < STATS_COUNT; i++) {
         for (j = 0; j < 3; j++) {
             if (i < var_r28 || i > var_r28 + 5) {
                 HuSprAttrSet(arg0->work[2], j + i * 3, HUSPR_ATTR_DISPOFF);
@@ -1406,7 +1476,7 @@ void fn_1_1CA98(void) {
 
     for (i = 0; i < 4; i++) {
         HuSprAttrReset(lbl_1_bss_18F4[i].unk00->work[1], 0, HUSPR_ATTR_DISPOFF);
-        for (j = 0; j < 12; j++) {
+        for (j = 0; j < STATS_COUNT; j++) {
             for (k = 0; k < 3; k++) {
                 HuSprAttrReset(lbl_1_bss_18F4[i].unk00->work[2], k + j * 3, HUSPR_ATTR_DISPOFF);
             }
@@ -1420,7 +1490,7 @@ void fn_1_1CB7C(void) {
 
     for (i = 0; i < 4; i++) {
         HuSprAttrSet(lbl_1_bss_18F4[i].unk00->work[1], 0, HUSPR_ATTR_DISPOFF);
-        for (j = 0; j < 12; j++) {
+        for (j = 0; j < STATS_COUNT; j++) {
             for (k = 0; k < 3; k++) {
                 HuSprAttrSet(lbl_1_bss_18F4[i].unk00->work[2], k + j * 3, HUSPR_ATTR_DISPOFF);
             }
@@ -1430,20 +1500,20 @@ void fn_1_1CB7C(void) {
 }
 
 void fn_1_1CC5C(void) {
-    OMOBJ* temp_r3;
+    OMOBJ* objman_proc;
     s32 temp_r31;
 
     temp_r31 = lbl_1_bss_1A0C.unk18++;
-    temp_r3 = omAddObjEx(lbl_1_bss_18D0, 0x100, 0x10, 0x10, -1, NULL);
-    lbl_1_bss_18F4[temp_r31].unk00 = temp_r3;
+    objman_proc = omAddObjEx(objman, 0x100, 0x10, 0x10, -1, NULL);
+    lbl_1_bss_18F4[temp_r31].unk00 = objman_proc;
     lbl_1_bss_18F4[temp_r31].unk04 = NULL;
     lbl_1_bss_18F4[temp_r31].unk08 = temp_r31;
-    fn_1_1A008(temp_r3, temp_r31);
-    fn_1_1C534(temp_r3, temp_r31);
+    fn_1_1A008(objman_proc, temp_r31);
+    fn_1_1C534(objman_proc, temp_r31); // Important
     while (TRUE) {
         fn_1_938();
         if (lbl_1_bss_18F4[temp_r31].unk04 != NULL) {
-            lbl_1_bss_18F4[temp_r31].unk04(temp_r3, &lbl_1_bss_18F4[temp_r31]);
+            lbl_1_bss_18F4[temp_r31].unk04(objman_proc, &lbl_1_bss_18F4[temp_r31]);
         }
     }
 }
@@ -1601,7 +1671,7 @@ void fn_1_1DA64(void) {
 void fn_1_1DAAC(void) {
     OMOBJ* temp_r3;
 
-    temp_r3 = omAddObjEx(lbl_1_bss_18D0, 0x100, 0x10, 0x10, -1, NULL);
+    temp_r3 = omAddObjEx(objman, 0x100, 0x10, 0x10, -1, NULL);
     lbl_1_bss_1994.unk00 = temp_r3;
     lbl_1_bss_1994.unk04 = NULL;
     fn_1_1CDF0(temp_r3);
