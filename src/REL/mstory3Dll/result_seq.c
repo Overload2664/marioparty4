@@ -94,6 +94,8 @@ enum {
     BONUS_STAR_MUSHROOM,
     BONUS_STAR_FORTUNE,
     BONUS_STAR_WARP,
+    BONUS_STAR_RUNNING,
+    BONUS_STAR_SLOWPOKE,
 };
 
 void fn_1_7E88(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -2374,8 +2376,20 @@ void determineBonusStarWinners(s32 bonus_star_type) {
             case BONUS_STAR_WARP:
                 counts[i] = GWPlayer[lbl_1_bss_1580.players[i].ranking_stats.unk00].warp_count;
                 break;
+            case BONUS_STAR_RUNNING:
+                counts[i] = GWPlayer[lbl_1_bss_1580.players[i].ranking_stats.unk00].ex_state.roll_count;
+                break;
+            case BONUS_STAR_SLOWPOKE:
+                counts[i] = -GWPlayer[lbl_1_bss_1580.players[i].ranking_stats.unk00].ex_state.roll_count;
+                break;
         }
     }
+
+    // If counts are negative the inital value -1 can cause issues
+    if (bonus_star_type > BONUS_STAR_HAPPENING) {
+        max_count = counts[0];
+    }
+
     for (i = 0; i < 4; i++) {
         if (max_count <= counts[i]) {
             max_count = counts[i];

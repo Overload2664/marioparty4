@@ -319,6 +319,10 @@ static void RollMain(void)
     }
     destMode = dice_sum;
     GWPlayer[rollPlayer].roll = dice_sum;
+
+    // Extra
+    GWPlayer[rollPlayer].ex_state.roll_count += dice_sum;
+
     BoardRollCreate(rollPlayer, 1);
     if (_CheckFlag(FLAG_ID_MAKE(1, 11))) {
         BoardTutorialHookExec(6, 0);

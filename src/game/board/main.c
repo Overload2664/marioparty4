@@ -346,6 +346,9 @@ void BoardSaveInit(s32 board)
         } else {
             GWStarsSet(i, BoardPlayerHandicapGet(i));
         }
+
+        // Extra
+        GWPlayer[i].ex_state.roll_count = 0;
     }
 }
 

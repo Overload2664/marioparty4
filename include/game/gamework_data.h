@@ -110,6 +110,11 @@ typedef struct player_state {
 /* 0x2A */ s16 stars;
 /* 0x2C */ s16 stars_max;
 /* 0x2E */ char unk_2E[2];
+
+    // Extra
+    struct ExState {
+        u32 roll_count;
+    } ex_state;
 } PlayerState; //size of 0x30
 
 typedef struct pause_backup_config {
