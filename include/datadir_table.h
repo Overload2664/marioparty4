@@ -138,3 +138,6 @@ DATADIR(YOSHIMDL0, "data/yoshimdl0.bin")
 DATADIR(YOSHIMDL1, "data/yoshimdl1.bin")
 DATADIR(YOSHIMOT, "data/yoshimot.bin")
 DATADIR(ZTAR, "data/ztar.bin")
+
+// Extra
+DATADIR(EX_MSTORY3, "data/ex_mstory3.bin")

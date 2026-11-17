@@ -928,7 +928,7 @@ void fn_1_18668(OMOBJ* arg0, s32 arg1) {
             HuSprGrpMemberSet(arg0->work[3], i, var_r30);
             fn_1_15D08(arg0->work[3], i, i * 66, 16, 58, 0);
         } else { // TODO: Give new categories a new icon
-            var_r30 = HuSprCreate(HuSprAnimRead(HuDataReadNum(11 + DATA_MAKE_NUM(DATADIR_MSTORY3, 124), HU_MEMNUM_OVL)), 700, 0);
+            var_r30 = HuSprCreate(HuSprAnimRead(HuDataReadNum(i - STAT_ROLLS + DATA_MAKE_NUM(DATADIR_EX_MSTORY3, 0), HU_MEMNUM_OVL)), 700, 0);
             HuSprGrpMemberSet(arg0->work[3], i, var_r30);
             fn_1_15D08(arg0->work[3], i, i * 66, 16, 58, 0);
         }
