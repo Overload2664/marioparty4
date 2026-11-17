@@ -95,7 +95,7 @@ enum {
     BONUS_STAR_FORTUNE,
     BONUS_STAR_WARP,
     BONUS_STAR_RUNNING,
-    BONUS_STAR_SLOWPOKE,
+    BONUS_STAR_SLOW,
     BONUS_STAR_ITEM,
     BONUS_STAR_SHOPPING,
     BONUS_STAR_EXTRAVAGANT,
@@ -2382,7 +2382,7 @@ void determineBonusStarWinners(s32 bonus_star_type) {
             case BONUS_STAR_RUNNING:
                 counts[i] = GWPlayer[lbl_1_bss_1580.players[i].ranking_stats.unk00].ex_state.roll_count;
                 break;
-            case BONUS_STAR_SLOWPOKE:
+            case BONUS_STAR_SLOW:
                 counts[i] = -GWPlayer[lbl_1_bss_1580.players[i].ranking_stats.unk00].ex_state.roll_count;
                 break;
             case BONUS_STAR_ITEM:
