@@ -1029,9 +1029,9 @@ static void ShrinkYourTurn(UnkUiWork02 *arg0, OMOBJ *arg1) {
     }
 }
 
-s32 BoardItemUseExec(s32 arg0) {
+s32 BoardItemUseExec(s32 player_idx) {
     BoardPauseDisableSet(1);
-    itemPlayer = arg0;
+    itemPlayer = player_idx;
     itemUseProc = HuPrcChildCreate(ItemUseProc, 0x2004, 0x4000, 0, boardMainProc);
     HuPrcDestructorSet2(itemUseProc, DestroyItemUse);
     while (itemUseProc) {
@@ -1164,6 +1164,9 @@ static void ItemUseProc(void) {
             BoardTutorialHookExec(0x17, 0);
         }
         FinishItemUse(temp_r23, var_r25);
+
+        // Extra
+        GWPlayer[itemPlayer].ex_state.items_used += 1;
     }
     if (itemUsed != BOARD_ITEM_BOOS_CRYSTAL_BALL && itemUsed != BOARD_ITEM_MAGIC_LAMP  && itemUsed != BOARD_ITEM_CELLULAR_SHOPPER) {
         SetItemUIStatus(3);

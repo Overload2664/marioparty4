@@ -326,7 +326,7 @@ static void ExecShop(void) {
     s32 var_r29;
     s32 temp_r27;
     s32 temp_r26;
-    s32 temp_r24;
+    s32 price;
     s32 var_r23;
     s32 i;
 
@@ -461,8 +461,8 @@ static void ExecShop(void) {
                 BoardWinKill();
                 break;
             }
-            temp_r24 = ExGameCfg.item_config.shop_price[activeItemTbl[itemCurChoice]];
-            if (temp_r24 >= 20) {
+            price = ExGameCfg.item_config.shop_price[activeItemTbl[itemCurChoice]];
+            if (price >= 20) {
                 var_r23 = 3;
             } else {
                 var_r23 = 6;
@@ -471,7 +471,12 @@ static void ExecShop(void) {
             if (!is_item) {
                 BoardPlayerMotBlendSet(shopPlayer, var_f30, 0xF);
             }
-            for (i = 0; i < temp_r24; i++) {
+
+            // Extra
+            GWPlayer[shopPlayer].ex_state.items_bought += 1;
+            GWPlayer[shopPlayer].ex_state.shop_spent += price;
+
+            for (i = 0; i < price; i++) {
                 BoardPlayerCoinsAdd(shopPlayer, -1);
                 HuAudFXPlay(0xE);
                 HuPrcSleep(var_r23);

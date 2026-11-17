@@ -174,9 +174,9 @@ static s32 suitMotTbl[][2] = { { DATA_MAKE_NUM(DATADIR_BKOOPASUIT, 1), DATA_MAKE
     { DATA_MAKE_NUM(DATADIR_BKOOPASUIT, 19), DATA_MAKE_NUM(DATADIR_BKOOPASUIT, 20) },
     { DATA_MAKE_NUM(DATADIR_BKOOPASUIT, 22), DATA_MAKE_NUM(DATADIR_BKOOPASUIT, 23) } };
 
-void BoardItemStart(s32 arg0, s32 arg1)
+void BoardItemStart(s32 player, s32 arg1)
 {
-    currItemRestore = arg0;
+    currItemRestore = player;
     currItem = arg1;
     suitMdl = -1;
     itemProc = HuPrcChildCreate(ItemProcess, 0x2004, 0x1000, 0, boardMainProc);

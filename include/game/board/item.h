@@ -52,6 +52,9 @@ static const char *EX_BONUS_STAR_NAMES[] = {
 	"Warp" MESS_SMALL_SPACE "Star",
 	"Running" MESS_SMALL_SPACE "Star",
 	"Slowpoke" MESS_SMALL_SPACE "Star",
+	"Item" MESS_SMALL_SPACE "Star",
+	"Shopping" MESS_SMALL_SPACE "Star",
+	"Extravagant" MESS_SMALL_SPACE "Star",
 };
 
 #endif

@@ -114,6 +114,9 @@ typedef struct player_state {
     // Extra
     struct ExState {
         u32 roll_count;
+        u32 items_bought;
+        u32 shop_spent;
+        u32 items_used;
     } ex_state;
 } PlayerState; //size of 0x30
 

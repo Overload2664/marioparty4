@@ -349,6 +349,9 @@ void BoardSaveInit(s32 board)
 
         // Extra
         GWPlayer[i].ex_state.roll_count = 0;
+        GWPlayer[i].ex_state.items_bought = 0;
+        GWPlayer[i].ex_state.shop_spent = 0;
+        GWPlayer[i].ex_state.items_used = 0;
     }
 }
 
