@@ -93,6 +93,7 @@ enum {
     BONUS_STAR_AGITATOR,
     BONUS_STAR_MUSHROOM,
     BONUS_STAR_FORTUNE,
+    BONUS_STAR_WARP,
 };
 
 void fn_1_7E88(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -2369,6 +2370,9 @@ void determineBonusStarWinners(s32 bonus_star_type) {
                 break;
             case BONUS_STAR_FORTUNE:
                 counts[i] = GWPlayer[lbl_1_bss_1580.players[i].ranking_stats.unk00].fortune_count;
+                break;
+            case BONUS_STAR_WARP:
+                counts[i] = GWPlayer[lbl_1_bss_1580.players[i].ranking_stats.unk00].warp_count;
                 break;
         }
     }
