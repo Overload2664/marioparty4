@@ -91,6 +91,7 @@ enum {
     BONUS_STAR_BOWSER,
     BONUS_STAR_MISFORTUNE,
     BONUS_STAR_AGITATOR,
+    BONUS_STAR_MUSHROOM,
 };
 
 void fn_1_7E88(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -2361,6 +2362,9 @@ void determineBonusStarWinners(s32 bonus_star_type) {
                 break;
             case BONUS_STAR_AGITATOR:
                 counts[i] = GWPlayer[lbl_1_bss_1580.players[i].ranking_stats.unk00].battle_count;
+                break;
+            case BONUS_STAR_MUSHROOM:
+                counts[i] = GWPlayer[lbl_1_bss_1580.players[i].ranking_stats.unk00].mushroom_count;
                 break;
         }
     }
