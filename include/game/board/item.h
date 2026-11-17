@@ -48,6 +48,7 @@ static const char *EX_BONUS_STAR_NAMES[] = {
 	"Misfortune" MESS_SMALL_SPACE "Star",
 	"Agitator" MESS_SMALL_SPACE "Star",
 	"Mushroom" MESS_SMALL_SPACE "Star",
+	"Fortune" MESS_SMALL_SPACE "Star",
 };
 
 #endif
