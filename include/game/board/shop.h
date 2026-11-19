@@ -41,6 +41,7 @@ static const char *ITEM_BANK_NAMES[] = {
     "Cellular" MESS_SMALL_SPACE "Shopper",
     "Barter" MESS_SMALL_SPACE "Box",
     "Super" MESS_SMALL_SPACE "Warp" MESS_SMALL_SPACE "Pipe",
+    "Chance" MESS_SMALL_SPACE "Charm",
 };
 
 static u32 ITEM_SHOP_PROBS_DEFAULT[BOARD_ITEMS_END] = {
@@ -48,7 +49,7 @@ static u32 ITEM_SHOP_PROBS_DEFAULT[BOARD_ITEMS_END] = {
     0x07, 0x05, 0x05, 0x00, 0x05,
     0x00, 0x03, 0x00, 0x00, 0x14,
     0x0F, 0x14, 0x4, 0x8, 0x1,
-    0x2
+    0x2, 0x5
 };
 
 static u32 ITEM_SPACE_PROBS_DEFAULT[BOARD_ITEMS_END] = {
@@ -56,7 +57,7 @@ static u32 ITEM_SPACE_PROBS_DEFAULT[BOARD_ITEMS_END] = {
     0x07, 0x05, 0x05, 0x00, 0x05,
     0x00, 0x03, 0x00, 0x00, 0x20,
     0x0F, 0x14, 0x4, 0x8, 0x1,
-    0x2
+    0x2, 0x5
 };
 
 static s32 ITEM_SHOP_PRICE_DEFAULT[BOARD_ITEMS_END] = {
@@ -65,7 +66,7 @@ static s32 ITEM_SHOP_PRICE_DEFAULT[BOARD_ITEMS_END] = {
     15, 15,  0, 25,
     30, 30,  5,  3,
     15, 20, 15, 30,
-    30
+    30, 20
 };
 
 

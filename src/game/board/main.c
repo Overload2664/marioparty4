@@ -438,8 +438,9 @@ static void MainFunc(void)
     } else {
         fade_enable = 0;
     }
-    if(ExecTurnStart() && !BoardBowserItemTurn()) {
-        // BoardIsBowserItem() is a fix related to bowser phone itemdd
+    if(ExecTurnStart() && !BoardBowserItemTurn() && !BoardFortuneItemTurn()) {
+        // BoardBowserItemTurn() is a fix related to bowser phone item
+        // BoardFortuneItemTurn() is a fix related to chance charm item
         turn_cont = 1;
     }
     if(CHECK_LAST5_TURN() && GWSystem.player_curr == 0 && !turn_cont) {

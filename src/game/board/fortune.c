@@ -12,6 +12,8 @@
 #include "game/board/window.h"
 #include "game/objsub.h"
 
+#include "game/board/fortune.h"
+
 static Vec camTargetFortune;
 static Vec camPosFortune;
 
@@ -61,8 +63,54 @@ static void ComFortuneAddCoin(s32 player1, s32 player2, s32 max_coins);
 static void ComFortuneSwapCoin(s32 player1, s32 player2);
 static void ComFortuneSwapStar(s32 player1, s32 player2);
 
+// Extra
+static u8 is_item = FALSE;
+static u8 is_item_turn = FALSE;
+BOOL BoardFortuneItemTurn(void) {
+    if (is_item_turn) {
+        is_item_turn = FALSE;
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+void BoardItemFortuneExec(s32 player, s32 space)
+{
+	is_item = TRUE;
+	if(_CheckFlag(FLAG_ID_MAKE(1, 11))) {
+		HuAudFXPlay(842);
+		BoardCameraViewSet(2);
+		BoardPlayerMotBlendSet(player, 0, 15);
+		while(!BoardPlayerMotBlendCheck(player)) {
+			HuPrcVSleep();
+		}
+		BoardCameraMotionWait();
+		BoardTutorialHookExec(17, 0);
+		is_item = FALSE;
+		return;
+	}
+	if(BoardPlayerSizeGet(player) == 2) {
+		is_item = FALSE;
+		return;
+	}
+	fortuneProc = HuPrcChildCreate(FortuneExec, 8195, 14336, 0, boardMainProc);
+	HuPrcDestructorSet2(fortuneProc, DestroyFortune);
+	currPlayer = player;
+	while(fortuneProc) {
+		HuPrcVSleep();
+	}
+	is_item = FALSE;
+}
+
 void BoardFortuneExec(s32 player, s32 space)
 {
+	if (is_item) {
+		BoardItemFortuneExec(player, space);
+		is_item_turn = TRUE;
+		return;
+	}
+
 	if(_CheckFlag(FLAG_ID_MAKE(1, 11))) {
 		HuAudFXPlay(842);
 		BoardCameraViewSet(2);
