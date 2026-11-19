@@ -162,6 +162,7 @@ typedef struct extra_game_config {
         u8 min_roll;
         u8 max_roll;
         u8 bowser_mg_enabled;
+        u8 player_speed;
     } board_config;
 
     struct MGConfig {

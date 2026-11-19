@@ -1,3 +1,4 @@
+#include "game/gamework_data.h"
 #include "types.h"
 #include "game/board/player.h"
 
@@ -1678,10 +1679,15 @@ void BoardPlayerMoveTo(s32 arg0, s32 arg1)
     Vec sp18;
     Vec spC;
     PlayerState *player;
+    s16 speed;
 
     BoardModelPosGet(BoardPlayerModelGet(arg0), &sp18);
     BoardSpacePosGet(0, arg1, &spC);
-    BoardPlayerPosLerpStart(arg0, &sp18, &spC, 0x19);
+    // BoardPlayerPosLerpStart(arg0, &sp18, &spC, 0x19);
+    // Extra
+    speed = 100 - ExGameCfg.board_config.player_speed;
+    BoardPlayerPosLerpStart(arg0, &sp18, &spC, speed);
+    
     while (GWPlayer[arg0].moving != 0) {
         HuPrcVSleep();
     }

@@ -1696,9 +1696,8 @@ static ExtSetEntry ext_board_entries[] = {
     { "COIN HANDICAP P2", EXTSET_KIND_NUM, 0, 999, 10 },
     { "COIN HANDICAP P3", EXTSET_KIND_NUM, 0, 999, 10 },
     { "COIN HANDICAP P4", EXTSET_KIND_NUM, 0, 999, 10 },
-    { "BOWSER MINIGAMES GAMES", EXTSET_KIND_ONOFF, 0, 1, 1 },
-    { "BOWSER EVENT", EXTSET_KIND_ONOFF, 0, 0, 1 },
-    { "END GAME EARLY", EXTSET_KIND_ONOFF, 0, 0, 0 },
+    { "BOWSER MINIGAMES", EXTSET_KIND_ONOFF, 0, 1, 1 },
+    { "PLAYER MOVE SPEED", EXTSET_KIND_NUM, 0, 100, 90 },
 };
 
 static ExtSetEntry ext_minigame_entries[] = {
@@ -2525,16 +2524,20 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
         sprintf(buffer, "Extra Game Config: Max Roll set to %d\n", ExGameCfg.board_config.max_roll);
         OSReport(buffer);
 
-        ExGameCfg.board_config.bowser_mg_enabled = getEntryValue("BOWSER MINIGAMES GAMES");
-        sprintf(buffer, "Extra Game Config: Bowser Games to %d\n", ExGameCfg.board_config.bowser_mg_enabled);
-        OSReport(buffer);
-
         for (i = 0; i < ARRAY_COUNT(GWPlayer); i++) {
             sprintf(buffer, "COIN HANDICAP P%d", i + 1);
             GWPlayer[i].ex_state.init_coins = getEntryValue(buffer);
             sprintf(buffer, "Extra Game Config: COIN HANDICAP P%d set to %d\n", i, GWPlayer[i].ex_state.init_coins);
             OSReport(buffer);
         }
+
+        ExGameCfg.board_config.bowser_mg_enabled = getEntryValue("BOWSER MINIGAMES");
+        sprintf(buffer, "Extra Game Config: Bowser Games set to %d\n", ExGameCfg.board_config.bowser_mg_enabled);
+        OSReport(buffer);
+
+        ExGameCfg.board_config.player_speed = getEntryValue("PLAYER MOVE SPEED");
+        sprintf(buffer, "Extra Game Config: Player speed set to %d\n", ExGameCfg.board_config.player_speed);
+        OSReport(buffer);
     }
     {
         // Extra Minigame
