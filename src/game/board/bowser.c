@@ -4,6 +4,7 @@
 #include "game/board/audio.h"
 #include "game/board/window.h"
 #include "game/board/ui.h"
+#include "game/gamework_data.h"
 #include "game/hu3d.h"
 
 #include "game/object.h"
@@ -1262,6 +1263,12 @@ static void ConfigBowserEvent(void)
     retry:
     while(1) {
         chance = BoardRandMod(100);
+
+        // Extra
+        if (!ExGameCfg.board_config.bowser_mg_enabled) {
+            chance = ((chance * 30) / 100) + 70;
+        }
+
         if(chance >= 95) {
             if(item_full) {
                 continue;

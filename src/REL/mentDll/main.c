@@ -1696,7 +1696,7 @@ static ExtSetEntry ext_board_entries[] = {
     { "HANDICAP P2", EXTSET_KIND_NUM, 0, 3, 0 },
     { "HANDICAP P3", EXTSET_KIND_NUM, 0, 3, 0 },
     { "HANDICAP P4", EXTSET_KIND_NUM, 0, 3, 0 },
-    { "STARTING COINS", EXTSET_KIND_NUM, 0, 99, 10 },
+    { "BOWSER MINIGAMES GAMES", EXTSET_KIND_ONOFF, 0, 1, 1 },
     { "BOWSER EVENT", EXTSET_KIND_ONOFF, 0, 0, 1 },
     { "END GAME EARLY", EXTSET_KIND_ONOFF, 0, 0, 0 },
 };
@@ -2522,6 +2522,10 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
 
         ExGameCfg.board_config.max_roll = getEntryValue("MAX ROLL");
         sprintf(msg, "Extra Game Config: Max Roll set to %d\n", ExGameCfg.board_config.max_roll);
+        OSReport(msg);
+
+        ExGameCfg.board_config.bowser_mg_enabled = getEntryValue("BOWSER MINIGAMES GAMES");
+        sprintf(msg, "Extra Game Config: Bowser Games to %d\n", ExGameCfg.board_config.bowser_mg_enabled);
         OSReport(msg);
     }
     {

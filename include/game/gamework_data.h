@@ -160,6 +160,7 @@ typedef struct extra_game_config {
         u8 shop_count;
         u8 min_roll;
         u8 max_roll;
+        u8 bowser_mg_enabled;
     } board_config;
 
     struct MGConfig {
