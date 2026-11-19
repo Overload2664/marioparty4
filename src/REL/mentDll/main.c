@@ -1698,6 +1698,8 @@ static ExtSetEntry ext_board_entries[] = {
     { "COIN HANDICAP P4", EXTSET_KIND_NUM, 0, 999, 10 },
     { "BOWSER MINIGAMES", EXTSET_KIND_ONOFF, 0, 1, 1 },
     { "PLAYER MOVE SPEED", EXTSET_KIND_NUM, 0, 100, 90 },
+    { "MAX HIDDEN STARS", EXTSET_KIND_NUM, 0, 999, 2 },
+    { "MAX HIDDEN COINS", EXTSET_KIND_NUM, 0, 999, 4 },
 };
 
 static ExtSetEntry ext_minigame_entries[] = {
@@ -2537,6 +2539,14 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
 
         ExGameCfg.board_config.player_speed = getEntryValue("PLAYER MOVE SPEED");
         sprintf(buffer, "Extra Game Config: Player speed set to %d\n", ExGameCfg.board_config.player_speed);
+        OSReport(buffer);
+        
+        ExGameCfg.board_config.hidden_star_remaining = getEntryValue("MAX HIDDEN STARS");
+        sprintf(buffer, "Extra Game Config: Max hidden stars set to %d\n", ExGameCfg.board_config.hidden_star_remaining);
+        OSReport(buffer);
+
+        ExGameCfg.board_config.hidden_coins_remaining = getEntryValue("MAX HIDDEN COINS");
+        sprintf(buffer, "Extra Game Config: Max hidden coins set to %d\n", ExGameCfg.board_config.hidden_coins_remaining);
         OSReport(buffer);
     }
     {

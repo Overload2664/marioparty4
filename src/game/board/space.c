@@ -693,7 +693,7 @@ s32 BoardSpaceWalkExec(s32 player, s32 space)
     }
     return 0;
 }
-
+// Important
 s32 BoardSpaceBlockExec(s32 player, s32 space)
 {
     s32 event_exec;

@@ -79,6 +79,11 @@ s32 BoardBlockExec(s32 player_idx)
         return 0;
     }
 
+    // Extra
+    if (ExGameCfg.board_config.hidden_star_remaining == 0 && ExGameCfg.board_config.hidden_coins_remaining == 0) {
+        return 0;
+    }
+
     blockProc = HuPrcChildCreate(BlockProc, 0x2003, 0x3800U, 0, boardMainProc);
     HuPrcDestructorSet2(blockProc, DestroyBlock);
 
@@ -233,6 +238,23 @@ static void CreateBlockObj(s32 arg0)
     }
     else {
         contains_star = 1;
+    }
+
+    // Extra
+    if (contains_star == 1) {
+        if (ExGameCfg.board_config.hidden_star_remaining <= 0) {
+            contains_star = 0;
+            ExGameCfg.board_config.hidden_coins_remaining--;
+        } else {
+            ExGameCfg.board_config.hidden_star_remaining--;
+        }
+    } else {
+        if (ExGameCfg.board_config.hidden_coins_remaining <= 0) {
+            contains_star = 1;
+            ExGameCfg.board_config.hidden_star_remaining--;
+        } else {
+            ExGameCfg.board_config.hidden_coins_remaining--;
+        }
     }
 
     work->contains_star = contains_star;
