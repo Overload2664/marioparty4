@@ -1824,7 +1824,7 @@ void preprocessShopItemProbs(void) {
         entry.kind = EXTSET_KIND_NUM;
         entry.value = ITEM_SHOP_PROBS_DEFAULT[i];
         entry.min = 0;
-        entry.max = 127;
+        entry.max = 999;
         ext_shop_probs[i] = entry;
     }
 }
@@ -1838,7 +1838,7 @@ void preprocessSpaceItemProbs(void) {
         entry.kind = EXTSET_KIND_NUM;
         entry.value = ITEM_SPACE_PROBS_DEFAULT[i];
         entry.min = 0;
-        entry.max = 127;
+        entry.max = 999;
         ext_space_probs[i] = entry;
     }
 }
@@ -1852,7 +1852,7 @@ void preprocessShopItemPrice(void) {
         entry.kind = EXTSET_KIND_NUM;
         entry.value = ITEM_SHOP_PRICE_DEFAULT[i];
         entry.min = 0;
-        entry.max = 127;
+        entry.max = 999;
         ext_shop_price[i] = entry;
     }
 }

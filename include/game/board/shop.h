@@ -56,7 +56,7 @@ static u32 ITEM_SPACE_PROBS_DEFAULT[BOARD_ITEMS_END] = {
     0x0F, 0x14, 0x4, 0x8, 0x1
 };
 
-static s8 ITEM_SHOP_PRICE_DEFAULT[BOARD_ITEMS_END] = {
+static s32 ITEM_SHOP_PRICE_DEFAULT[BOARD_ITEMS_END] = {
      5,  5, 15, 15,
     10, 10, 15, 15,
     15, 15,  0, 25,
