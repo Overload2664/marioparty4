@@ -93,6 +93,7 @@ static void ExecItemMushroom(void);
 static void ExecItemGoldenMushroom(void);
 static void ExecItemHiddenBlockCard(void);
 static void ExecItemCellularShopper(void);
+static void ExecItemBarterBox(void);
 //
 static void LampParticleUpdate(HU3DMODEL *model, HU3DPARTICLE *particle, Mtx matrix);
 static void GenieParticleUpdate(HU3DMODEL *model, HU3DPARTICLE *particle, Mtx matrix);
@@ -137,18 +138,19 @@ static s32 itemMotTbl[2] = { DATA_MAKE_NUM(DATADIR_BOARD, 117), -1 };
 
 static void (*itemFuncTbl[])(void) = { ExecItemMini, ExecItemMega, ExecItemMiniSuper, ExecItemMegaSuper, ExecItemHammer, ExecItemPipe, ExecItemSwap,
     ExecItemSpark, ExecItemLight, ExecItemWhistle, ExecItemBowser, ExecItemBooBall, ExecItemGenie, ExecItemBag, ExecItemBowserPhone, ExecItemMushroom,
-    ExecItemGoldenMushroom, ExecItemHiddenBlockCard, ExecItemCellularShopper };
+    ExecItemGoldenMushroom, ExecItemHiddenBlockCard, ExecItemCellularShopper, ExecItemBarterBox };
 
 static void (*itemRestoreFuncTbl[])(void)
     = { RestoreItemMini, RestoreItemMega, RestoreItemMiniSuper, RestoreItemMegaSuper, RestoreItemNull, RestoreItemNull, RestoreItemNull,
           RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemBowser, RestoreItemNull, RestoreItemNull, RestoreItemNull, 
-          RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull };
+          RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull };
 // 3D models
 static s32 itemMdlTbl[] = { DATA_MAKE_NUM(DATADIR_BOARD, 109), DATA_MAKE_NUM(DATADIR_BOARD, 110), DATA_MAKE_NUM(DATADIR_BOARD, 111),
     DATA_MAKE_NUM(DATADIR_BOARD, 112), DATA_MAKE_NUM(DATADIR_BOARD, 113), DATA_MAKE_NUM(DATADIR_BOARD, 114), DATA_MAKE_NUM(DATADIR_BOARD, 115),
     DATA_MAKE_NUM(DATADIR_BOARD, 116), DATA_MAKE_NUM(DATADIR_BOARD, 118), DATA_MAKE_NUM(DATADIR_BOARD, 119), DATA_MAKE_NUM(DATADIR_BOARD, 120),
     DATA_MAKE_NUM(DATADIR_BOARD, 121), DATA_MAKE_NUM(DATADIR_BOARD, 122), DATA_MAKE_NUM(DATADIR_BOARD, 123), DATA_MAKE_NUM(DATADIR_BOARD, 164), 
-    DATA_MAKE_NUM(DATADIR_BOARD, 166), DATA_MAKE_NUM(DATADIR_BOARD, 168), DATA_MAKE_NUM(DATADIR_BOARD, 170), DATA_MAKE_NUM(DATADIR_BOARD, 172) };
+    DATA_MAKE_NUM(DATADIR_BOARD, 166), DATA_MAKE_NUM(DATADIR_BOARD, 168), DATA_MAKE_NUM(DATADIR_BOARD, 170), DATA_MAKE_NUM(DATADIR_BOARD, 172),
+    DATA_MAKE_NUM(DATADIR_BOARD, 174) };
 
 static s32 forceMoveSfxTbl[] = { 0x38, 0x45, 0x42, 0x4D, 0x48, 0x3F };
 
@@ -2012,6 +2014,253 @@ static void ExecItemCellularShopper(void)
     }
 }
 
+static void ExecItemBarterBox(void)
+{
+    Vec sp1A4[3];
+    Vec sp180[3];
+    Vec sp15C[3];
+    Vec sp138[3];
+    s32 spC0[6];
+    Vec spB4;
+    Vec spA8;
+    Vec sp9C;
+    Vec sp90;
+    Vec sp84;
+    Vec sp78;
+    Vec sp6C;
+    Vec sp60;
+    s16 sp54[6];
+    Vec sp48;
+    Vec sp3C;
+    float temp_f29;
+    float var_f30;
+    s16 temp_r29;
+    s32 var_r23;
+    s32 var_r22;
+    s32 var_r28;
+    s32 var_r27;
+    s32 var_r26;
+    s32 var_r30;
+    s32 i;
+    s32 pos;
+    s32 target_player;
+    s8 var_r21;
+    Mtx sp108;
+    Mtx spD8;
+    u16 index_choice_map[ARRAY_COUNT(GWPlayer)];
+
+    HuAudFXPlay(0x350);
+    ItemShowProc(NULL, NULL);
+
+    BoardWinCreateChoice(4, 1179662, -1, 0); // Fix: extra space
+    BoardWinAttrSet(0x10);
+
+    pos = 0;
+    for (i = 0; i < ARRAY_COUNT(GWPlayer); i++) {
+        if (i != currItemRestore) {
+            index_choice_map[pos] = i;
+            pos++;
+        }
+    }
+    for (i = 0; i < ARRAY_COUNT(GWPlayer) - 1; i++) {
+        BoardWinInsertMesSet(BoardPlayerGetCharMess(index_choice_map[i]), i);
+    }
+
+    if (GWPlayer[currItemRestore].com) {
+        // For now we select a random player
+        target_player = BoardRandMod(3);
+        ComSetStealPlayerInput(currItemRestore, target_player);
+    }
+
+    BoardWinWait();
+    BoardWinKill();
+
+    target_player = index_choice_map[BoardWinChoiceGet()];
+
+    suitMdl = BoardModelCreate(itemMdlTbl[currItem], NULL, 0);
+    BoardModelLayerSet(suitMdl, 7);
+    BoardModelAttrSet(suitMdl, 0x400000);
+    sp9C.x = sp9C.y = sp9C.z = 0.0f;
+    sp9C.y = 45.0f;
+    HuAudFXPlay(0x364);
+    BoardUiInlineFunc01(&sp9C);
+    BoardModelPosGet(suitMdl, &spB4);
+    BoardPlayerRotGet(currItemRestore, &sp90);
+    for (var_r27 = 0; var_r27 < 3; var_r27++) {
+        if (((float *)&sp90)[var_r27] < 0.0f) {
+            ((float *)&sp90)[var_r27] += 360.0f;
+        }
+        if (((float *)&sp90)[var_r27] >= 360.0f) {
+            ((float *)&sp90)[var_r27] -= 360.0f;
+        }
+    }
+    BoardModelRotGet(suitMdl, &spA8);
+    while (1) {
+        VECAdd(&spA8, &sp9C, &spA8);
+        for (var_r26 = 0; var_r26 < 3; var_r26++) {
+            if (((float *)&spA8)[var_r26] < 0.0f) {
+                ((float *)&spA8)[var_r26] += 360.0f;
+            }
+            if (((float *)&spA8)[var_r26] >= 360.0f) {
+                ((float *)&spA8)[var_r26] -= 360.0f;
+            }
+        }
+        sp9C.y *= 0.94f;
+        if (sp9C.y <= 6.0f) {
+            sp9C.y = 6.0f;
+            if (fabs(sp90.y - spA8.y) <= sp9C.y) {
+                spA8.y = sp90.y;
+                break;
+            }
+        }
+        BoardModelRotSetV(suitMdl, &spA8);
+        HuPrcVSleep();
+    }
+    BoardModelRotSetV(suitMdl, &spA8);
+    var_r23 = var_r22 = 0;
+    for (i = 0; i < ARRAY_COUNT(GWPlayer->items); i++) {
+        if (GWPlayer[currItemRestore].items[i] != -1) {
+            var_r23++;
+        }
+        if (GWPlayer[target_player].items[i] != -1) {
+            var_r22++;
+        }
+    }
+    if (var_r23 >= var_r22) {
+        var_r28 = var_r23 * 2;
+    }
+    else {
+        var_r28 = var_r22 * 2;
+    }
+    BoardModelRotGet(suitMdl, &sp3C);
+    Hu3DCameraSet(0, sp108);
+    PSMTXInverse(sp108, spD8);
+    Hu3DMtxRotGet(spD8, &sp48);
+    sp3C.x = sp48.x;
+    for (i = 0; i < var_r28 / 2; i++) {
+        temp_r29 = sp54[i] = BoardModelCreate(itemMdlTbl[currItem], NULL, 1);
+        BoardModelLayerSet(temp_r29, 6);
+        BoardModelPassSet(temp_r29, 0);
+        BoardModelRotSetV(temp_r29, &sp3C);
+        BoardModelVisibilitySet(temp_r29, 0);
+        BoardModelAttrSet(temp_r29, 0x400000);
+        temp_r29 = sp54[i + 3] = BoardModelCreate(itemMdlTbl[currItem], NULL, 1);
+        BoardModelLayerSet(temp_r29, 6);
+        BoardModelPassSet(temp_r29, 0);
+        BoardModelRotSetV(temp_r29, &sp3C);
+        BoardModelVisibilitySet(temp_r29, 0);
+        BoardModelAttrSet(temp_r29, 0x400000);
+    }
+    BoardItemGetDestPos(currItemRestore, &sp15C[0]);
+    BoardItemGetDestPos(target_player, &sp138[0]);
+    BoardModelPosGet(suitMdl, &sp90);
+    VECSubtract(&sp90, &Hu3DCamera->pos, &sp90);
+    temp_f29 = VECMag(&sp90);
+    for (i = 0; i < 3; i++) {
+        sp15C[i].z = temp_f29;
+        sp138[i].z = temp_f29;
+    }
+    for (i = 0; i < var_r28 / 2; i++) {
+        HuAudFXPlay(0x319);
+        BoardModelVisibilitySet(sp54[i], 1);
+        BoardModelVisibilitySet(sp54[i + 3], 1);
+        sp1A4[i] = sp180[i] = spB4;
+        Hu3D2Dto3D(&sp15C[i], 1, &sp84);
+        Hu3D2Dto3D(&sp138[i], 1, &sp78);
+        VECSubtract(&sp84, &sp1A4[i], &sp6C);
+        VECScale(&sp6C, &sp6C, 0.033333335f);
+        VECSubtract(&sp78, &sp180[i], &sp60);
+        VECScale(&sp60, &sp60, 0.033333335f);
+        for (var_r30 = 0; var_r30 < 30; var_r30++) {
+            BoardModelPosSetV(sp54[i], &sp1A4[i]);
+            BoardModelPosSetV(sp54[i + 3], &sp180[i]);
+            VECAdd(&sp1A4[i], &sp6C, &sp1A4[i]);
+            VECAdd(&sp180[i], &sp60, &sp180[i]);
+            HuPrcVSleep();
+        }
+        sp1A4[i] = sp84;
+        sp180[i] = sp78;
+        BoardModelPosSetV(sp54[i], &sp1A4[i]);
+        BoardModelPosSetV(sp54[i + 3], &sp180[i]);
+    }
+    omVibrate(currItemRestore, 180, 6, 6);
+    omVibrate(target_player, 180, 6, 6);
+    for (i = 0; i < 60; i++) {
+        for (var_r30 = 0; var_r30 < var_r28 / 2; var_r30++) {
+            sp6C = sp1A4[var_r30];
+            sp6C.x += 3.0 * sind(frandmods(360));
+            sp6C.y += 3.0 * sind(frandmods(360));
+            BoardModelPosSetV(sp54[var_r30], &sp6C);
+            sp6C = sp180[var_r30];
+            sp6C.x += 3.0 * sind(frandmods(360));
+            sp6C.y += 3.0 * sind(frandmods(360));
+            BoardModelPosSetV(sp54[var_r30 + 3], &sp6C);
+        }
+        HuPrcSleep(2);
+    }
+    for (i = 0; i < var_r28 / 2; i++) {
+        BoardModelPosSetV(sp54[i], &sp1A4[i]);
+        BoardModelPosSetV(sp54[i + 3], &sp180[i]);
+    }
+    for (i = 0; i < 3; i++) {
+        spC0[i] = BoardPlayerItemRemove(currItemRestore, 0);
+        spC0[i + 3] = BoardPlayerItemRemove(target_player, 0);
+    }
+    for (i = 0; i < 3; i++) {
+        if (spC0[i + 3] != -1) {
+            BoardPlayerItemAdd(currItemRestore, spC0[i + 3]);
+        }
+        if (spC0[i] != -1) {
+            BoardPlayerItemAdd(target_player, spC0[i]);
+        }
+    }
+    for (i = (var_r28 / 2) - 1; i >= 0; i--) {
+        HuAudFXPlay(0x32C);
+        VECSubtract(&spB4, &sp1A4[i], &sp6C);
+        VECScale(&sp6C, &sp6C, 0.033333335f);
+        VECSubtract(&spB4, &sp180[i], &sp60);
+        VECScale(&sp60, &sp60, 0.033333335f);
+        for (var_r30 = 0; var_r30 < 30; var_r30++) {
+            BoardModelPosSetV(sp54[i], &sp1A4[i]);
+            BoardModelPosSetV(sp54[i + 3], &sp180[i]);
+            VECAdd(&sp1A4[i], &sp6C, &sp1A4[i]);
+            VECAdd(&sp180[i], &sp60, &sp180[i]);
+            HuPrcVSleep();
+        }
+        BoardModelVisibilitySet(sp54[i], 0);
+        BoardModelVisibilitySet(sp54[i + 3], 0);
+    }
+    sp9C.y = 0.6f;
+    var_f30 = 255.0f;
+    var_r21 = 0;
+    while (1) {
+        BoardModelRotSetV(suitMdl, &spA8);
+        BoardModelAlphaSet(suitMdl, var_f30);
+        VECAdd(&spA8, &sp9C, &spA8);
+        sp9C.y *= 1.02f;
+        if (sp9C.y >= 35.0f) {
+            if (var_r21 == 0) {
+                HuAudFXPlay(0x365);
+                var_r21 = 1;
+            }
+            sp9C.y = 45.0f;
+            var_f30 -= 5.6666665f;
+            if (var_f30 <= 0.0f) {
+                break;
+            }
+        }
+        HuPrcVSleep();
+    }
+    BoardModelKill(suitMdl);
+    for (i = 0; i < var_r28 / 2; i++) {
+        BoardModelKill(sp54[i]);
+        BoardModelKill(sp54[i + 3]);
+    }
+    HuPrcKill(NULL);
+    while (1) {
+        HuPrcVSleep();
+    }
+}
 
 static void ForceConsts(void)
 {
