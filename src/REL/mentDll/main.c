@@ -1692,10 +1692,10 @@ static ExtSetEntry ext_board_entries[] = {
     { "SHOP ITEM COUNT", EXTSET_KIND_NUM, 5, MAX_SHOP_ITEMS, 7 },
     { "MIN ROLL", EXTSET_KIND_NUM, 0, 99, 1 },
     { "MAX ROLL", EXTSET_KIND_NUM, 0, 99, 10 },
-    { "HANDICAP P1", EXTSET_KIND_NUM, 0, 3, 0 },
-    { "HANDICAP P2", EXTSET_KIND_NUM, 0, 3, 0 },
-    { "HANDICAP P3", EXTSET_KIND_NUM, 0, 3, 0 },
-    { "HANDICAP P4", EXTSET_KIND_NUM, 0, 3, 0 },
+    { "COIN HANDICAP P1", EXTSET_KIND_NUM, 0, 999, 10 },
+    { "COIN HANDICAP P2", EXTSET_KIND_NUM, 0, 999, 10 },
+    { "COIN HANDICAP P3", EXTSET_KIND_NUM, 0, 999, 10 },
+    { "COIN HANDICAP P4", EXTSET_KIND_NUM, 0, 999, 10 },
     { "BOWSER MINIGAMES GAMES", EXTSET_KIND_ONOFF, 0, 1, 1 },
     { "BOWSER EVENT", EXTSET_KIND_ONOFF, 0, 0, 1 },
     { "END GAME EARLY", EXTSET_KIND_ONOFF, 0, 0, 0 },
@@ -2372,7 +2372,7 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
     s32 has_team;
     s32 has_bonus_star;
     // Extra
-    char msg[256];
+    char buffer[256];
 
     configure_section = 0xA;
     sub_section = 0;
@@ -2485,6 +2485,7 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
         s32 p2_handicap = board_configs[1].handicaps[2];
         s32 p3_handicap = board_configs[1].handicaps[3];
         s32 p4_handicap = board_configs[1].handicaps[4];
+        // Inits GWPlayer
         BoardPartyConfigSet(has_team, has_bonus_star, mg_list, max_turn, p1_handicap, p2_handicap, p3_handicap, p4_handicap);
     }
     for (i = 0; i < 4; i++) {
@@ -2513,86 +2514,93 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
     {
         // Extra Board
         ExGameCfg.board_config.shop_count = getEntryValue("SHOP ITEM COUNT");
-        sprintf(msg, "Extra Game Config: Shop Item Count set to %d\n", ExGameCfg.board_config.shop_count);
-        OSReport(msg);
+        sprintf(buffer, "Extra Game Config: Shop Item Count set to %d\n", ExGameCfg.board_config.shop_count);
+        OSReport(buffer);
 
         ExGameCfg.board_config.min_roll = getEntryValue("MIN ROLL");
-        sprintf(msg, "Extra Game Config: Min Roll set to %d\n", ExGameCfg.board_config.min_roll);
-        OSReport(msg);
+        sprintf(buffer, "Extra Game Config: Min Roll set to %d\n", ExGameCfg.board_config.min_roll);
+        OSReport(buffer);
 
         ExGameCfg.board_config.max_roll = getEntryValue("MAX ROLL");
-        sprintf(msg, "Extra Game Config: Max Roll set to %d\n", ExGameCfg.board_config.max_roll);
-        OSReport(msg);
+        sprintf(buffer, "Extra Game Config: Max Roll set to %d\n", ExGameCfg.board_config.max_roll);
+        OSReport(buffer);
 
         ExGameCfg.board_config.bowser_mg_enabled = getEntryValue("BOWSER MINIGAMES GAMES");
-        sprintf(msg, "Extra Game Config: Bowser Games to %d\n", ExGameCfg.board_config.bowser_mg_enabled);
-        OSReport(msg);
+        sprintf(buffer, "Extra Game Config: Bowser Games to %d\n", ExGameCfg.board_config.bowser_mg_enabled);
+        OSReport(buffer);
+
+        for (i = 0; i < ARRAY_COUNT(GWPlayer); i++) {
+            sprintf(buffer, "COIN HANDICAP P%d", i + 1);
+            GWPlayer[i].ex_state.init_coins = getEntryValue(buffer);
+            sprintf(buffer, "Extra Game Config: COIN HANDICAP P%d set to %d\n", i, GWPlayer[i].ex_state.init_coins);
+            OSReport(buffer);
+        }
     }
     {
         // Extra Minigame
         ExGameCfg.mg_config.disable_1v3 = getEntryValue("DISABLE 1v3");
-        sprintf(msg, "Extra Game Config: disable_1v3 set to %d\n", ExGameCfg.mg_config.disable_1v3);
-        OSReport(msg);
+        sprintf(buffer, "Extra Game Config: disable_1v3 set to %d\n", ExGameCfg.mg_config.disable_1v3);
+        OSReport(buffer);
 
         ExGameCfg.mg_config.norm_coin_mg = getEntryValue("NORMALIZE COIN GAMES");
-        sprintf(msg, "Extra Game Config: norm_coin_mg set to %d\n", ExGameCfg.mg_config.norm_coin_mg);
-        OSReport(msg);
+        sprintf(buffer, "Extra Game Config: norm_coin_mg set to %d\n", ExGameCfg.mg_config.norm_coin_mg);
+        OSReport(buffer);
 
         ExGameCfg.mg_config.f4a_turn = getEntryValue("F4A CHANGES TURN");
-        sprintf(msg, "Extra Game Config: f4a_turn set to %d\n",
+        sprintf(buffer, "Extra Game Config: f4a_turn set to %d\n",
             ExGameCfg.mg_config.f4a_turn);
-        OSReport(msg);
+        OSReport(buffer);
 
         ExGameCfg.mg_config.v2_turn = getEntryValue("2v2 CHANGES TURN");
-        sprintf(msg, "Extra Game Config: v2_turn set to %d\n",
+        sprintf(buffer, "Extra Game Config: v2_turn set to %d\n",
             ExGameCfg.mg_config.v2_turn);
-        OSReport(msg);
+        OSReport(buffer);
 
         ExGameCfg.mg_config.v3_turn = getEntryValue("1v3 CHANGES TURN");
-        sprintf(msg, "Extra Game Config: v3_turn set to %d\n",
+        sprintf(buffer, "Extra Game Config: v3_turn set to %d\n",
             ExGameCfg.mg_config.v3_turn);
-        OSReport(msg);
+        OSReport(buffer);
 
         ExGameCfg.mg_config.coin_mg_turn = getEntryValue("COIN MG CHANGES TURN");
-        sprintf(msg, "Extra Game Config: coin_mg_turn set to %d\n",
+        sprintf(buffer, "Extra Game Config: coin_mg_turn set to %d\n",
             ExGameCfg.mg_config.coin_mg_turn);
-        OSReport(msg);
+        OSReport(buffer);
 
         ExGameCfg.mg_config.battle_turn = getEntryValue("BATTLE CHANGES TURN");
-        sprintf(msg, "Extra Game Config: battle_turn set to %d\n",
+        sprintf(buffer, "Extra Game Config: battle_turn set to %d\n",
             ExGameCfg.mg_config.battle_turn);
-        OSReport(msg);
+        OSReport(buffer);
 
         ExGameCfg.mg_config.battle_reverse_turn = getEntryValue("BATTLE REVERSE TURN");
-        sprintf(msg, "Extra Game Config: battle_reverse_turn set to %d\n",
+        sprintf(buffer, "Extra Game Config: battle_reverse_turn set to %d\n",
             ExGameCfg.mg_config.battle_reverse_turn);
-        OSReport(msg);
+        OSReport(buffer);
 
         ExGameCfg.mg_config.f4a_rew[0] = getEntryValue("F4A WINNER GETS");
         ExGameCfg.mg_config.f4a_rew[1] = getEntryValue("F4A LOSER GETS");
-        sprintf(msg, "Extra Game Config: f4a_rew set to %d and %d\n",
+        sprintf(buffer, "Extra Game Config: f4a_rew set to %d and %d\n",
             ExGameCfg.mg_config.f4a_rew[0], ExGameCfg.mg_config.f4a_rew[1]);
-        OSReport(msg);
+        OSReport(buffer);
 
         ExGameCfg.mg_config.v2_rew[0] = getEntryValue("2v2 WINNER GETS");
         ExGameCfg.mg_config.v2_rew[1] = getEntryValue("2v2 LOSER GETS");
-        sprintf(msg, "Extra Game Config: v2_rew set to %d and %d\n",
+        sprintf(buffer, "Extra Game Config: v2_rew set to %d and %d\n",
             ExGameCfg.mg_config.v2_rew[0], ExGameCfg.mg_config.v2_rew[1]);
-        OSReport(msg);
+        OSReport(buffer);
         
         ExGameCfg.mg_config.v3_rew[0] = getEntryValue("1v3 WINNER GETS");
         ExGameCfg.mg_config.v3_rew[1] = getEntryValue("1v3 LOSER GETS");
-        sprintf(msg, "Extra Game Config: v3_rew set to %d and %d\n",
+        sprintf(buffer, "Extra Game Config: v3_rew set to %d and %d\n",
             ExGameCfg.mg_config.v3_rew[0], ExGameCfg.mg_config.v3_rew[1]);
-        OSReport(msg);
+        OSReport(buffer);
         
         ExGameCfg.mg_config.coin_mg_rew[0] = getEntryValue("COIN GAME 1st GETS");
         ExGameCfg.mg_config.coin_mg_rew[1] = getEntryValue("COIN GAME 2nd GETS");
         ExGameCfg.mg_config.coin_mg_rew[2] = getEntryValue("COIN GAME 3rd GETS");
         ExGameCfg.mg_config.coin_mg_rew[3] = getEntryValue("COIN GAME 4th GETS");
-        sprintf(msg, "Extra Game Config: coin_mg_rew set to %d and %d and %d and %d\n",
+        sprintf(buffer, "Extra Game Config: coin_mg_rew set to %d and %d and %d and %d\n",
             ExGameCfg.mg_config.coin_mg_rew[0], ExGameCfg.mg_config.coin_mg_rew[1], ExGameCfg.mg_config.coin_mg_rew[2], ExGameCfg.mg_config.coin_mg_rew[3]);
-        OSReport(msg);
+        OSReport(buffer);
     }
     {
         // Extra
@@ -2600,30 +2608,30 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
         for (i = 0; i < ARRAY_COUNT(EX_BONUS_STAR_NAMES); i++) {
             ExGameCfg.bonus_stars.is_on[i] = getEntryValueTopic("BONUS STARS", EX_BONUS_STAR_NAMES[i]);
         }
-        sprintf(msg, "Bonus Stars flags set\n");
-        OSReport(msg);
+        sprintf(buffer, "Bonus Stars flags set\n");
+        OSReport(buffer);
 
 
         // Items Shop probs
         for (i = 0; i < BOARD_ITEMS_END; i++) {
             ExGameCfg.item_config.shop_probs[i] = getEntryValueTopic("SHOP ITEMS PROBS", ITEM_BANK_NAMES[i]);
         }
-        sprintf(msg, "Shop probabilities set\n");
-        OSReport(msg);
+        sprintf(buffer, "Shop probabilities set\n");
+        OSReport(buffer);
 
         // Items Space probs
         for (i = 0; i < BOARD_ITEMS_END; i++) {
             ExGameCfg.item_config.space_probs[i] = getEntryValueTopic("SPACE ITEMS PROBS", ITEM_BANK_NAMES[i]);
         }
-        sprintf(msg, "Item space probabilities set\n");
-        OSReport(msg);
+        sprintf(buffer, "Item space probabilities set\n");
+        OSReport(buffer);
 
         // Items Shop price
         for (i = 0; i < BOARD_ITEMS_END; i++) {
             ExGameCfg.item_config.shop_price[i] = getEntryValueTopic("SHOP ITEMS PRICE", ITEM_BANK_NAMES[i]);
         }
-        sprintf(msg, "Item space probabilities set\n");
-        OSReport(msg);
+        sprintf(buffer, "Item space probabilities set\n");
+        OSReport(buffer);
     }
     BoardSaveInit(gameConfigs[2]);
     transitionToPartyBoard();

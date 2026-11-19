@@ -378,7 +378,7 @@ void BoardStoryConfigSet(s32 mg_list, s32 diff_story)
     _SetFlag(FLAG_ID_MAKE(0, 11));
     _SetFlag(FLAG_ID_MAKE(1, 10));
 }
-
+// Inits GWPlayer
 void BoardPartyConfigSet(s32 team, s32 bonus_star, s32 mg_list, s32 max_turn, s32 p1_handicap, s32 p2_handicap, s32 p3_handicap, s32 p4_handicap)
 {
     GWSystem.party = 1;

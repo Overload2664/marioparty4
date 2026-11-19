@@ -113,6 +113,7 @@ typedef struct player_state {
 
     // Extra
     struct ExState {
+        u32 init_coins;
         u32 roll_count;
         u32 items_bought;
         u32 shop_spent;

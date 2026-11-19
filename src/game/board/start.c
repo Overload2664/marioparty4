@@ -734,9 +734,25 @@ static void ExecStartRoll(void) {
             coinCount = 10;
             time = 6;
         }
+
+        // Extra
+        if (time != 1 && GWPartyGet()) {
+            coinCount = 0;
+            for (j = 0; j < 4; j++) {
+                coinCount = MAX(coinCount, GWPlayer[j].ex_state.init_coins);
+            }
+        }
+
         for (i = 0; i < coinCount; i++) {
             for (j = 0; j < 4; j++) {
-                BoardPlayerCoinsAdd(j, 1);
+                // Extra change
+                if (time != 1 && GWPartyGet()) { // Not to be confused with extra boards
+                    if (i < GWPlayer[j].ex_state.init_coins) {
+                        BoardPlayerCoinsAdd(j, 1);
+                    }
+                } else {
+                    BoardPlayerCoinsAdd(j, 1);
+                }
             }
             HuAudFXPlay(7);
             HuPrcSleep(time);
