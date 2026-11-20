@@ -97,6 +97,7 @@ static void ExecItemCellularShopper(void);
 static void ExecItemBarterBox(void);
 static void ExecItemSuperWarpPipe(void);
 static void ExecItemChanceCharm(void);
+static void ExecItemWackyWatch(void);
 //
 static void LampParticleUpdate(HU3DMODEL *model, HU3DPARTICLE *particle, Mtx matrix);
 static void GenieParticleUpdate(HU3DMODEL *model, HU3DPARTICLE *particle, Mtx matrix);
@@ -141,20 +142,20 @@ static s32 itemMotTbl[2] = { DATA_MAKE_NUM(DATADIR_BOARD, 117), -1 };
 
 static void (*itemFuncTbl[])(void) = { ExecItemMini, ExecItemMega, ExecItemMiniSuper, ExecItemMegaSuper, ExecItemHammer, ExecItemPipe, ExecItemSwap,
     ExecItemSpark, ExecItemLight, ExecItemWhistle, ExecItemBowser, ExecItemBooBall, ExecItemGenie, ExecItemBag, ExecItemBowserPhone, ExecItemMushroom,
-    ExecItemGoldenMushroom, ExecItemHiddenBlockCard, ExecItemCellularShopper, ExecItemBarterBox, ExecItemSuperWarpPipe, ExecItemChanceCharm };
+    ExecItemGoldenMushroom, ExecItemHiddenBlockCard, ExecItemCellularShopper, ExecItemBarterBox, ExecItemSuperWarpPipe, ExecItemChanceCharm, ExecItemWackyWatch };
 
 static void (*itemRestoreFuncTbl[])(void)
     = { RestoreItemMini, RestoreItemMega, RestoreItemMiniSuper, RestoreItemMegaSuper, RestoreItemNull, RestoreItemNull, RestoreItemNull,
           RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemBowser, RestoreItemNull, RestoreItemNull, RestoreItemNull, 
           RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull,
-        RestoreItemNull};
+        RestoreItemNull, RestoreItemNull};
 // 3D models
 static s32 itemMdlTbl[] = { DATA_MAKE_NUM(DATADIR_BOARD, 109), DATA_MAKE_NUM(DATADIR_BOARD, 110), DATA_MAKE_NUM(DATADIR_BOARD, 111),
     DATA_MAKE_NUM(DATADIR_BOARD, 112), DATA_MAKE_NUM(DATADIR_BOARD, 113), DATA_MAKE_NUM(DATADIR_BOARD, 114), DATA_MAKE_NUM(DATADIR_BOARD, 115),
     DATA_MAKE_NUM(DATADIR_BOARD, 116), DATA_MAKE_NUM(DATADIR_BOARD, 118), DATA_MAKE_NUM(DATADIR_BOARD, 119), DATA_MAKE_NUM(DATADIR_BOARD, 120),
     DATA_MAKE_NUM(DATADIR_BOARD, 121), DATA_MAKE_NUM(DATADIR_BOARD, 122), DATA_MAKE_NUM(DATADIR_BOARD, 123), DATA_MAKE_NUM(DATADIR_BOARD, 164), 
     DATA_MAKE_NUM(DATADIR_BOARD, 166), DATA_MAKE_NUM(DATADIR_BOARD, 168), DATA_MAKE_NUM(DATADIR_BOARD, 170), DATA_MAKE_NUM(DATADIR_BOARD, 172),
-    DATA_MAKE_NUM(DATADIR_BOARD, 174), DATA_MAKE_NUM(DATADIR_BOARD, 176), DATA_MAKE_NUM(DATADIR_BOARD, 178) };
+    DATA_MAKE_NUM(DATADIR_BOARD, 174), DATA_MAKE_NUM(DATADIR_BOARD, 176), DATA_MAKE_NUM(DATADIR_BOARD, 178), DATA_MAKE_NUM(DATADIR_BOARD, 180) };
 
 static s32 forceMoveSfxTbl[] = { 0x38, 0x45, 0x42, 0x4D, 0x48, 0x3F };
 
@@ -2523,6 +2524,25 @@ static void ExecItemChanceCharm(void)
     omVibrate(currItemRestore, 90, 4, 2);
 
     BoardItemFortuneExec(GWSystem.player_curr, GWPlayer[GWSystem.player_curr].space_curr);
+
+    HuPrcSleep(60);
+    HuPrcKill(NULL);
+    while (1) {
+        HuPrcVSleep();
+    }
+}
+
+static void ExecItemWackyWatch(void)
+{
+    HuAudFXPlay(0x350);
+    ItemShowProc(NULL, NULL);
+    omVibrate(currItemRestore, 90, 4, 2);
+
+    if (GWSystem.max_turn > 5) {
+        GWSystem.turn = GWSystem.max_turn - 5;
+    } else {
+        GWSystem.turn = 1;
+    }
 
     HuPrcSleep(60);
     HuPrcKill(NULL);

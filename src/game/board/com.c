@@ -55,7 +55,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 1] = {
         BOARD_ITEM_CELLULAR_SHOPPER,
         BOARD_ITEM_BARTER_BOX,
         BOARD_ITEM_SUPER_WARP_PIPE,
-        BOARD_ITEM_CHANCE_CHARM
+        BOARD_ITEM_CHANCE_CHARM,
+        BOARD_ITEM_WACKY_WATCH
     },
     {   //Luigi
         BOARD_ITEM_MAGIC_LAMP,
@@ -78,7 +79,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 1] = {
         BOARD_ITEM_CELLULAR_SHOPPER,
         BOARD_ITEM_BARTER_BOX,
         BOARD_ITEM_SUPER_WARP_PIPE,
-        BOARD_ITEM_CHANCE_CHARM
+        BOARD_ITEM_CHANCE_CHARM,
+        BOARD_ITEM_WACKY_WATCH
     },   
     {   //Peach
         BOARD_ITEM_MAGIC_LAMP,
@@ -101,7 +103,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 1] = {
         BOARD_ITEM_CELLULAR_SHOPPER,
         BOARD_ITEM_BARTER_BOX,
         BOARD_ITEM_SUPER_WARP_PIPE,
-        BOARD_ITEM_CHANCE_CHARM
+        BOARD_ITEM_CHANCE_CHARM,
+        BOARD_ITEM_WACKY_WATCH
     },   
     {   //Yoshi
         BOARD_ITEM_MAGIC_LAMP,
@@ -124,7 +127,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 1] = {
         BOARD_ITEM_CELLULAR_SHOPPER,
         BOARD_ITEM_BARTER_BOX,
         BOARD_ITEM_SUPER_WARP_PIPE,
-        BOARD_ITEM_CHANCE_CHARM
+        BOARD_ITEM_CHANCE_CHARM,
+        BOARD_ITEM_WACKY_WATCH
     },    
     {   //Wario
         BOARD_ITEM_MAGIC_LAMP,
@@ -147,7 +151,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 1] = {
         BOARD_ITEM_CELLULAR_SHOPPER,
         BOARD_ITEM_BARTER_BOX,
         BOARD_ITEM_SUPER_WARP_PIPE,
-        BOARD_ITEM_CHANCE_CHARM
+        BOARD_ITEM_CHANCE_CHARM,
+        BOARD_ITEM_WACKY_WATCH
     },   
     {   //DK
         BOARD_ITEM_MAGIC_LAMP,
@@ -170,7 +175,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 1] = {
         BOARD_ITEM_CELLULAR_SHOPPER,
         BOARD_ITEM_BARTER_BOX,
         BOARD_ITEM_SUPER_WARP_PIPE,
-        BOARD_ITEM_CHANCE_CHARM
+        BOARD_ITEM_CHANCE_CHARM,
+        BOARD_ITEM_WACKY_WATCH
     },   
     {   //Daisy
         BOARD_ITEM_MAGIC_LAMP,
@@ -193,7 +199,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 1] = {
         BOARD_ITEM_CELLULAR_SHOPPER,
         BOARD_ITEM_BARTER_BOX,
         BOARD_ITEM_SUPER_WARP_PIPE,
-        BOARD_ITEM_CHANCE_CHARM
+        BOARD_ITEM_CHANCE_CHARM,
+        BOARD_ITEM_WACKY_WATCH
     },   
     {   //Waluigi
         BOARD_ITEM_MAGIC_LAMP,
@@ -216,7 +223,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 1] = {
         BOARD_ITEM_CELLULAR_SHOPPER,
         BOARD_ITEM_BARTER_BOX,
         BOARD_ITEM_SUPER_WARP_PIPE,
-        BOARD_ITEM_CHANCE_CHARM
+        BOARD_ITEM_CHANCE_CHARM,
+        BOARD_ITEM_WACKY_WATCH
     }
 };
 // Important
@@ -236,6 +244,7 @@ static UseCheckFunc comItemUseCheckFuncTbl[] = {
     CheckLampUse,
     NULL,
     // Extra (TODO: Make the checks for new items more sophisticated maybe)
+    CheckMiniUse,
     CheckMiniUse,
     CheckMiniUse,
     CheckMiniUse,
@@ -357,7 +366,7 @@ s32 BoardComItemWeightGet(s32 player, s32 item) {
             break;
         }
     }
-    weight = BOARD_ITEMS_END - 1 - 1 - i;
+    weight = BOARD_ITEMS_END - 1 - i;
     return weight;
 }
 
