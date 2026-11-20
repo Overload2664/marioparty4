@@ -7,6 +7,9 @@
 #include "types.h"
 #include "version.h"
 
+// Extra
+#define MAX_SPACES 256
+
 //HACK: to prevent prototype errors
 extern void HuPadRumbleAllStop(void);
 
@@ -54,7 +57,7 @@ typedef struct system_state {
 /* 0x32 */ s8 lucky_value;
 /* 0x34 */ u16 mg_next;
 /* 0x36 */ s16 mg_type;
-/* 0x38 */ u16 unk_38;
+/* 0x38 */ u16 mg_param;
 /* 0x3A */ u8 flag[3][16];
 /* 0x6A */ u8 unk_6A[0x72];
 } SystemState; //8018fcf8, sizeof 0xDC
@@ -165,6 +168,8 @@ typedef struct extra_game_config {
         u8 player_speed;
         u16 hidden_star_remaining;
         u16 hidden_coins_remaining;
+        u8 battle_to_blue;
+        u8 battle_change_flag[MAX_SPACES];
     } board_config;
 
     struct MGConfig {

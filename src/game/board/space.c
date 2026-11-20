@@ -28,7 +28,7 @@ extern void BoardMushroomExec(s32 player, s32 space); // wrong
 extern void BoardBooHouseExec(s32 player, s32 space); // wrong
 extern void BoardBlockHouseExec(s32 player, s32 space); // wrong
 
-static BoardSpace spaceData[2][256];
+static BoardSpace spaceData[2][MAX_SPACES];
 s16 boardSpaceStarTbl[8];
 static GXTexObj spaceHiliteTex;
 static GXTexObj spaceTex;
@@ -531,16 +531,6 @@ end:
 
 void BoardSpaceLandExec(s32 player, s32 space)
 {
-#define BLUE_SPACE 1
-#define RED_SPACE 2
-#define BOWSER_SPACE 3
-#define MUSHROOM_SPACE 4
-#define BATTLE_SPACE 5
-#define HAPPENING_SPACE 6
-#define FORTUNE_SPACE 7
-#define STAR_SPACE 8
-#define WARP_SPACE 9
-
     BoardSpace *space_ptr = BoardSpaceGet(0, space);
     switch (space_ptr->type) {
         case BLUE_SPACE:
@@ -668,7 +658,7 @@ s32 BoardSpaceWalkExec(s32 player, s32 space)
         return 1;
     }
     if (space_ptr->flag & 0x600000) {
-        s32 mg_param = GWSystem.unk_38;
+        s32 mg_param = GWSystem.mg_param;
         if (BoardPlayerSizeGet(player) == 1) {
             BoardPlayerIdleSet(player);
             BoardMGCreate(mg_param);
@@ -1127,5 +1117,19 @@ void BoardSpaceDestroy(void)
     if (spaceTexData) {
         HuMemDirectFree(spaceTexData);
         spaceTexData = NULL;
+    }
+}
+
+// Extra
+void BoardSpaceApplyBattleChange(void) {
+    const s32 layer = 0;
+    s32 i;
+
+    // Spaces are indexed as 1 to 256 instead of 0 to 255
+    for (i = 1; i < spaceCnt[layer] + 1; i++) {
+        BoardSpace *space = BoardSpaceGet(layer, i);
+        if (space->type == BATTLE_SPACE && ExGameCfg.board_config.battle_change_flag[i - 1]) {
+            space->type = BLUE_SPACE;
+        }
     }
 }

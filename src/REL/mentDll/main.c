@@ -1700,6 +1700,7 @@ static ExtSetEntry ext_board_entries[] = {
     { "PLAYER MOVE SPEED", EXTSET_KIND_NUM, 0, 100, 90 },
     { "MAX HIDDEN STARS", EXTSET_KIND_NUM, 0, 999, 2 },
     { "MAX HIDDEN COINS", EXTSET_KIND_NUM, 0, 999, 4 },
+    { "AFTER BATTLE TO BLUE", EXTSET_KIND_ONOFF, 0, 1, 1 },
 };
 
 static ExtSetEntry ext_minigame_entries[] = {
@@ -2547,6 +2548,10 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
 
         ExGameCfg.board_config.hidden_coins_remaining = getEntryValue("MAX HIDDEN COINS");
         sprintf(buffer, "Extra Game Config: Max hidden coins set to %d\n", ExGameCfg.board_config.hidden_coins_remaining);
+        OSReport(buffer);
+
+        ExGameCfg.board_config.battle_to_blue = getEntryValue("AFTER BATTLE TO BLUE");
+        sprintf(buffer, "Extra Game Config: After battle to blue set to %d\n", ExGameCfg.board_config.battle_to_blue);
         OSReport(buffer);
     }
     {

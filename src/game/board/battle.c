@@ -243,6 +243,9 @@ static void ExecBattle(void) {
         BoardWinKill();
         var_r27 = 1;
     } else {
+        // Extra
+        ExGameCfg.board_config.battle_change_flag[currSpace - 1] = TRUE;
+
         HuAudFXPlay(0x4F);
         BoardWinCreate(2, MAKE_MESSID(2, 0), 1);
         BoardWinWait();

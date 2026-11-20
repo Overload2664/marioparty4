@@ -306,9 +306,15 @@ void BoardSaveInit(s32 board)
     GWSystem.lucky_value = 1;
     GWSystem.mg_next = 0;
     GWMGTypeSet(0);
-    GWSystem.unk_38 = 0;
+    GWSystem.mg_param = 0;
     GWSystem.block_pos = 0;
     memset(GWSystem.board_data, 0, sizeof(GWSystem.board_data));
+
+    // Extra
+    for (i = 0; i < MAX_SPACES; i++) {
+        ExGameCfg.board_config.battle_change_flag[i] = 0;
+    }
+
     for(i=0; i<4; i++) {
         s32 party_flag;
         BoardPlayerAutoSizeSet(i, 0);
@@ -429,6 +435,13 @@ static void MainFunc(void)
         #endif
     }
     CreateBoard();
+
+    // Extra
+    if (ExGameCfg.board_config.battle_to_blue) {
+        // Doing it here too because the board gets reread everytime after a minigame
+        BoardSpaceApplyBattleChange();
+    }
+
     if(!_CheckFlag(FLAG_ID_MAKE(1, 1))) {
         GWSystem.player_curr = -1;
         BoardStartExec();
@@ -472,6 +485,11 @@ static void MainFunc(void)
         }
         BoardMusStartBoard();
         for(i=GWSystem.player_curr; i<4; i++) {
+            // // Extra
+            // if (ExGameCfg.board_config.battle_to_blue) {
+            //     BoardSpaceApplyBattleChange();
+            // }
+
             if(GWBoardGet() == BOARD_ID_EXTRA1 || GWBoardGet() == BOARD_ID_EXTRA2) {
                 if(CHECK_LAST5_TURN() && i == 0 && !turn_cont) {
                     BoardLast5GfxInit();
@@ -1374,7 +1392,7 @@ void BoardMGCreate(s32 arg0)
 {
     _SetFlag(FLAG_ID_MAKE(1, 19));
     _ClearFlag(FLAG_ID_MAKE(1, 20));
-    GWSystem.unk_38 = arg0;
+    GWSystem.mg_param = arg0;
     omAddObjEx(boardObjMan, 0x201, 0, 0, -1, ExecBoardMG);
     BoardEventFlagSet();
     BoardSpaceWalkMiniEventExec();
