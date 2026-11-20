@@ -570,6 +570,7 @@ void BoardSpaceLandExec(s32 player, s32 space)
             if (GWPlayer[player].battle_count > 99) {
                 GWPlayer[player].battle_count = 99;
             }
+            GWPlayer[player].color = 3;
             BoardBattleExec(player, space);
             break;
 

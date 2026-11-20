@@ -122,7 +122,6 @@ void BoardBattleExec(s32 player, s32 space) {
         }
         BoardCameraMotionWait();
         BoardTutorialHookExec(0xF, 0);
-        GWPlayer[player].color = 3;
         return;
     }
     currPlayer = player;
@@ -132,7 +131,6 @@ void BoardBattleExec(s32 player, s32 space) {
     while (battleProc) {
         HuPrcVSleep();
     }
-    GWPlayer[player].color = 3;
 }
 
 static void DestroyBattle(void) {
