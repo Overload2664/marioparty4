@@ -33,7 +33,7 @@ static BOOL CheckLampUse(s32 player, s32 item);
 
 static s8 itemUse = -1;
 
-static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 2] = {
+static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 1] = {
     {   //Mario
         BOARD_ITEM_MAGIC_LAMP,
         BOARD_ITEM_BOOS_CRYSTAL_BALL,
