@@ -2538,6 +2538,14 @@ static void ExecItemWackyWatch(void)
     ItemShowProc(NULL, NULL);
     omVibrate(currItemRestore, 90, 4, 2);
 
+
+    // TODO(ME): Add animation
+    BoardWinCreate(2, MAKE_MESSID(55, 121), -1);
+    BoardWinAttrSet(0x10);
+    
+    BoardWinWait();
+    BoardWinKill();
+
     if (GWSystem.max_turn > 5) {
         GWSystem.turn = GWSystem.max_turn - 5;
     } else {
