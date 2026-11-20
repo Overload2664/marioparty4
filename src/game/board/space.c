@@ -345,7 +345,7 @@ void BoardSpaceStarSetIndex(s32 index)
     BoardModelRotYSet(StarPlatGetMdl(), rot.y);
     BoardModelVisibilitySet(StarPlatGetMdl(), 1);
 }
-
+// Important
 s32 BoardSpaceStarGetNext(void)
 {
     s16 random_pos;

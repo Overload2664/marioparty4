@@ -98,9 +98,9 @@ static s32 diceDigitMdlTbl[10] = { DATA_MAKE_NUM(DATADIR_BOARD, 0x0C), DATA_MAKE
     DATA_MAKE_NUM(DATADIR_BOARD, 0x0F), DATA_MAKE_NUM(DATADIR_BOARD, 0x10), DATA_MAKE_NUM(DATADIR_BOARD, 0x11), DATA_MAKE_NUM(DATADIR_BOARD, 0x12),
     DATA_MAKE_NUM(DATADIR_BOARD, 0x13), DATA_MAKE_NUM(DATADIR_BOARD, 0x14), DATA_MAKE_NUM(DATADIR_BOARD, 0x15) };
 
-s32 BoardRollExec(s32 arg0)
+s32 BoardRollExec(s32 player_idx)
 {
-    rollPlayer = arg0;
+    rollPlayer = player_idx;
     inputTimer = 0;
     numDice = 1; // Dice rolls
     diceSize = 0;
@@ -111,34 +111,37 @@ s32 BoardRollExec(s32 arg0)
     maxExRoll = ExGameCfg.board_config.max_roll;
     switch (BoardItemPrevGet()) {
         case BOARD_ITEM_MINI_MUSHROOM:
-            numDice = 1;
-            break;
-        case BOARD_ITEM_SUPER_MINI_MUSHROOM:
         case BOARD_ITEM_MEGA_MUSHROOM:
         case BOARD_ITEM_MUSHROOM:
-            numDice = 2;
+            numDice += 1;
             break;
+        case BOARD_ITEM_SUPER_MINI_MUSHROOM:
         case BOARD_ITEM_SUPER_MEGA_MUSHROOM:
         case BOARD_ITEM_GOLDEN_MUSHROOM:
-            numDice = 3;
+            numDice += 2;
             break;
     }
-    if (BoardPlayerSizeGet(arg0) == 1) {
+    if (BoardPlayerSizeGet(player_idx) == 1) {
         diceSize = 1;
         maxRoll = 5;
-        maxExRoll = MAX(minExRoll, maxExRoll / 2);
+        maxExRoll = MAX(minExRoll, maxExRoll / 2 + 2);
+        if (BoardMegaDoubleDiceCheck() != 0) {
+            numDice += 1; // check
+        }
     }
-    else if (BoardPlayerSizeGet(arg0) == 2) {
+    else if (BoardPlayerSizeGet(player_idx) == 2) {
         diceSize = 2;
         maxRoll = 10;
+        minExRoll = MIN(minExRoll + 1, 99);
+        maxExRoll = MIN(maxExRoll + 2, 99);
         if (BoardMegaDoubleDiceCheck() != 0) {
-            numDice = 2;
+            numDice += 1; // check
         }
     }
     if (GWPlayer[rollPlayer].bowser_suit != 0) {
         diceSize = 3;
     }
-    GWPlayer[arg0].num_dice = numDice;
+    GWPlayer[player_idx].num_dice = numDice;
     rollProc = HuPrcChildCreate(RollMain, 0x2005, 0x6000, 0, boardMainProc);
     HuPrcDestructorSet2(rollProc, RollDestroy);
     while (rollProc != NULL) {
