@@ -23,6 +23,7 @@
 #include "game/hsfex.h"
 
 #include "ext_math.h"
+#include <stdio.h>
 
 #ifndef __MWERKS__
 #include "game/board/view.h"
@@ -186,37 +187,46 @@ static void ExecStar(void) {
     float temp_f30;
     float var_f28;
     float var_f31;
-    s16 temp_r30;
+    s16 star_host_model;
     u32 sp8;
-    s32 temp_r24;
+    s32 space_curr;
     s32 temp_r29;
     s32 var_r26;
     s32 var_r25;
     s32 i;
-    s32 temp_r27;
-    s32 temp_r31;
+    s32 board_curr;
+    s32 player_curr;
     s32 var_r22;
-    BoardSpace *var_r23;
+    BoardSpace *space;
 
-    temp_r31 = GWSystem.player_curr;
-    temp_r27 = GWBoardGet();
-    temp_r30 = BoardStarHostMdlGet();
+    // Extra
+    s32 cur_cost;
+    char cur_cost_str[32];
+
+    cur_cost = ExGameCfg.board_config.star_cur_cost;
+    cur_cost += BoardRandMod(ExGameCfg.board_config.star_variance * 2 + 1) - ExGameCfg.board_config.star_variance;
+    cur_cost = MAX(0, cur_cost);
+    sprintf(cur_cost_str, "%d", cur_cost);
+
+    player_curr = GWSystem.player_curr;
+    board_curr = GWBoardGet();
+    star_host_model = BoardStarHostMdlGet();
     HuAudFXPlay(0x33A);
     for (i = 0; i < 2; i++) {
-        hostMot[i] = BoardModelMotionCreate(temp_r30, hostMotTbl[temp_r27][i]);
+        hostMot[i] = BoardModelMotionCreate(star_host_model, hostMotTbl[board_curr][i]);
     }
-    BoardPlayerPosGet(temp_r31, &sp24);
-    temp_r24 = GWPlayer[temp_r31].space_curr;
-    var_r23 = BoardSpaceGet(0, temp_r24);
-    sp8 = (var_r23->flag & 0x70000) >> 16;
+    BoardPlayerPosGet(player_curr, &sp24);
+    space_curr = GWPlayer[player_curr].space_curr;
+    space = BoardSpaceGet(0, space_curr);
+    sp8 = (space->flag & 0x70000) >> 16;
     starDoneF = 0;
-    var_r22 = BoardSpaceLinkFlagSearch(0, temp_r24, 0x04000000);
+    var_r22 = BoardSpaceLinkFlagSearch(0, space_curr, 0x04000000);
     BoardSpacePosGet(0, var_r22, &sp18);
     VECSubtract(&sp18, &sp24, &spC);
     temp_f30 = 90.0 - atan2d(spC.z, spC.x);
     temp_f30 = 90.0f * ((temp_f30 + 3.0f) / 90.0f);
-    temp_f29 = BoardPlayerRotYGet(temp_r31);
-    BoardPlayerIdleSet(temp_r31);
+    temp_f29 = BoardPlayerRotYGet(player_curr);
+    BoardPlayerIdleSet(player_curr);
     if (BoardDAngleCalc(temp_f30 - temp_f29) < 0.0f) {
         var_f28 = -BoardDAngleCalc(temp_f30 - temp_f29);
     } else {
@@ -227,8 +237,8 @@ static void ExecStar(void) {
     } else {
         var_r25 = 15;
     }
-    BoardPlayerMotBlendSet(temp_r31, temp_f30, var_r25);
-    temp_f27 = BoardModelRotYGet(temp_r30);
+    BoardPlayerMotBlendSet(player_curr, temp_f30, var_r25);
+    temp_f27 = BoardModelRotYGet(star_host_model);
     var_f31 = BoardDAngleCalc(temp_f30 + 180.0f) - temp_f27;
     if ((var_f31 <= 4.0f && var_f31 >= 0.0f)
         || (var_f31 <= 360.0f && var_f31 >= 355.0f)
@@ -239,27 +249,28 @@ static void ExecStar(void) {
     }
     if (var_r26 != 0) {
         var_f31 /= var_r25;
-        BoardModelMotionShiftSet(temp_r30, hostMot[1], 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
-        BoardModelMotionSpeedSet(temp_r30, 2.0f);
+        BoardModelMotionShiftSet(star_host_model, hostMot[1], 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
+        BoardModelMotionSpeedSet(star_host_model, 2.0f);
     }
-    while (!BoardPlayerMotBlendCheck(temp_r31)) {
+    while (!BoardPlayerMotBlendCheck(player_curr)) {
         if (var_r26 != 0) {
-            temp_f30 = var_f31 + BoardModelRotYGet(temp_r30);
-            BoardModelRotYSet(temp_r30, temp_f30);
+            temp_f30 = var_f31 + BoardModelRotYGet(star_host_model);
+            BoardModelRotYSet(star_host_model, temp_f30);
         }
         HuPrcVSleep();
     }
-    BoardModelMotionShiftSet(temp_r30, 1, 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
+    BoardModelMotionShiftSet(star_host_model, 1, 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
     BoardCameraViewSet(3);
     BoardCameraMotionWait();
-    if (GWStarsGet(temp_r31) >= 999) {
-        temp_r29 = starMesTbl1[temp_r27] + 5;
+    if (GWStarsGet(player_curr) >= 999) {
+        temp_r29 = starMesTbl1[board_curr] + 5;
         BoardWinCreate(0, temp_r29, BoardWinPortraitGetStar());
         BoardWinWait();
         BoardWinKill();
-    } else if (BoardPlayerCoinsGet(temp_r31) < 20 && GWSystem.last5_effect != 4) {
-        temp_r29 = starMesTbl1[temp_r27] + 2;
+    } else if (BoardPlayerCoinsGet(player_curr) < cur_cost && GWSystem.last5_effect != 4) {
+        temp_r29 = starMesTbl1[board_curr] + 2;
         BoardWinCreate(2, temp_r29, BoardWinPortraitGetStar());
+        BoardWinInsertMesSet(MAKE_MESSID_PTR(cur_cost_str), 0); // Extra
         BoardWinWait();
         BoardWinKill();
     } else {
@@ -267,28 +278,29 @@ static void ExecStar(void) {
         while (!BoardStatusStopCheck(0) || !BoardStatusStopCheck(1) || !BoardStatusStopCheck(2) || !BoardStatusStopCheck(3)) {
             HuPrcVSleep();
         }
-        temp_r29 = starMesTbl1[temp_r27];
+        temp_r29 = starMesTbl1[board_curr];
         BoardWinCreate(2, temp_r29, BoardWinPortraitGetStar());
-        BoardWinInsertMesSet(BoardPlayerGetCharMess(temp_r31), 0);
+        BoardWinInsertMesSet(BoardPlayerGetCharMess(player_curr), 0);
         BoardWinWait();
         BoardWinKill();
         while (1) {
-            BoardStatusShowSetForce(temp_r31);
-            BoardStatusShowSet(temp_r31, 1);
-            while (!BoardStatusStopCheck(temp_r31)) {
+            BoardStatusShowSetForce(player_curr);
+            BoardStatusShowSet(player_curr, 1);
+            while (!BoardStatusStopCheck(player_curr)) {
                 HuPrcVSleep();
             }
             if (GWSystem.last5_effect == 4) {
-                temp_r29 = starMesTbl1[temp_r27] + 8;
+                temp_r29 = starMesTbl1[board_curr] + 8;
                 BoardWinCreate(2, temp_r29, BoardWinPortraitGetStar());
                 BoardWinWait();
                 break;
             }
-            temp_r29 = starMesTbl1[temp_r27] + 1;
+            temp_r29 = starMesTbl1[board_curr] + 1;
             BoardWinCreateChoice(1, temp_r29, BoardWinPortraitGetStar(), 0);
             BoardWinAttrSet(0x10);
-            if (GWPlayer[temp_r31].com) {
-                if (BoardPlayerCoinsGet(temp_r31) >= 20) {
+            BoardWinInsertMesSet(MAKE_MESSID_PTR(cur_cost_str), 0); // Extra
+            if (GWPlayer[player_curr].com) {
+                if (BoardPlayerCoinsGet(player_curr) >= cur_cost) {
                     BoardComKeySetUp();
                 } else {
                     BoardComKeySetDown();
@@ -297,12 +309,13 @@ static void ExecStar(void) {
             BoardWinWait();
             switch (BoardWinChoiceGet()) {
                 case 0:
-                    if (BoardPlayerCoinsGet(temp_r31) < 20) {
-                        temp_r29 = starMesTbl1[temp_r27] + 2;
+                    if (BoardPlayerCoinsGet(player_curr) < cur_cost) {
+                        temp_r29 = starMesTbl1[board_curr] + 2;
                         BoardWinCreate(2, temp_r29, BoardWinPortraitGetStar());
+                        BoardWinInsertMesSet(MAKE_MESSID_PTR(cur_cost_str), 0); // Extra
                         BoardWinWait();
-                        BoardStatusShowSet(temp_r31, 0);
-                        while (!BoardStatusStopCheck(temp_r31)) {
+                        BoardStatusShowSet(player_curr, 0);
+                        while (!BoardStatusStopCheck(player_curr)) {
                             HuPrcVSleep();
                         }
                         BoardStatusShowSetAll(1);
@@ -310,76 +323,80 @@ static void ExecStar(void) {
                     }
                     goto block_A;
                 case 1:
-                    temp_r29 = starMesTbl1[temp_r27] + 4;
+                    temp_r29 = starMesTbl1[board_curr] + 4;
                     BoardWinCreate(2, temp_r29, BoardWinPortraitGetStar());
                     BoardWinWait();
-                    BoardStatusShowSet(temp_r31, 0);
-                    while (!BoardStatusStopCheck(temp_r31)) {
+                    BoardStatusShowSet(player_curr, 0);
+                    while (!BoardStatusStopCheck(player_curr)) {
                         HuPrcVSleep();
                     }
                     BoardStatusShowSetAll(1);
                     goto block_B;
                 default:
-                    BoardStatusShowSet(temp_r31, 0);
-                    while (!BoardStatusStopCheck(temp_r31)) {
+                    BoardStatusShowSet(player_curr, 0);
+                    while (!BoardStatusStopCheck(player_curr)) {
                         HuPrcVSleep();
                     }
                     BoardWinKill();
-                    BoardViewMapExec(temp_r31);
+                    BoardViewMapExec(player_curr);
                     break;
             }
         }
 block_A:
-        temp_r29 = starMesTbl1[temp_r27] + 3;
+        temp_r29 = starMesTbl1[board_curr] + 3;
         BoardWinCreate(2, temp_r29, BoardWinPortraitGetStar());
         BoardWinWait();
         BoardWinKill();
         if (GWSystem.last5_effect != 4) {
-            for (i = 0; i < 20; i++) {
-                BoardPlayerCoinsAdd(temp_r31, -1);
+            for (i = 0; i < cur_cost; i++) {
+                BoardPlayerCoinsAdd(player_curr, -1);
                 HuAudFXPlay(0xE);
                 HuPrcSleep(3);
             }
             HuAudFXPlay(0xF);
+
+            // Extra
+            ExGameCfg.board_config.star_cur_cost += ExGameCfg.board_config.star_increment;
+            ExGameCfg.board_config.stars_remaining--;
         }
         _SetFlag(0x10017);
-        BoardModelMotionShiftSet(temp_r30, hostMot[0], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
+        BoardModelMotionShiftSet(star_host_model, hostMot[0], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
         HuPrcSleep(30);
         starDoneF = 1;
         BoardAudSeqFadeOut(0, 1000);
-        BoardModelPosGet(temp_r30, &sp24);
+        BoardModelPosGet(star_host_model, &sp24);
         sp24.y += 130.0f;
-        BoardStarGive(temp_r31, &sp24);
-        BoardStatusShowSet(temp_r31, 0);
-        while (!BoardStatusStopCheck(temp_r31)) {
+        BoardStarGive(player_curr, &sp24);
+        BoardStatusShowSet(player_curr, 0);
+        while (!BoardStatusStopCheck(player_curr)) {
             HuPrcVSleep();
         }
-        BoardModelMotionShiftSet(temp_r30, 1, 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
-        BoardStarShowNext(temp_r31);
+        BoardModelMotionShiftSet(star_host_model, 1, 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
+        BoardStarShowNext(player_curr);
         BoardMusStartBoard();
-        BoardModelRotYSet(temp_r30, 0.0f);
+        BoardModelRotYSet(star_host_model, 0.0f);
     }
 block_B:
     BoardWinKill();
-    var_f31 = -BoardModelRotYGet(temp_r30);
+    var_f31 = -BoardModelRotYGet(star_host_model);
     if (var_r26 != 0) {
         var_f31 /= var_r25;
-        BoardModelMotionShiftSet(temp_r30, hostMot[1], 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
-        BoardModelMotionSpeedSet(temp_r30, 3.0f);
+        BoardModelMotionShiftSet(star_host_model, hostMot[1], 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
+        BoardModelMotionSpeedSet(star_host_model, 3.0f);
     }
-    BoardPlayerMotBlendSet(temp_r31, 0, var_r25);
-    while (!BoardPlayerMotBlendCheck(temp_r31)) {
+    BoardPlayerMotBlendSet(player_curr, 0, var_r25);
+    while (!BoardPlayerMotBlendCheck(player_curr)) {
         if (var_r26 != 0) {
-            temp_f30 = var_f31 + BoardModelRotYGet(temp_r30);
-            BoardModelRotYSet(temp_r30, temp_f30);
+            temp_f30 = var_f31 + BoardModelRotYGet(star_host_model);
+            BoardModelRotYSet(star_host_model, temp_f30);
         }
         HuPrcVSleep();
     }
-    BoardModelRotYSet(temp_r30, 0.0f);
-    BoardModelMotionShiftSet(temp_r30, 1, 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
+    BoardModelRotYSet(star_host_model, 0.0f);
+    BoardModelMotionShiftSet(star_host_model, 1, 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
     if (!_CheckFlag(FLAG_ID_MAKE(1, 22))) {
         BoardCameraViewSet(1);
-        BoardCameraTargetPlayerSet(temp_r31);
+        BoardCameraTargetPlayerSet(player_curr);
         BoardCameraMotionWait();
     }
     HuPrcEnd();

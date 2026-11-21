@@ -1701,6 +1701,10 @@ static ExtSetEntry ext_board_entries[] = {
     { "MAX HIDDEN STARS", EXTSET_KIND_NUM, 0, 999, 2 },
     { "MAX HIDDEN COINS", EXTSET_KIND_NUM, 0, 999, 4 },
     { "AFTER BATTLE TO BLUE", EXTSET_KIND_ONOFF, 0, 1, 1 },
+    { "MAX STARS BOUGHT", EXTSET_KIND_NUM, 0, 999, 999 },
+    { "INITIAL STAR COST", EXTSET_KIND_NUM, 0, 999, 10 },
+    { "STAR COST INCREMENT", EXTSET_KIND_NUM, 0, 999, 5 },
+    { "STAR COST VARIANCE", EXTSET_KIND_NUM, 0, 999, 5 },
 };
 
 static ExtSetEntry ext_minigame_entries[] = {
@@ -1752,7 +1756,6 @@ u32 getEntryValue(const char* entry_name) {
     u32 entry_idx;
     ExtSetEntry* entries;
     u32 entries_count;
-    char error_msg[256];
 
     for (topic_idx = 0; topic_idx < EXTSET_TOPIC_COUNT; topic_idx++) {
         entries = ext_topics[topic_idx].entries;
@@ -1765,8 +1768,7 @@ u32 getEntryValue(const char* entry_name) {
         }
     }
 
-    sprintf(error_msg, "getEntryValue: %s not found\n", entry_name);
-    OSReport(error_msg);
+    OSReport("getEntryValue: %s not found\n", entry_name);
     return -1;
 }
 
@@ -1775,7 +1777,6 @@ u32 getEntryValueTopic(const char* topic_name, const char* entry_name) {
     u32 entry_idx;
     ExtSetEntry* entries;
     u32 entries_count;
-    char error_msg[256];
     char *title;
 
     for (topic_idx = 0; topic_idx < EXTSET_TOPIC_COUNT; topic_idx++) {
@@ -1794,8 +1795,7 @@ u32 getEntryValueTopic(const char* topic_name, const char* entry_name) {
         }
     }
 
-    sprintf(error_msg, "getEntryValueTopic: %s not found\n", entry_name);
-    OSReport(error_msg);
+    OSReport("getEntryValueTopic: %s not found\n", entry_name);
     return -1;
 }
 
@@ -2552,6 +2552,22 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
 
         ExGameCfg.board_config.battle_to_blue = getEntryValue("AFTER BATTLE TO BLUE");
         sprintf(buffer, "Extra Game Config: After battle to blue set to %d\n", ExGameCfg.board_config.battle_to_blue);
+        OSReport(buffer);
+
+        ExGameCfg.board_config.stars_remaining = getEntryValue("MAX STARS BOUGHT");
+        sprintf(buffer, "Extra Game Config: Max stars bought set to %d\n", ExGameCfg.board_config.stars_remaining);
+        OSReport(buffer);
+
+        ExGameCfg.board_config.star_cur_cost = getEntryValue("INITIAL STAR COST");
+        sprintf(buffer, "Extra Game Config: Initial star cost set to %d\n", ExGameCfg.board_config.star_cur_cost);
+        OSReport(buffer);
+
+        ExGameCfg.board_config.star_increment = getEntryValue("STAR COST INCREMENT");
+        sprintf(buffer, "Extra Game Config: Star cost increment set to %d\n", ExGameCfg.board_config.star_increment);
+        OSReport(buffer);
+
+        ExGameCfg.board_config.star_variance = getEntryValue("STAR COST VARIANCE");
+        sprintf(buffer, "Extra Game Config: Star cost variance set to %d\n", ExGameCfg.board_config.star_variance);
         OSReport(buffer);
     }
     {

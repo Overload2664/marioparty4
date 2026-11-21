@@ -170,6 +170,10 @@ typedef struct extra_game_config {
         u16 hidden_coins_remaining;
         u8 battle_to_blue;
         u8 battle_change_flag[MAX_SPACES];
+        s16 stars_remaining;
+        s16 star_cur_cost;
+        s16 star_increment;
+        s16 star_variance;
     } board_config;
 
     struct MGConfig {
