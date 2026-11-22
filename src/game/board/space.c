@@ -1039,6 +1039,7 @@ void BoardSpaceInit(s32 data_num)
     // Extra
     s32 i;
     for (i = 0; i < MAX_STARS; i++) {
+        boardSpaceStarTbl[i] = 0;
         starSpacePlatMdls[i] = -1;
     }
     
