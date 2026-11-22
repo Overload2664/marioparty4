@@ -314,10 +314,6 @@ void BoardSaveInit(s32 board)
     for (i = 0; i < MAX_SPACES; i++) {
         ExGameCfg.board_config.battle_change_flag[i] = 0;
     }
-    ExGameCfg.board_config.stars_remaining = 999;
-    ExGameCfg.board_config.star_cur_cost = 20;
-    ExGameCfg.board_config.star_increment = 0;
-    ExGameCfg.board_config.star_variance = 0;
 
     for(i=0; i<4; i++) {
         s32 party_flag;
