@@ -29,7 +29,7 @@ extern void BoardBooHouseExec(s32 player, s32 space); // wrong
 extern void BoardBlockHouseExec(s32 player, s32 space); // wrong
 
 static BoardSpace spaceData[2][MAX_SPACES];
-s16 boardSpaceStarTbl[8];
+s16 boardSpaceStarTbl[MAX_STARS];
 static GXTexObj spaceHiliteTex;
 static GXTexObj spaceTex;
 
@@ -52,6 +52,12 @@ static s16 spaceDrawF;
 
 static s16 spaceDrawMdl = -1;
 static s16 starPlatMdl = -1;
+
+// Extra
+s16 starSpacePlatMdls[MAX_SPACES];
+static void makeStarPlats(void);
+static void showStarPlats(void);
+static void hideStarPlats(void);
 
 static s32 ExecPipeSpace(s32 player, s32 space);
 
@@ -343,7 +349,15 @@ void BoardSpaceStarSetIndex(s32 index)
     BoardModelPosSetV(StarPlatGetMdl(), &pos);
     BoardSpaceRotGet(0, space, &rot);
     BoardModelRotYSet(StarPlatGetMdl(), rot.y);
-    BoardModelVisibilitySet(StarPlatGetMdl(), 1);
+
+    // Extra
+    if (ExGameCfg.board_config.show_all_platforms) {
+        showStarPlats();
+        BoardModelVisibilitySet(StarPlatGetMdl(), 0);
+    } else {
+        hideStarPlats();
+        BoardModelVisibilitySet(StarPlatGetMdl(), 1);
+    }
 }
 // Important
 s32 BoardSpaceStarGetNext(void)
@@ -1021,6 +1035,13 @@ begin:
 void BoardSpaceInit(s32 data_num)
 {
     s32 board;
+
+    // Extra
+    s32 i;
+    for (i = 0; i < MAX_STARS; i++) {
+        starSpacePlatMdls[i] = -1;
+    }
+    
     BoardJunctionMaskZero();
     memset(spaceData, 0, sizeof(spaceData));
     memset(spaceAttr, 0, sizeof(spaceAttr));
@@ -1099,6 +1120,11 @@ void BoardSpaceInit(s32 data_num)
         GWSystem.star_flag = 0;
     }
     if (GWBoardGet() != BOARD_ID_EXTRA1 && GWBoardGet() != BOARD_ID_EXTRA2) {
+        // Extra
+        if (ExGameCfg.board_config.show_all_platforms) {
+            makeStarPlats();
+        }
+
         starPlatMdl = BoardModelCreate(DATA_MAKE_NUM(DATADIR_BOARD, 6), NULL, 0);
         BoardModelMotionStart(starPlatMdl, 0, 0x40000001);
         BoardModelVisibilitySet(starPlatMdl, 0);
@@ -1106,7 +1132,15 @@ void BoardSpaceInit(s32 data_num)
             Vec pos;
             Vec rot;
             s16 space;
-            BoardModelVisibilitySet(starPlatMdl, 1);
+            // Extra
+            if (ExGameCfg.board_config.show_all_platforms) {
+                showStarPlats();
+                BoardModelVisibilitySet(starPlatMdl, 0);
+            } else {
+                hideStarPlats();
+                BoardModelVisibilitySet(starPlatMdl, 1);
+            }
+
             GWSystem.star_flag |= (u8)(1 << GWSystem.star_pos);
             BoardSpaceTypeSet(0, boardSpaceStarTbl[GWSystem.star_pos], 8);
             {
@@ -1156,4 +1190,55 @@ void BoardSpaceApplyBattleChange(void) {
 void BoardSpaceHideStar(void) {
     BoardModelVisibilitySet(StarPlatGetMdl(), 0);
     BoardSpaceTypeSet(0, boardSpaceStarTbl[GWSystem.star_pos], BLUE_SPACE);
+    hideStarPlats();
+}
+
+static void makeStarPlats(void) {
+    s16 mdl;
+    Vec pos;
+    Vec rot;
+    s16 space;
+    s32 i;
+
+    for (i = 0; i < MAX_STARS; i++) {
+        if (boardSpaceStarTbl[i] <= 0) {
+            break;
+        }
+
+        mdl = BoardModelCreate(DATA_MAKE_NUM(DATADIR_BOARD, 6), NULL, 0);
+        BoardModelMotionStart(mdl, 0, 0x40000001);
+        BoardModelVisibilitySet(mdl, 0);
+
+        space = BoardSpaceLinkFlagSearch(0, boardSpaceStarTbl[i], 0x04000000);
+        BoardSpacePosGet(0, space, &pos);
+        BoardModelPosSetV(mdl, &pos);
+        BoardSpaceRotGet(0, space, &rot);
+        BoardModelRotYSet(mdl, rot.y);
+
+        starSpacePlatMdls[i] = mdl;
+    }
+}
+
+static void showStarPlats(void) {
+    s32 i;
+
+    for (i = 0; i < MAX_STARS; i++) {
+        if (boardSpaceStarTbl[i] <= 0) {
+            break;
+        }
+
+        BoardModelVisibilitySet(starSpacePlatMdls[i], 1);
+    }
+}
+
+static void hideStarPlats(void) {
+    s32 i;
+
+    for (i = 0; i < MAX_STARS; i++) {
+        if (boardSpaceStarTbl[i] <= 0) {
+            break;
+        }
+
+        BoardModelVisibilitySet(starSpacePlatMdls[i], 0);
+    }
 }

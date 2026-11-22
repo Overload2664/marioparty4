@@ -1705,6 +1705,7 @@ static ExtSetEntry ext_board_entries[] = {
     { "INITIAL STAR COST", EXTSET_KIND_NUM, 0, 999, 10 },
     { "STAR COST INCREMENT", EXTSET_KIND_NUM, 0, 999, 5 },
     { "STAR COST VARIANCE", EXTSET_KIND_NUM, 0, 999, 5 },
+    { "SHOW ALL PLATFORMS", EXTSET_KIND_ONOFF, 0, 1, 1 },
 };
 
 static ExtSetEntry ext_minigame_entries[] = {
@@ -2568,6 +2569,10 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
 
         ExGameCfg.board_config.star_variance = getEntryValue("STAR COST VARIANCE");
         sprintf(buffer, "Extra Game Config: Star cost variance set to %d\n", ExGameCfg.board_config.star_variance);
+        OSReport(buffer);
+
+        ExGameCfg.board_config.show_all_platforms = getEntryValue("SHOW ALL PLATFORMS");
+        sprintf(buffer, "Extra Game Config: Show all platfroms set to %d\n", ExGameCfg.board_config.show_all_platforms);
         OSReport(buffer);
     }
     {

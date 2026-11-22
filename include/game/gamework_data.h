@@ -9,6 +9,7 @@
 
 // Extra
 #define MAX_SPACES 256
+#define MAX_STARS 8
 
 //HACK: to prevent prototype errors
 extern void HuPadRumbleAllStop(void);
@@ -174,6 +175,7 @@ typedef struct extra_game_config {
         s16 star_cur_cost;
         s16 star_increment;
         s16 star_variance;
+        u8 show_all_platforms;
     } board_config;
 
     struct MGConfig {
