@@ -3250,7 +3250,11 @@ static void ExecItemBag(void)
 
     for (i = 0; i < 3; i++) {
         if (itemBagItems[i] == -1) {
-            itemBagItems[i] = rand8() % 13;
+            // itemBagItems[i] = rand8() % 13;
+            itemBagItems[i] = BoardRandMod(BOARD_ITEMS_END);
+            if (itemBagItems[i] == BOARD_ITEM_ITEM_BAG) {
+                itemBagItems[i] = BOARD_ITEM_MUSHROOM;
+            }
         }
     }
     temp_r23 = GWPlayer[currItemRestore].port;
@@ -3261,10 +3265,10 @@ static void ExecItemBag(void)
     temp_r27 = var_r30 = 3 - BoardPlayerItemCount(currItemRestore);
     for (i = 0; i < temp_r27; i++) {
         sp8[i] = BoardModelCreate(itemMdlTbl[itemBagItems[i]], NULL, 1);
-        if (itemBagItems[i] == 0xB) {
+        if (itemBagItems[i] == BOARD_ITEM_BOOS_CRYSTAL_BALL) {
             BoardModelAttrSet(sp8[i], 0x40000001);
         }
-        if (itemBagItems[i] == 5) {
+        if (itemBagItems[i] == BOARD_ITEM_WARP_PIPE) {
             temp_f31 = -50.0f;
             Hu3DData[BoardModelIDGet(sp8[i])].mtx[1][3] = temp_f31;
         }

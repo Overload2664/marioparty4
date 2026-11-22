@@ -1251,8 +1251,12 @@ void BoardMakeRandomItem(void) {
 
     for (i = 0; i < ARRAY_COUNT(itemRandTbl); i++) {
         chosenItemIndex = BoardRandMod(BOARD_ITEMS_END);
-        if (chosenItemIndex != BOARD_ITEM_BOWSER_SUIT && chosenItemIndex != BOARD_ITEM_ITEM_BAG) {
+        // if (chosenItemIndex != BOARD_ITEM_BOWSER_SUIT && chosenItemIndex != BOARD_ITEM_ITEM_BAG) {
+        // Extra
+        if (chosenItemIndex != BOARD_ITEM_ITEM_BAG) {
             itemRandTbl[i] = chosenItemIndex;
+        } else {
+            itemRandTbl[i] = BOARD_ITEM_MUSHROOM;
         }
     }
     BoardItemBagItemSet(itemRandTbl);

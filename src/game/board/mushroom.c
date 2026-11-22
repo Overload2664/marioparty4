@@ -477,6 +477,8 @@ static void DoItemGive(OMOBJ* arg0) {
     Vec sp10;
     s32 sp8[2] = {0, 1};
     itemObjWork* temp_r31;
+    s32 i;
+    u32 randomItem;
 
     temp_r31 = omObjGetWork(arg0, itemObjWork);
     
@@ -518,7 +520,17 @@ static void DoItemGive(OMOBJ* arg0) {
             BoardModelVisibilitySet(itemMdl, 0);
             HuAudFXPlay(0x30D);
             // BoardPlayerItemAdd(temp_r31->unk00_field1, sp8[itemResult]);
-            BoardPlayerItemAdd(temp_r31->unk00_field1, itemResult);
+            if (itemResult == BOARD_ITEM_ITEM_BAG) {
+                for (i = 0; i < 3; i++) {
+                    randomItem = BoardRandMod(BOARD_ITEMS_END);
+                    if (randomItem == BOARD_ITEM_ITEM_BAG) {
+                        randomItem = BOARD_ITEM_MUSHROOM;
+                    }
+                    BoardPlayerItemAdd(temp_r31->unk00_field1, randomItem);
+                }
+            } else {
+                BoardPlayerItemAdd(temp_r31->unk00_field1, itemResult);
+            }
             temp_r31->unk00_field2 = 1;
         }
         /* fallthrough */
