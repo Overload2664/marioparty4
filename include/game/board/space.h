@@ -62,6 +62,7 @@ extern s16 boardSpaceStarTbl[8];
 
 // Extra
 void BoardSpaceApplyBattleChange(void);
+void BoardSpaceHideStar(void);
 
 #define BLUE_SPACE 1
 #define RED_SPACE 2

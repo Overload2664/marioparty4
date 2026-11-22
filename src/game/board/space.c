@@ -312,7 +312,7 @@ void BoardSpaceHostSet(s32 space)
     s16 host_space;
     Vec pos;
     BoardSpace *space_plat;
-    BoardSpaceTypeSet(0, space, 8);
+    BoardSpaceTypeSet(0, space, STAR_SPACE);
     host_space = BoardSpaceLinkFlagSearch(0, space, 0x04000000);
     BoardSpacePosGet(0, host_space, &pos);
     BoardModelPosSetV(BoardStarHostMdlGet(), &pos);
@@ -334,7 +334,7 @@ void BoardSpaceStarSetIndex(s32 index)
     Vec rot;
     s16 space;
     if (_CheckFlag(FLAG_ID_MAKE(1, 1))) {
-        BoardSpaceTypeSet(0, boardSpaceStarTbl[GWSystem.star_pos], 1);
+        BoardSpaceTypeSet(0, boardSpaceStarTbl[GWSystem.star_pos], BLUE_SPACE);
     }
     GWSystem.star_pos = index & 0x7;
     BoardSpaceHostSet(BoardSpaceStarGetCurr());
@@ -616,8 +616,17 @@ void BoardSpaceLandExec(s32 player, s32 space)
             break;
 
         case STAR_SPACE:
-            BoardStarExec(player, space);
-            break;
+            // Extra
+            if (ExGameCfg.board_config.stars_remaining > 0) {
+                BoardStarExec(player, space);
+
+                if (ExGameCfg.board_config.stars_remaining <= 0) {
+                    BoardSpaceHideStar();
+                }
+                break;
+            }
+            // BoardStarExec(player, space);
+            // break;
         
         // Extra
         // default:
@@ -655,8 +664,17 @@ s32 BoardSpaceWalkExec(s32 player, s32 space)
         }
     }
     if (is_star) {
-        BoardStarExec(player, space);
-        return 1;
+        // BoardStarExec(player, space);
+        // return 1;
+
+        // Extra
+        if (ExGameCfg.board_config.stars_remaining > 0) {
+            BoardStarExec(player, space);
+            if (ExGameCfg.board_config.stars_remaining <= 0) {
+                BoardSpaceHideStar();
+            }
+            return 1;
+        }
     }
     if (space_ptr->flag & 0x600000) {
         s32 mg_param = GWSystem.mg_param;
@@ -1133,4 +1151,9 @@ void BoardSpaceApplyBattleChange(void) {
             space->type = BLUE_SPACE;
         }
     }
+}
+
+void BoardSpaceHideStar(void) {
+    BoardModelVisibilitySet(StarPlatGetMdl(), 0);
+    BoardSpaceTypeSet(0, boardSpaceStarTbl[GWSystem.star_pos], BLUE_SPACE);
 }

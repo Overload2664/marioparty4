@@ -7,6 +7,7 @@
 #include "game/board/space.h"
 #include "game/board/star.h"
 #include "game/audio.h"
+#include "game/gamework_data.h"
 #include "game/objsub.h"
 #include "game/pad.h"
 
@@ -362,6 +363,10 @@ static void ExecLast5(void)
 {
 	s32 i;
 	messBase = messBaseTbl[GWBoardGet()];
+
+	// Extra
+	BoardStarShowHost();
+
 	CreateLast5();
 	WipeCreate(WIPE_MODE_IN, WIPE_TYPE_NORMAL, -1);
 	while(WipeStatGet()) {
@@ -395,6 +400,12 @@ static void ExecLast5(void)
 		BoardPlayerRotYSet(i, 0.0f);
 	}
 	BoardStatusItemSet(0);
+
+	// Extra
+	if (ExGameCfg.board_config.stars_remaining <= 0) {
+		BoardStarHideHost();
+	}
+
 	HuPrcSleep(60);
 	HuPrcEnd();
 }

@@ -8,6 +8,7 @@
 #include "game/board/player.h"
 #include "game/board/shop.h"
 #include "game/board/space.h"
+#include "game/board/star.h"
 #include "game/board/start.h"
 #include "game/board/tutorial.h"
 #include "game/board/ui.h"
@@ -440,6 +441,11 @@ static void MainFunc(void)
     if (ExGameCfg.board_config.battle_to_blue) {
         // Doing it here too because the board gets reread everytime after a minigame
         BoardSpaceApplyBattleChange();
+    }
+    // Hide star selling when reached max
+    if (!(GWBoardGet() == BOARD_ID_EXTRA1) && !(GWBoardGet() == BOARD_ID_EXTRA2) && ExGameCfg.board_config.stars_remaining <= 0) {
+        BoardSpaceHideStar();
+        BoardStarHideHost();
     }
 
     if(!_CheckFlag(FLAG_ID_MAKE(1, 1))) {

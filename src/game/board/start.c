@@ -203,7 +203,7 @@ static void ExecStart(void) {
         HuPrcEnd();
     }
     BoardCameraNearFarSet(100.0f, 13000.0f);
-    if (GWBoardGet() == BOARD_ID_EXTRA1 || GWBoardGet() == BOARD_ID_EXTRA2) {
+    if (GWBoardGet() == BOARD_ID_EXTRA1 || GWBoardGet() == BOARD_ID_EXTRA2 || ExGameCfg.board_config.stars_remaining <= 0) {
         WipeColorSet(0, 0, 0);
         WipeCreate(WIPE_MODE_OUT, WIPE_TYPE_NORMAL, 21);
         while (WipeStatGet() != 0) {
@@ -222,6 +222,13 @@ static void ExecStart(void) {
         BoardCameraMotionWait();
         BoardCameraMoveSet(1);
         WipeCreate(WIPE_MODE_IN, WIPE_TYPE_NORMAL, 21);
+
+        // Extra
+        if (!(GWBoardGet() == BOARD_ID_EXTRA1) && !(GWBoardGet() == BOARD_ID_EXTRA2) && ExGameCfg.board_config.stars_remaining <= 0) {
+            BoardSpaceHideStar();
+            BoardStarHideHost();
+        }
+
         while (WipeStatGet() != 0) {
             HuPrcVSleep();
         }

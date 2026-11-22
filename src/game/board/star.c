@@ -154,6 +154,13 @@ void BoardStarHostSet(s16 arg0) {
     if (GWBoardGet() == BOARD_ID_EXTRA1 || GWBoardGet() == BOARD_ID_EXTRA2) {
         return;
     }
+
+    // Extra
+    if (ExGameCfg.board_config.stars_remaining <= 0) {
+        BoardStarHideHost();
+        return;
+    }
+
     if (_CheckFlag(FLAG_ID_MAKE(1, 1))) {
         BoardSpaceHostSet(boardSpaceStarTbl[GWSystem.star_pos]);
     }
@@ -372,7 +379,13 @@ block_A:
             HuPrcVSleep();
         }
         BoardModelMotionShiftSet(star_host_model, 1, 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
-        BoardStarShowNext(player_curr);
+        // Extra
+        // BoardStarShowNext(player_curr);
+        if (ExGameCfg.board_config.stars_remaining > 0) {
+            BoardStarShowNext(player_curr);
+        } else {
+            BoardStarHideHost();
+        }
         BoardMusStartBoard();
         BoardModelRotYSet(star_host_model, 0.0f);
     }
@@ -697,7 +710,12 @@ void BoardStarShowNext(s32 arg0) {
     if (GWBoardGet() == BOARD_ID_MAIN6 && BoardItemPrevGet() != 9 && boardStarGiveHook) {
         boardStarGiveHook();
     }
-    BoardSpaceStarMove();
+
+    // Extra
+    if (ExGameCfg.board_config.stars_remaining > 0) {
+        BoardSpaceStarMove();
+    }
+
     if (arg0 == -1) {
         var_r28 = 1;
         arg0 = 0;
@@ -840,4 +858,13 @@ static void HideNextHost(s32 arg0) {
     ShowNextWork *temp_r31 = omObjGetWork(showNextObj, ShowNextWork);
 
     temp_r31->unk01 = arg0;
+}
+
+// Extra
+void BoardStarShowHost(void) {
+    BoardModelVisibilitySet(hostMdl, 1);
+}
+
+void BoardStarHideHost(void) {
+    BoardModelVisibilitySet(hostMdl, 0);
 }

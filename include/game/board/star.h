@@ -13,4 +13,8 @@ void BoardStarShowNext(s32 arg0);
 
 extern s32 boardStarSndTbl[];
 
+// Extra
+void BoardStarShowHost(void);
+void BoardStarHideHost(void);
+
 #endif
