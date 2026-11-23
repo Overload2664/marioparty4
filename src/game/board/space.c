@@ -28,6 +28,10 @@ extern void BoardMushroomExec(s32 player, s32 space); // wrong
 extern void BoardBooHouseExec(s32 player, s32 space); // wrong
 extern void BoardBlockHouseExec(s32 player, s32 space); // wrong
 
+// Extra
+static void BoardSpaceCreateCycle(void);
+static s32 BoardSpaceStarGetNextCyclic(void);
+
 static BoardSpace spaceData[2][MAX_SPACES];
 s16 boardSpaceStarTbl[MAX_STARS];
 static GXTexObj spaceHiliteTex;
@@ -387,7 +391,7 @@ s32 BoardSpaceStarGetNext(void)
         }
     }
 begin:
-    random_pos = BoardRandMod(8);
+    random_pos = BoardRandMod(MAX_STARS);
     if (star_pos == random_pos || BoardStarSpaceTypeGet(random_pos) == 10) {
         goto begin;
     }
@@ -509,7 +513,13 @@ void BoardSpaceStarMove(void)
             star_total = GWSystem.star_total++;
         }
     }
-    star_next = BoardSpaceStarGetNext();
+    // star_next = BoardSpaceStarGetNext();
+    // Extra
+    if (ExGameCfg.board_config.cyclic_stars) {
+        star_next = BoardSpaceStarGetNextCyclic();
+    } else {
+        star_next = BoardSpaceStarGetNext();
+    }
     BoardSpaceStarSetIndex(star_next);
 }
 
@@ -1125,6 +1135,9 @@ void BoardSpaceInit(s32 data_num)
         if (ExGameCfg.board_config.show_all_platforms) {
             makeStarPlats();
         }
+        if (ExGameCfg.board_config.need_new_cycle && ExGameCfg.board_config.cyclic_stars) {
+            BoardSpaceCreateCycle();
+        }
 
         starPlatMdl = BoardModelCreate(DATA_MAKE_NUM(DATADIR_BOARD, 6), NULL, 0);
         BoardModelMotionStart(starPlatMdl, 0, 0x40000001);
@@ -1242,4 +1255,59 @@ static void hideStarPlats(void) {
 
         BoardModelVisibilitySet(starSpacePlatMdls[i], 0);
     }
+}
+
+static void BoardSpaceCreateCycle(void) {
+    s32 star_count;
+    s32 random_num;
+    s32 random_pos;
+    s32 i;
+    s32 j;
+
+    for (i = 0; i < MAX_STARS; i++) {
+        ExGameCfg.board_config.star_cycle[i] = -1;
+    }
+
+    for (star_count = 0; star_count < MAX_STARS; star_count++) {
+        if (boardSpaceStarTbl[star_count] <= 0) {
+            break;
+        }
+    }
+
+    for (i = 0; i < star_count; i++) {
+        random_num = BoardRandMod(star_count - i);
+        random_pos = 0;
+        for (j = 0; j < star_count; j++) {
+            if (ExGameCfg.board_config.star_cycle[j] == -1) {
+                if (random_pos == random_num) {
+                    ExGameCfg.board_config.star_cycle[j] = i;
+                    break;
+                } else {
+                    random_pos++;
+                }
+            } else {
+                continue;
+            }
+        }
+    }
+
+    ExGameCfg.board_config.cur_star_idx = 0;
+    ExGameCfg.board_config.need_new_cycle = FALSE;
+}
+
+static s32 BoardSpaceStarGetNextCyclic(void) {
+    s32 star_count;
+    s32 result;
+
+    for (star_count = 0; star_count < MAX_STARS; star_count++) {
+        if (boardSpaceStarTbl[star_count] <= 0) {
+            break;
+        }
+    }
+
+    result = ExGameCfg.board_config.star_cycle[ExGameCfg.board_config.cur_star_idx];
+    ExGameCfg.board_config.cur_star_idx++;
+    ExGameCfg.board_config.cur_star_idx = ExGameCfg.board_config.cur_star_idx % star_count;
+
+    return result;
 }

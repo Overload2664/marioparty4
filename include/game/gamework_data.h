@@ -176,6 +176,10 @@ typedef struct extra_game_config {
         s16 star_increment;
         s16 star_variance;
         u8 show_all_platforms;
+        u8 cyclic_stars;
+        u8 need_new_cycle;
+        s32 star_cycle[MAX_STARS];
+        s32 cur_star_idx;
     } board_config;
 
     struct MGConfig {

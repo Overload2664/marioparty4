@@ -1706,6 +1706,7 @@ static ExtSetEntry ext_board_entries[] = {
     { "STAR COST INCREMENT", EXTSET_KIND_NUM, 0, 999, 5 },
     { "STAR COST VARIANCE", EXTSET_KIND_NUM, 0, 999, 5 },
     { "SHOW ALL PLATFORMS", EXTSET_KIND_ONOFF, 0, 1, 1 },
+    { "CYCLIC STARS", EXTSET_KIND_ONOFF, 0, 1, 1 },
 };
 
 static ExtSetEntry ext_minigame_entries[] = {
@@ -2573,6 +2574,11 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
 
         ExGameCfg.board_config.show_all_platforms = getEntryValue("SHOW ALL PLATFORMS");
         sprintf(buffer, "Extra Game Config: Show all platfroms set to %d\n", ExGameCfg.board_config.show_all_platforms);
+        OSReport(buffer);
+
+        ExGameCfg.board_config.cyclic_stars = getEntryValue("CYCLIC STARS");
+        ExGameCfg.board_config.need_new_cycle = ExGameCfg.board_config.cyclic_stars;
+        sprintf(buffer, "Extra Game Config: Cyclic stars set to %d\n", ExGameCfg.board_config.cyclic_stars);
         OSReport(buffer);
     }
     {
