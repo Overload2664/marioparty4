@@ -1701,12 +1701,15 @@ static ExtSetEntry ext_board_entries[] = {
     { "MAX HIDDEN STARS", EXTSET_KIND_NUM, 0, 999, 2 },
     { "MAX HIDDEN COINS", EXTSET_KIND_NUM, 0, 999, 4 },
     { "AFTER BATTLE TO BLUE", EXTSET_KIND_ONOFF, 0, 1, 1 },
+};
+
+static ExtSetEntry ext_star_entries[] = {
+    { "SHOW ALL PLATFORMS", EXTSET_KIND_ONOFF, 0, 1, 1 },
+    { "CYCLIC STARS", EXTSET_KIND_ONOFF, 0, 1, 1 },
     { "MAX STARS BOUGHT", EXTSET_KIND_NUM, 0, 999, 999 },
     { "INITIAL STAR COST", EXTSET_KIND_NUM, 0, 999, 10 },
     { "STAR COST INCREMENT", EXTSET_KIND_NUM, 0, 999, 5 },
     { "STAR COST VARIANCE", EXTSET_KIND_NUM, 0, 999, 5 },
-    { "SHOW ALL PLATFORMS", EXTSET_KIND_ONOFF, 0, 1, 1 },
-    { "CYCLIC STARS", EXTSET_KIND_ONOFF, 0, 1, 1 },
 };
 
 static ExtSetEntry ext_minigame_entries[] = {
@@ -1737,6 +1740,7 @@ static ExtSetEntry ext_space_probs[BOARD_ITEMS_END];
 
 static ExtSetTopic ext_topics[] = {
     { "BOARD SETTINGS", ext_board_entries, EXTSET_COUNT(ext_board_entries) },
+    { "STAR SETTINGS", ext_star_entries, EXTSET_COUNT(ext_star_entries) },
     { "MINIGAME SETTINGS", ext_minigame_entries, EXTSET_COUNT(ext_minigame_entries) },
     { "BONUS STARS", ext_bonus_stars, EXTSET_COUNT(ext_bonus_stars) },
     { "SHOP ITEMS PROBS", ext_shop_probs, EXTSET_COUNT(ext_shop_probs) },
@@ -2555,7 +2559,9 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
         ExGameCfg.board_config.battle_to_blue = getEntryValue("AFTER BATTLE TO BLUE");
         sprintf(buffer, "Extra Game Config: After battle to blue set to %d\n", ExGameCfg.board_config.battle_to_blue);
         OSReport(buffer);
-
+    }
+    {
+        // Extra Star
         ExGameCfg.board_config.stars_remaining = getEntryValue("MAX STARS BOUGHT");
         sprintf(buffer, "Extra Game Config: Max stars bought set to %d\n", ExGameCfg.board_config.stars_remaining);
         OSReport(buffer);
