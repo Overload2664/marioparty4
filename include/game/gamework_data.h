@@ -200,7 +200,7 @@ typedef struct extra_game_config {
     } mg_config;
 
     struct BonusStars {
-        u8 is_on[ARRAY_COUNT(EX_BONUS_STAR_NAMES)];
+        u8 prob[ARRAY_COUNT(EX_BONUS_STAR_NAMES)];
     } bonus_stars;
 
     struct ITEMConfig {

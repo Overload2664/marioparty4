@@ -1,4 +1,5 @@
 #include "REL/mstory3Dll.h"
+#include "game/board/main.h"
 #include "game/chrman.h"
 #include "game/data.h"
 #include "game/esprite.h"
@@ -80,26 +81,6 @@ typedef struct {
     /* 0x30 */ float unk30;
     /* 0x34 */ float unk34;
 } StructBssC8; // Size 0x38
-
-// Extra
-enum {
-    BONUS_STAR_MINIGAME,
-    BONUS_STAR_COIN,
-    BONUS_STAR_HAPPENING,
-    BONUS_STAR_RED,
-    BONUS_STAR_BLUE,
-    BONUS_STAR_BOWSER,
-    BONUS_STAR_MISFORTUNE,
-    BONUS_STAR_AGITATOR,
-    BONUS_STAR_MUSHROOM,
-    BONUS_STAR_FORTUNE,
-    BONUS_STAR_WARP,
-    BONUS_STAR_RUNNING,
-    BONUS_STAR_SLOW,
-    BONUS_STAR_ITEM,
-    BONUS_STAR_SHOPPING,
-    BONUS_STAR_EXTRAVAGANT,
-};
 
 void fn_1_7E88(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void fn_1_82E0(void);
@@ -1422,7 +1403,7 @@ void fn_1_CE6C(OMOBJ* arg0) {
     fn_1_9768();
     if (lbl_1_bss_1580.bonus_stars != 0) {
         for (i = 0; i < ARRAY_COUNT(EX_BONUS_STAR_NAMES); i++) {
-            if (ExGameCfg.bonus_stars.is_on[i]) {
+            if (BoardRandMod(100) < ExGameCfg.bonus_stars.prob[i]) {
                 handleBonusStar(i);
             }
         }

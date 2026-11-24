@@ -67,9 +67,9 @@ void GWInit(void)
 
     for (i = 0; i < ARRAY_COUNT(EX_BONUS_STAR_NAMES); i++) {
         if (i < 3) {
-            ExGameCfg.bonus_stars.is_on[i] = 1;
+            ExGameCfg.bonus_stars.prob[i] = 100;
         } else {
-            ExGameCfg.bonus_stars.is_on[i] = 0;
+            ExGameCfg.bonus_stars.prob[i] = 0;
         }
     }
 

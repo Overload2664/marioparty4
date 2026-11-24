@@ -1742,7 +1742,7 @@ static ExtSetTopic ext_topics[] = {
     { "BOARD SETTINGS", ext_board_entries, EXTSET_COUNT(ext_board_entries) },
     { "STAR SETTINGS", ext_star_entries, EXTSET_COUNT(ext_star_entries) },
     { "MINIGAME SETTINGS", ext_minigame_entries, EXTSET_COUNT(ext_minigame_entries) },
-    { "BONUS STARS", ext_bonus_stars, EXTSET_COUNT(ext_bonus_stars) },
+    { "BONUS STARS PROBS", ext_bonus_stars, EXTSET_COUNT(ext_bonus_stars) },
     { "SHOP ITEMS PROBS", ext_shop_probs, EXTSET_COUNT(ext_shop_probs) },
     { "SPACE ITEMS PROBS", ext_space_probs, EXTSET_COUNT(ext_space_probs) },
     { "SHOP ITEMS PRICE", ext_shop_price, EXTSET_COUNT(ext_shop_price) }
@@ -1812,11 +1812,26 @@ void preprocessBonusStars(void) {
         ExtSetEntry entry;
 
         entry.label = EX_BONUS_STAR_NAMES[i];
-        entry.kind = EXTSET_KIND_ONOFF;
-        if(i < 5) {
-            entry.value = 1;
-        } else {
-            entry.value = 0;
+        entry.kind = EXTSET_KIND_NUM;
+        entry.min = 0;
+        entry.max = 100;
+        switch (i) {
+            case BONUS_STAR_MINIGAME:
+            case BONUS_STAR_COIN:
+            case BONUS_STAR_HAPPENING:
+            case BONUS_STAR_RUNNING:
+            case BONUS_STAR_SHOPPING:
+                entry.value = 100;
+                break;
+
+            case BONUS_STAR_BOWSER:
+            case BONUS_STAR_RED:
+                entry.value = 50;
+                break;
+
+            default:
+                entry.value = 0;
+                break;
         }
         ext_bonus_stars[i] = entry;
     }
@@ -2657,7 +2672,7 @@ void openPartyMenu(OMOBJ *obj, MentBoardMenuConfig *handler_holder)
         // Extra
         // Bonus Stars
         for (i = 0; i < ARRAY_COUNT(EX_BONUS_STAR_NAMES); i++) {
-            ExGameCfg.bonus_stars.is_on[i] = getEntryValueTopic("BONUS STARS", EX_BONUS_STAR_NAMES[i]);
+            ExGameCfg.bonus_stars.prob[i] = getEntryValueTopic("BONUS STARS PROBS", EX_BONUS_STAR_NAMES[i]);
         }
         sprintf(buffer, "Bonus Stars flags set\n");
         OSReport(buffer);
