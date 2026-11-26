@@ -98,6 +98,7 @@ static void ExecItemBarterBox(void);
 static void ExecItemSuperWarpPipe(void);
 static void ExecItemChanceCharm(void);
 static void ExecItemWackyWatch(void);
+static void ExecItemPlunderChest(void);
 //
 static void LampParticleUpdate(HU3DMODEL *model, HU3DPARTICLE *particle, Mtx matrix);
 static void GenieParticleUpdate(HU3DMODEL *model, HU3DPARTICLE *particle, Mtx matrix);
@@ -142,13 +143,14 @@ static s32 itemMotTbl[2] = { DATA_MAKE_NUM(DATADIR_BOARD, 117), -1 };
 
 static void (*itemFuncTbl[])(void) = { ExecItemMini, ExecItemMega, ExecItemMiniSuper, ExecItemMegaSuper, ExecItemHammer, ExecItemPipe, ExecItemSwap,
     ExecItemSpark, ExecItemLight, ExecItemWhistle, ExecItemBowser, ExecItemBooBall, ExecItemGenie, ExecItemBag, ExecItemBowserPhone, ExecItemMushroom,
-    ExecItemGoldenMushroom, ExecItemHiddenBlockCard, ExecItemCellularShopper, ExecItemBarterBox, ExecItemSuperWarpPipe, ExecItemChanceCharm, ExecItemWackyWatch };
+    ExecItemGoldenMushroom, ExecItemHiddenBlockCard, ExecItemCellularShopper, ExecItemBarterBox, ExecItemSuperWarpPipe, ExecItemChanceCharm, ExecItemWackyWatch,
+    ExecItemPlunderChest };
 
 static void (*itemRestoreFuncTbl[])(void)
     = { RestoreItemMini, RestoreItemMega, RestoreItemMiniSuper, RestoreItemMegaSuper, RestoreItemNull, RestoreItemNull, RestoreItemNull,
           RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemBowser, RestoreItemNull, RestoreItemNull, RestoreItemNull, 
           RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull,
-        RestoreItemNull, RestoreItemNull};
+        RestoreItemNull, RestoreItemNull, RestoreItemNull};
 // 3D models
 // static s32 itemMdlTbl[] = { DATA_MAKE_NUM(DATADIR_BOARD, 109), DATA_MAKE_NUM(DATADIR_BOARD, 110), DATA_MAKE_NUM(DATADIR_BOARD, 111),
 //     DATA_MAKE_NUM(DATADIR_BOARD, 112), DATA_MAKE_NUM(DATADIR_BOARD, 113), DATA_MAKE_NUM(DATADIR_BOARD, 114), DATA_MAKE_NUM(DATADIR_BOARD, 115),
@@ -2559,6 +2561,189 @@ static void ExecItemWackyWatch(void)
     }
 }
 
+static void ExecItemPlunderChest(void)
+{
+    s32 i;
+    s32 pos;
+    s32 target_player;
+    u16 index_choice_map[ARRAY_COUNT(GWPlayer)];
+    PlayerState *player_state;
+    u16 item_count;
+    s16 item_to_steal;
+
+    UnkItemShowProcStruct sp3C;
+    Vec sp30;
+    Vec sp24;
+    Vec sp18;
+    float temp_f31;
+    float sp10[2];
+    s16 itemBagItemsModels[3];
+    s16 temp_r28;
+    s16 slots_empty;
+    s16 var_r26;
+    s16 j;
+    s16 port;
+    u16 var_r25;
+    HUPROCESS *temp_r29;
+    HUPROCESS *temp_r24;
+
+    HuAudFXPlay(0x350);
+    ItemShowProc(NULL, NULL);
+
+    BoardWinCreateChoice(4, 1179662, -1, 0); // Fix: extra space
+    BoardWinAttrSet(0x10);
+
+    pos = 0;
+    for (i = 0; i < ARRAY_COUNT(GWPlayer); i++) {
+        if (i != currItemRestore) {
+            index_choice_map[pos] = i;
+            pos++;
+        }
+    }
+    for (i = 0; i < ARRAY_COUNT(GWPlayer) - 1; i++) {
+        BoardWinInsertMesSet(BoardPlayerGetCharMess(index_choice_map[i]), i);
+    }
+
+    if (GWPlayer[currItemRestore].com) {
+        // For now we select a random player
+        target_player = BoardRandMod(3);
+        ComSetStealPlayerInput(currItemRestore, target_player);
+    }
+
+    BoardWinWait();
+    BoardWinKill();
+
+    target_player = index_choice_map[BoardWinChoiceGet()];
+
+    player_state = BoardPlayerGet(target_player);
+
+    for (item_count = 0; item_count < ARRAY_COUNT(player_state->items); item_count++) {
+        if (player_state->items[item_count] == -1) {
+            break;
+        }
+    }
+
+    if (item_count == 0) {
+        item_to_steal = -1;
+    } else {
+        item_to_steal = BoardPlayerItemRemove(target_player, BoardRandMod(item_count));
+    }
+
+    if (item_to_steal == -1) {
+        BoardWinCreate(0, 3604638, -1); // Fix: extra space
+        BoardWinAttrSet(0x10);
+        BoardWinInsertMesSet(BoardPlayerGetCharMess(target_player), 0);
+
+        BoardWinWait();
+        BoardWinKill();
+
+        goto PLUNDER_CHEST_END;
+    }
+
+    if (BoardPlayerItemCount(currItemRestore) == ARRAY_COUNT(player_state->items)) {
+        BoardWinCreate(0, 3604639, -1); // Fix: extra space
+        BoardWinAttrSet(0x10);
+
+        BoardWinWait();
+        BoardWinKill();
+
+        goto PLUNDER_CHEST_END;
+    }
+
+    for (i = 0; i < 3; i++) {
+        itemBagItems[i] = item_to_steal;
+    }
+    port = GWPlayer[currItemRestore].port;
+    suitMdl = BoardModelCreate(BoardItemModelGet(currItem), NULL, 1);
+    BoardModelLayerSet(suitMdl, 2);
+    BoardCameraRotGet(&sp18);
+    BoardModelRotYSet(suitMdl, sp18.y);
+    slots_empty = j = 1;
+    for (i = 0; i < slots_empty; i++) {
+        itemBagItemsModels[i] = BoardModelCreate(BoardItemModelGet(itemBagItems[i]), NULL, 1);
+        if (itemBagItems[i] == BOARD_ITEM_BOOS_CRYSTAL_BALL) {
+            BoardModelAttrSet(itemBagItemsModels[i], 0x40000001);
+        }
+        if (itemBagItems[i] == BOARD_ITEM_WARP_PIPE) {
+            temp_f31 = -50.0f;
+            Hu3DData[BoardModelIDGet(itemBagItemsModels[i])].mtx[1][3] = temp_f31;
+        }
+        BoardModelRotYSet(itemBagItemsModels[i], sp18.y);
+        BoardModelLayerSet(itemBagItemsModels[i], 2);
+        BoardModelVisibilitySet(itemBagItemsModels[i], 0);
+    }
+    sp3C.unk02 = suitMdl;
+    sp3C.unk04 = 2.0f;
+    sp3C.unk08 = 5.0f;
+    sp3C.unk10 = sp3C.unk14 = sp3C.unk18 = 0.0f;
+    sp3C.unk1C = 0;
+    HuAudFXPlay(0x350);
+    temp_r24 = ItemShowProc(&sp3C, NULL);
+    HuWinMesMaxSizeGet(1, sp10, MAKE_MESSID(18, 20));
+    temp_r28 = HuWinCreate(-10000.0f, 320.0f, sp10[0], sp10[1], 0);
+    HuWinMesSet(temp_r28, MAKE_MESSID(18, 20));
+    HuWinBGTPLvlSet(temp_r28, 0.0f);
+    HuWinMesSpeedSet(temp_r28, 0);
+    var_r26 = frandmod(40) + 30;
+    j = 0;
+    sp24.x = sp24.y = sp24.z = 0.0f;
+    while (j < slots_empty) {
+        if (GWPlayerCfg[currItemRestore].iscom == 1) {
+            if (--var_r26 == 0) {
+                var_r25 = 0x100;
+                var_r26 = frandmod(40) + 30;
+            }
+        }
+        else {
+            var_r25 = HuPadBtnDown[port];
+        }
+        if (!(var_r25 & 0x100)) {
+            HuPrcVSleep();
+        }
+        else {
+            BoardPlayerDiceJumpStart(currItemRestore);
+            while (!BoardPlayerDiceJumpCheck(currItemRestore)) {
+                HuPrcVSleep();
+            }
+            HuAudFXPlay(0x324);
+            BoardModelPosGet(suitMdl, &sp30);
+            BoardModelPosSetV(itemBagItemsModels[j], &sp30);
+            BoardModelScaleSetV(itemBagItemsModels[j], &sp24);
+            BoardModelVisibilitySet(itemBagItemsModels[j], 1);
+            temp_r29 = HuPrcChildCreate(ExecItemBagJump, 0x2004, 0x1000, 0, HuPrcCurrentGet());
+            temp_r29->user_data = (void *)itemBagItemsModels[j];
+            temp_r29 = HuPrcChildCreate(ExecItemBagShow, 0x2004, 0x1000, 0, HuPrcCurrentGet());
+            temp_r29->user_data = temp_r24;
+            while (GWPlayer[currItemRestore].jump) {
+                HuPrcVSleep();
+            }
+            HuPrcChildWatch();
+            BoardPlayerItemAdd(currItemRestore, itemBagItems[j]);
+            BoardPlayerMotionShiftSet(currItemRestore, 1, 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
+            HuPrcSleep(10);
+            j++;
+        }
+    }
+    HuWinKill(temp_r28);
+    BoardModelPosGet(suitMdl, &sp30);
+    CharEffectLayerSet(3);
+    CharEffectSmokeCreate(1, &sp30);
+    HuAudFXPlay(0x351);
+    HuPrcSleep(10);
+    HuPrcKill(temp_r24);
+    BoardModelKill(suitMdl);
+    for (i = 0; i < slots_empty; i++) {
+        BoardModelKill(itemBagItemsModels[i]);
+    }
+
+PLUNDER_CHEST_END:
+    HuPrcSleep(60);
+    HuPrcKill(NULL);
+    while (1) {
+        HuPrcVSleep();
+    }
+}
+
 static void ForceConsts(void)
 {
     (void)-0.5f;
@@ -3237,12 +3422,12 @@ static void ExecItemBag(void)
     Vec sp18;
     float temp_f31;
     float sp10[2];
-    s16 sp8[3];
+    s16 itemBagItemsModels[3];
     s16 temp_r28;
-    s16 temp_r27;
+    s16 slots_empty;
     s16 var_r26;
-    s16 var_r30;
-    s16 temp_r23;
+    s16 j;
+    s16 port;
     s16 i;
     u16 var_r25;
     HUPROCESS *temp_r29;
@@ -3257,24 +3442,24 @@ static void ExecItemBag(void)
             }
         }
     }
-    temp_r23 = GWPlayer[currItemRestore].port;
+    port = GWPlayer[currItemRestore].port;
     suitMdl = BoardModelCreate(BoardItemModelGet(currItem), NULL, 1);
     BoardModelLayerSet(suitMdl, 2);
     BoardCameraRotGet(&sp18);
     BoardModelRotYSet(suitMdl, sp18.y);
-    temp_r27 = var_r30 = 3 - BoardPlayerItemCount(currItemRestore);
-    for (i = 0; i < temp_r27; i++) {
-        sp8[i] = BoardModelCreate(BoardItemModelGet(itemBagItems[i]), NULL, 1);
+    slots_empty = j = 3 - BoardPlayerItemCount(currItemRestore);
+    for (i = 0; i < slots_empty; i++) {
+        itemBagItemsModels[i] = BoardModelCreate(BoardItemModelGet(itemBagItems[i]), NULL, 1);
         if (itemBagItems[i] == BOARD_ITEM_BOOS_CRYSTAL_BALL) {
-            BoardModelAttrSet(sp8[i], 0x40000001);
+            BoardModelAttrSet(itemBagItemsModels[i], 0x40000001);
         }
         if (itemBagItems[i] == BOARD_ITEM_WARP_PIPE) {
             temp_f31 = -50.0f;
-            Hu3DData[BoardModelIDGet(sp8[i])].mtx[1][3] = temp_f31;
+            Hu3DData[BoardModelIDGet(itemBagItemsModels[i])].mtx[1][3] = temp_f31;
         }
-        BoardModelRotYSet(sp8[i], sp18.y);
-        BoardModelLayerSet(sp8[i], 2);
-        BoardModelVisibilitySet(sp8[i], 0);
+        BoardModelRotYSet(itemBagItemsModels[i], sp18.y);
+        BoardModelLayerSet(itemBagItemsModels[i], 2);
+        BoardModelVisibilitySet(itemBagItemsModels[i], 0);
     }
     sp3C.unk02 = suitMdl;
     sp3C.unk04 = 2.0f;
@@ -3289,9 +3474,9 @@ static void ExecItemBag(void)
     HuWinBGTPLvlSet(temp_r28, 0.0f);
     HuWinMesSpeedSet(temp_r28, 0);
     var_r26 = frandmod(40) + 30;
-    var_r30 = 0;
+    j = 0;
     sp24.x = sp24.y = sp24.z = 0.0f;
-    while (var_r30 < temp_r27) {
+    while (j < slots_empty) {
         if (GWPlayerCfg[currItemRestore].iscom == 1) {
             if (--var_r26 == 0) {
                 var_r25 = 0x100;
@@ -3299,7 +3484,7 @@ static void ExecItemBag(void)
             }
         }
         else {
-            var_r25 = HuPadBtnDown[temp_r23];
+            var_r25 = HuPadBtnDown[port];
         }
         if (!(var_r25 & 0x100)) {
             HuPrcVSleep();
@@ -3311,21 +3496,21 @@ static void ExecItemBag(void)
             }
             HuAudFXPlay(0x324);
             BoardModelPosGet(suitMdl, &sp30);
-            BoardModelPosSetV(sp8[var_r30], &sp30);
-            BoardModelScaleSetV(sp8[var_r30], &sp24);
-            BoardModelVisibilitySet(sp8[var_r30], 1);
+            BoardModelPosSetV(itemBagItemsModels[j], &sp30);
+            BoardModelScaleSetV(itemBagItemsModels[j], &sp24);
+            BoardModelVisibilitySet(itemBagItemsModels[j], 1);
             temp_r29 = HuPrcChildCreate(ExecItemBagJump, 0x2004, 0x1000, 0, HuPrcCurrentGet());
-            temp_r29->user_data = (void *)sp8[var_r30];
+            temp_r29->user_data = (void *)itemBagItemsModels[j];
             temp_r29 = HuPrcChildCreate(ExecItemBagShow, 0x2004, 0x1000, 0, HuPrcCurrentGet());
             temp_r29->user_data = temp_r24;
             while (GWPlayer[currItemRestore].jump) {
                 HuPrcVSleep();
             }
             HuPrcChildWatch();
-            BoardPlayerItemAdd(currItemRestore, itemBagItems[var_r30]);
+            BoardPlayerItemAdd(currItemRestore, itemBagItems[j]);
             BoardPlayerMotionShiftSet(currItemRestore, 1, 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
             HuPrcSleep(10);
-            var_r30++;
+            j++;
         }
     }
     HuWinKill(temp_r28);
@@ -3336,8 +3521,8 @@ static void ExecItemBag(void)
     HuPrcSleep(10);
     HuPrcKill(temp_r24);
     BoardModelKill(suitMdl);
-    for (i = 0; i < temp_r27; i++) {
-        BoardModelKill(sp8[i]);
+    for (i = 0; i < slots_empty; i++) {
+        BoardModelKill(itemBagItemsModels[i]);
     }
     HuPrcSleep(30);
     HuPrcKill(NULL);

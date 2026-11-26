@@ -382,46 +382,46 @@ void BoardPlayerExistCheck(s32 arg0, s32 arg1)
     }
 }
 
-s32 BoardPlayerItemAdd(s32 arg0, s32 arg1)
+s32 BoardPlayerItemAdd(s32 player_idx, s32 item)
 {
-    PlayerState *var_r30;
-    s32 var_r29;
-    s32 var_r31;
+    PlayerState *player_state;
+    s32 slot_idx;
+    s32 i;
 
-    var_r29 = -1;
-    var_r30 = BoardPlayerGet(arg0);
-    for (var_r31 = 0; var_r31 < ARRAY_COUNT(GWPlayer[arg0].items); var_r31++) {
-        if (GWPlayer[arg0].items[var_r31] == BOARD_ITEM_NONE) {
+    slot_idx = -1;
+    player_state = BoardPlayerGet(player_idx);
+    for (i = 0; i < ARRAY_COUNT(GWPlayer[player_idx].items); i++) {
+        if (GWPlayer[player_idx].items[i] == BOARD_ITEM_NONE) {
             HuAudFXPlay(0x360);
-            var_r30->items[var_r31] = arg1; // Important
-            BoardItemStatusKill(arg0);
-            var_r29 = var_r31;
+            player_state->items[i] = item; // Important
+            BoardItemStatusKill(player_idx);
+            slot_idx = i;
             break;
         }
     }
-    return var_r29;
+    return slot_idx;
 }
 
-s32 BoardPlayerItemRemove(s32 arg0, s32 arg1)
+s32 BoardPlayerItemRemove(s32 player_idx, s32 slot_idx)
 {
-    s32 temp_r29;
-    PlayerState *temp_r28;
+    s32 item;
+    PlayerState *player_state;
 
-    temp_r28 = BoardPlayerGet(arg0);
-    temp_r29 = temp_r28->items[arg1];
-    if (temp_r28->items[arg1] == BOARD_ITEM_NONE) {
-        return temp_r29;
+    player_state = BoardPlayerGet(player_idx);
+    item = player_state->items[slot_idx];
+    if (player_state->items[slot_idx] == BOARD_ITEM_NONE) {
+        return item;
     }
-    if (arg1 == 0) {
-        temp_r28->items[0] = temp_r28->items[1];
+    if (slot_idx == 0) {
+        player_state->items[0] = player_state->items[1];
     }
-    if ((arg1 == 1) || (arg1 == 0)) {
-        temp_r28->items[1] = temp_r28->items[2];
+    if ((slot_idx == 1) || (slot_idx == 0)) {
+        player_state->items[1] = player_state->items[2];
     }
-    temp_r28->items[2] = BOARD_ITEM_NONE;
+    player_state->items[2] = BOARD_ITEM_NONE;
     HuAudFXPlay(0x363);
-    BoardItemStatusKill(arg0);
-    return temp_r29;
+    BoardItemStatusKill(player_idx);
+    return item;
 }
 
 /**
