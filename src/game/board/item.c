@@ -150,12 +150,12 @@ static void (*itemRestoreFuncTbl[])(void)
           RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull,
         RestoreItemNull, RestoreItemNull};
 // 3D models
-static s32 itemMdlTbl[] = { DATA_MAKE_NUM(DATADIR_BOARD, 109), DATA_MAKE_NUM(DATADIR_BOARD, 110), DATA_MAKE_NUM(DATADIR_BOARD, 111),
-    DATA_MAKE_NUM(DATADIR_BOARD, 112), DATA_MAKE_NUM(DATADIR_BOARD, 113), DATA_MAKE_NUM(DATADIR_BOARD, 114), DATA_MAKE_NUM(DATADIR_BOARD, 115),
-    DATA_MAKE_NUM(DATADIR_BOARD, 116), DATA_MAKE_NUM(DATADIR_BOARD, 118), DATA_MAKE_NUM(DATADIR_BOARD, 119), DATA_MAKE_NUM(DATADIR_BOARD, 120),
-    DATA_MAKE_NUM(DATADIR_BOARD, 121), DATA_MAKE_NUM(DATADIR_BOARD, 122), DATA_MAKE_NUM(DATADIR_BOARD, 123), DATA_MAKE_NUM(DATADIR_BOARD, 164), 
-    DATA_MAKE_NUM(DATADIR_BOARD, 166), DATA_MAKE_NUM(DATADIR_BOARD, 168), DATA_MAKE_NUM(DATADIR_BOARD, 170), DATA_MAKE_NUM(DATADIR_BOARD, 172),
-    DATA_MAKE_NUM(DATADIR_BOARD, 174), DATA_MAKE_NUM(DATADIR_BOARD, 176), DATA_MAKE_NUM(DATADIR_BOARD, 178), DATA_MAKE_NUM(DATADIR_BOARD, 180) };
+// static s32 itemMdlTbl[] = { DATA_MAKE_NUM(DATADIR_BOARD, 109), DATA_MAKE_NUM(DATADIR_BOARD, 110), DATA_MAKE_NUM(DATADIR_BOARD, 111),
+//     DATA_MAKE_NUM(DATADIR_BOARD, 112), DATA_MAKE_NUM(DATADIR_BOARD, 113), DATA_MAKE_NUM(DATADIR_BOARD, 114), DATA_MAKE_NUM(DATADIR_BOARD, 115),
+//     DATA_MAKE_NUM(DATADIR_BOARD, 116), DATA_MAKE_NUM(DATADIR_BOARD, 118), DATA_MAKE_NUM(DATADIR_BOARD, 119), DATA_MAKE_NUM(DATADIR_BOARD, 120),
+//     DATA_MAKE_NUM(DATADIR_BOARD, 121), DATA_MAKE_NUM(DATADIR_BOARD, 122), DATA_MAKE_NUM(DATADIR_BOARD, 123), DATA_MAKE_NUM(DATADIR_BOARD, 164), 
+//     DATA_MAKE_NUM(DATADIR_BOARD, 166), DATA_MAKE_NUM(DATADIR_BOARD, 168), DATA_MAKE_NUM(DATADIR_BOARD, 170), DATA_MAKE_NUM(DATADIR_BOARD, 172),
+//     DATA_MAKE_NUM(DATADIR_BOARD, 174), DATA_MAKE_NUM(DATADIR_BOARD, 176), DATA_MAKE_NUM(DATADIR_BOARD, 178), DATA_MAKE_NUM(DATADIR_BOARD, 180) };
 
 static s32 forceMoveSfxTbl[] = { 0x38, 0x45, 0x42, 0x4D, 0x48, 0x3F };
 
@@ -597,7 +597,7 @@ static void ItemSizeSet(s32 arg0)
 
 static void ExecItemMini(void)
 {
-    suitMdl = BoardModelCreate(itemMdlTbl[currItem], NULL, 0);
+    suitMdl = BoardModelCreate(BoardItemModelGet(currItem), NULL, 0);
     BoardModelLayerSet(suitMdl, 2);
     HuAudFXPlay(0x350);
     ItemShowProc(NULL, NULL);
@@ -615,7 +615,7 @@ static void ExecItemMini(void)
 
 static void ExecItemMega(void)
 {
-    suitMdl = BoardModelCreate(itemMdlTbl[currItem], NULL, 0);
+    suitMdl = BoardModelCreate(BoardItemModelGet(currItem), NULL, 0);
     HuAudFXPlay(0x350);
     ItemShowProc(NULL, NULL);
     ItemSizeShowAnim();
@@ -632,7 +632,7 @@ static void ExecItemMega(void)
 
 static void ExecItemMiniSuper(void)
 {
-    suitMdl = BoardModelCreate(itemMdlTbl[currItem], NULL, 0);
+    suitMdl = BoardModelCreate(BoardItemModelGet(currItem), NULL, 0);
     BoardModelLayerSet(suitMdl, 2);
     HuAudFXPlay(0x350);
     ItemShowProc(NULL, NULL);
@@ -650,7 +650,7 @@ static void ExecItemMiniSuper(void)
 
 static void ExecItemMegaSuper(void)
 {
-    suitMdl = BoardModelCreate(itemMdlTbl[currItem], NULL, 0);
+    suitMdl = BoardModelCreate(BoardItemModelGet(currItem), NULL, 0);
     BoardModelLayerSet(suitMdl, 2);
     HuAudFXPlay(0x350);
     ItemShowProc(NULL, NULL);
@@ -680,7 +680,7 @@ static void ExecItemHammer(void)
     HuAudFXPlay(0x350);
     ItemShowProc(NULL, NULL);
     temp_r27 = ItemGetTarget();
-    suitMdl = BoardModelCreate(itemMdlTbl[currItem], NULL, 0);
+    suitMdl = BoardModelCreate(BoardItemModelGet(currItem), NULL, 0);
     BoardModelLayerSet(suitMdl, 2);
     var_r30 = frandBool();
     if (var_r30 != 0) {
@@ -779,7 +779,7 @@ static void ExecItemPipe(void)
     HuAudFXPlay(0x350);
     ItemShowProc(NULL, NULL);
     for (i = 0; i < 2; i++) {
-        sp30[i] = BoardModelCreate(itemMdlTbl[currItem], NULL, 1);
+        sp30[i] = BoardModelCreate(BoardItemModelGet(currItem), NULL, 1);
         BoardModelLayerSet(sp30[i], 2);
         sp9C.x = sp9C.z = 2.0f;
         sp9C.y = 0.0f;
@@ -1008,7 +1008,7 @@ static void ExecItemSwap(void)
     BoardCharWheelInit(currItemRestore, 3);
     BoardCharWheelWait();
     temp_r24 = BoardCharWheelResultGet();
-    suitMdl = BoardModelCreate(itemMdlTbl[currItem], NULL, 0);
+    suitMdl = BoardModelCreate(BoardItemModelGet(currItem), NULL, 0);
     BoardModelLayerSet(suitMdl, 7);
     BoardModelAttrSet(suitMdl, 0x400000);
     sp9C.x = sp9C.y = sp9C.z = 0.0f;
@@ -1069,13 +1069,13 @@ static void ExecItemSwap(void)
     Hu3DMtxRotGet(spD8, &sp48);
     sp3C.x = sp48.x;
     for (var_r31 = 0; var_r31 < var_r28 / 2; var_r31++) {
-        temp_r29 = sp54[var_r31] = BoardModelCreate(itemMdlTbl[currItem], NULL, 1);
+        temp_r29 = sp54[var_r31] = BoardModelCreate(BoardItemModelGet(currItem), NULL, 1);
         BoardModelLayerSet(temp_r29, 6);
         BoardModelPassSet(temp_r29, 0);
         BoardModelRotSetV(temp_r29, &sp3C);
         BoardModelVisibilitySet(temp_r29, 0);
         BoardModelAttrSet(temp_r29, 0x400000);
-        temp_r29 = sp54[var_r31 + 3] = BoardModelCreate(itemMdlTbl[currItem], NULL, 1);
+        temp_r29 = sp54[var_r31 + 3] = BoardModelCreate(BoardItemModelGet(currItem), NULL, 1);
         BoardModelLayerSet(temp_r29, 6);
         BoardModelPassSet(temp_r29, 0);
         BoardModelRotSetV(temp_r29, &sp3C);
@@ -1213,7 +1213,7 @@ static void ExecItemSpark(void)
     BoardModelLayerSet(temp_r30, 3);
     BoardModelVisibilitySet(temp_r30, 0);
     HuAudFXPlay(0x350);
-    suitMdl = BoardModelCreate(itemMdlTbl[currItem], itemMotTbl, 0);
+    suitMdl = BoardModelCreate(BoardItemModelGet(currItem), itemMotTbl, 0);
     BoardModelLayerSet(suitMdl, 2);
     ItemShowProc(NULL, NULL);
     temp_r28 = GWPlayer[currItemRestore].space_curr;
@@ -1386,7 +1386,7 @@ static void ExecItemWhistle(void)
         BoardModelVisibilitySet(sp20[var_r31], 0);
     }
     HuAudFXPlay(0x350);
-    suitMdl = BoardModelCreate(itemMdlTbl[currItem], NULL, 0);
+    suitMdl = BoardModelCreate(BoardItemModelGet(currItem), NULL, 0);
     BoardModelLayerSet(suitMdl, 2);
     ItemShowProc(NULL, NULL);
     BoardModelPosGet(suitMdl, &sp90);
@@ -2082,7 +2082,7 @@ static void ExecItemBarterBox(void)
 
     target_player = index_choice_map[BoardWinChoiceGet()];
 
-    suitMdl = BoardModelCreate(itemMdlTbl[currItem], NULL, 0);
+    suitMdl = BoardModelCreate(BoardItemModelGet(currItem), NULL, 0);
     BoardModelLayerSet(suitMdl, 7);
     BoardModelAttrSet(suitMdl, 0x400000);
     sp9C.x = sp9C.y = sp9C.z = 0.0f;
@@ -2143,13 +2143,13 @@ static void ExecItemBarterBox(void)
     Hu3DMtxRotGet(spD8, &sp48);
     sp3C.x = sp48.x;
     for (i = 0; i < var_r28 / 2; i++) {
-        temp_r29 = sp54[i] = BoardModelCreate(itemMdlTbl[currItem], NULL, 1);
+        temp_r29 = sp54[i] = BoardModelCreate(BoardItemModelGet(currItem), NULL, 1);
         BoardModelLayerSet(temp_r29, 6);
         BoardModelPassSet(temp_r29, 0);
         BoardModelRotSetV(temp_r29, &sp3C);
         BoardModelVisibilitySet(temp_r29, 0);
         BoardModelAttrSet(temp_r29, 0x400000);
-        temp_r29 = sp54[i + 3] = BoardModelCreate(itemMdlTbl[currItem], NULL, 1);
+        temp_r29 = sp54[i + 3] = BoardModelCreate(BoardItemModelGet(currItem), NULL, 1);
         BoardModelLayerSet(temp_r29, 6);
         BoardModelPassSet(temp_r29, 0);
         BoardModelRotSetV(temp_r29, &sp3C);
@@ -2303,7 +2303,7 @@ static void ExecItemSuperWarpPipe(void)
     HuAudFXPlay(0x350);
     ItemShowProc(NULL, NULL);
     for (i = 0; i < 2; i++) {
-        sp30[i] = BoardModelCreate(itemMdlTbl[currItem], NULL, 1);
+        sp30[i] = BoardModelCreate(BoardItemModelGet(currItem), NULL, 1);
         BoardModelLayerSet(sp30[i], 2);
         sp9C.x = sp9C.z = 2.0f;
         sp9C.y = 0.0f;
@@ -3026,7 +3026,7 @@ static void ExecItemGenie(void)
     s32 temp_r25;
     s32 var_r30;
 
-    suitMdl = BoardModelCreate(itemMdlTbl[currItem], NULL, 1);
+    suitMdl = BoardModelCreate(BoardItemModelGet(currItem), NULL, 1);
     BoardModelLayerSet(suitMdl, 2);
     genieParticleAnim = HuSprAnimReadFile(DATA_MAKE_NUM(DATADIR_BOARD, 105));
     HuSprAnimLock(genieParticleAnim);
@@ -3258,13 +3258,13 @@ static void ExecItemBag(void)
         }
     }
     temp_r23 = GWPlayer[currItemRestore].port;
-    suitMdl = BoardModelCreate(itemMdlTbl[currItem], NULL, 1);
+    suitMdl = BoardModelCreate(BoardItemModelGet(currItem), NULL, 1);
     BoardModelLayerSet(suitMdl, 2);
     BoardCameraRotGet(&sp18);
     BoardModelRotYSet(suitMdl, sp18.y);
     temp_r27 = var_r30 = 3 - BoardPlayerItemCount(currItemRestore);
     for (i = 0; i < temp_r27; i++) {
-        sp8[i] = BoardModelCreate(itemMdlTbl[itemBagItems[i]], NULL, 1);
+        sp8[i] = BoardModelCreate(BoardItemModelGet(itemBagItems[i]), NULL, 1);
         if (itemBagItems[i] == BOARD_ITEM_BOOS_CRYSTAL_BALL) {
             BoardModelAttrSet(sp8[i], 0x40000001);
         }
