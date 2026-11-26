@@ -99,6 +99,7 @@ static void ExecItemSuperWarpPipe(void);
 static void ExecItemChanceCharm(void);
 static void ExecItemWackyWatch(void);
 static void ExecItemPlunderChest(void);
+static void ExecItemGaddbrush(void);
 //
 static void LampParticleUpdate(HU3DMODEL *model, HU3DPARTICLE *particle, Mtx matrix);
 static void GenieParticleUpdate(HU3DMODEL *model, HU3DPARTICLE *particle, Mtx matrix);
@@ -144,13 +145,13 @@ static s32 itemMotTbl[2] = { DATA_MAKE_NUM(DATADIR_BOARD, 117), -1 };
 static void (*itemFuncTbl[])(void) = { ExecItemMini, ExecItemMega, ExecItemMiniSuper, ExecItemMegaSuper, ExecItemHammer, ExecItemPipe, ExecItemSwap,
     ExecItemSpark, ExecItemLight, ExecItemWhistle, ExecItemBowser, ExecItemBooBall, ExecItemGenie, ExecItemBag, ExecItemBowserPhone, ExecItemMushroom,
     ExecItemGoldenMushroom, ExecItemHiddenBlockCard, ExecItemCellularShopper, ExecItemBarterBox, ExecItemSuperWarpPipe, ExecItemChanceCharm, ExecItemWackyWatch,
-    ExecItemPlunderChest };
+    ExecItemPlunderChest, ExecItemGaddbrush };
 
 static void (*itemRestoreFuncTbl[])(void)
     = { RestoreItemMini, RestoreItemMega, RestoreItemMiniSuper, RestoreItemMegaSuper, RestoreItemNull, RestoreItemNull, RestoreItemNull,
           RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemBowser, RestoreItemNull, RestoreItemNull, RestoreItemNull, 
           RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull,
-        RestoreItemNull, RestoreItemNull, RestoreItemNull};
+        RestoreItemNull, RestoreItemNull, RestoreItemNull, RestoreItemNull};
 // 3D models
 // static s32 itemMdlTbl[] = { DATA_MAKE_NUM(DATADIR_BOARD, 109), DATA_MAKE_NUM(DATADIR_BOARD, 110), DATA_MAKE_NUM(DATADIR_BOARD, 111),
 //     DATA_MAKE_NUM(DATADIR_BOARD, 112), DATA_MAKE_NUM(DATADIR_BOARD, 113), DATA_MAKE_NUM(DATADIR_BOARD, 114), DATA_MAKE_NUM(DATADIR_BOARD, 115),
@@ -2738,6 +2739,237 @@ static void ExecItemPlunderChest(void)
 
 PLUNDER_CHEST_END:
     HuPrcSleep(60);
+    HuPrcKill(NULL);
+    while (1) {
+        HuPrcVSleep();
+    }
+}
+
+static void ExecItemGaddbrush(void)
+{
+    Vec sp1A4[3];
+    Vec sp180[3];
+    Vec sp15C[3];
+    Vec sp138[3];
+    s32 spC0[6];
+    Vec spB4;
+    Vec spA8;
+    Vec sp9C;
+    Vec sp90;
+    Vec sp84;
+    Vec sp78;
+    Vec sp6C;
+    Vec sp60;
+    s16 sp54[6];
+    Vec sp48;
+    Vec sp3C;
+    float temp_f29;
+    float var_f30;
+    s16 temp_r29;
+    s32 var_r23;
+    s32 var_r22;
+    s32 var_r28;
+    s32 var_r27;
+    s32 var_r26;
+    s32 var_r30;
+    s32 var_r31;
+    s32 target_player;
+    PlayerState *player_state;
+    s8 var_r21;
+    Mtx sp108;
+    Mtx spD8;
+
+    HuAudFXPlay(0x350);
+    ItemShowProc(NULL, NULL);
+    BoardCharWheelInit(currItemRestore, 3);
+    BoardCharWheelWait();
+    target_player = BoardCharWheelResultGet();
+    player_state = BoardPlayerGet(target_player);
+    suitMdl = BoardModelCreate(BoardItemModelGet(currItem), NULL, 0);
+    BoardModelLayerSet(suitMdl, 7);
+    BoardModelAttrSet(suitMdl, 0x400000);
+    sp9C.x = sp9C.y = sp9C.z = 0.0f;
+    sp9C.y = 45.0f;
+    HuAudFXPlay(0x364);
+    BoardUiInlineFunc01(&sp9C);
+    BoardModelPosGet(suitMdl, &spB4);
+    BoardPlayerRotGet(currItemRestore, &sp90);
+    for (var_r27 = 0; var_r27 < 3; var_r27++) {
+        if (((float *)&sp90)[var_r27] < 0.0f) {
+            ((float *)&sp90)[var_r27] += 360.0f;
+        }
+        if (((float *)&sp90)[var_r27] >= 360.0f) {
+            ((float *)&sp90)[var_r27] -= 360.0f;
+        }
+    }
+    BoardModelRotGet(suitMdl, &spA8);
+    while (1) {
+        VECAdd(&spA8, &sp9C, &spA8);
+        for (var_r26 = 0; var_r26 < 3; var_r26++) {
+            if (((float *)&spA8)[var_r26] < 0.0f) {
+                ((float *)&spA8)[var_r26] += 360.0f;
+            }
+            if (((float *)&spA8)[var_r26] >= 360.0f) {
+                ((float *)&spA8)[var_r26] -= 360.0f;
+            }
+        }
+        sp9C.y *= 0.94f;
+        if (sp9C.y <= 6.0f) {
+            sp9C.y = 6.0f;
+            if (fabs(sp90.y - spA8.y) <= sp9C.y) {
+                spA8.y = sp90.y;
+                break;
+            }
+        }
+        BoardModelRotSetV(suitMdl, &spA8);
+        HuPrcVSleep();
+    }
+    BoardModelRotSetV(suitMdl, &spA8);
+    var_r23 = var_r22 = 0;
+    for (var_r31 = 0; var_r31 < ARRAY_COUNT(GWPlayer->items); var_r31++) {
+        if (GWPlayer[currItemRestore].items[var_r31] != -1) {
+            var_r23++;
+        }
+        if (GWPlayer[target_player].items[var_r31] != -1) {
+            var_r22++;
+        }
+    }
+    if (var_r23 >= var_r22) {
+        var_r28 = var_r23 * 2;
+    }
+    else {
+        var_r28 = var_r22 * 2;
+    }
+    BoardModelRotGet(suitMdl, &sp3C);
+    Hu3DCameraSet(0, sp108);
+    PSMTXInverse(sp108, spD8);
+    Hu3DMtxRotGet(spD8, &sp48);
+    sp3C.x = sp48.x;
+    for (var_r31 = 0; var_r31 < var_r28 / 2; var_r31++) {
+        temp_r29 = sp54[var_r31] = BoardModelCreate(BoardItemModelGet(currItem), NULL, 1);
+        BoardModelLayerSet(temp_r29, 6);
+        BoardModelPassSet(temp_r29, 0);
+        BoardModelRotSetV(temp_r29, &sp3C);
+        BoardModelVisibilitySet(temp_r29, 0);
+        BoardModelAttrSet(temp_r29, 0x400000);
+        temp_r29 = sp54[var_r31 + 3] = BoardModelCreate(BoardItemModelGet(currItem), NULL, 1);
+        BoardModelLayerSet(temp_r29, 6);
+        BoardModelPassSet(temp_r29, 0);
+        BoardModelRotSetV(temp_r29, &sp3C);
+        BoardModelVisibilitySet(temp_r29, 0);
+        BoardModelAttrSet(temp_r29, 0x400000);
+    }
+    BoardItemGetDestPos(currItemRestore, &sp15C[0]);
+    BoardItemGetDestPos(target_player, &sp138[0]);
+    BoardModelPosGet(suitMdl, &sp90);
+    VECSubtract(&sp90, &Hu3DCamera->pos, &sp90);
+    temp_f29 = VECMag(&sp90);
+    for (var_r31 = 0; var_r31 < 3; var_r31++) {
+        sp15C[var_r31].z = temp_f29;
+        sp138[var_r31].z = temp_f29;
+    }
+    for (var_r31 = 0; var_r31 < var_r28 / 2; var_r31++) {
+        HuAudFXPlay(0x319);
+        BoardModelVisibilitySet(sp54[var_r31], 1);
+        BoardModelVisibilitySet(sp54[var_r31 + 3], 1);
+        sp1A4[var_r31] = sp180[var_r31] = spB4;
+        Hu3D2Dto3D(&sp15C[var_r31], 1, &sp84);
+        Hu3D2Dto3D(&sp138[var_r31], 1, &sp78);
+        VECSubtract(&sp84, &sp1A4[var_r31], &sp6C);
+        VECScale(&sp6C, &sp6C, 0.033333335f);
+        VECSubtract(&sp78, &sp180[var_r31], &sp60);
+        VECScale(&sp60, &sp60, 0.033333335f);
+        for (var_r30 = 0; var_r30 < 30; var_r30++) {
+            BoardModelPosSetV(sp54[var_r31], &sp1A4[var_r31]);
+            BoardModelPosSetV(sp54[var_r31 + 3], &sp180[var_r31]);
+            VECAdd(&sp1A4[var_r31], &sp6C, &sp1A4[var_r31]);
+            VECAdd(&sp180[var_r31], &sp60, &sp180[var_r31]);
+            HuPrcVSleep();
+        }
+        sp1A4[var_r31] = sp84;
+        sp180[var_r31] = sp78;
+        BoardModelPosSetV(sp54[var_r31], &sp1A4[var_r31]);
+        BoardModelPosSetV(sp54[var_r31 + 3], &sp180[var_r31]);
+    }
+    omVibrate(currItemRestore, 180, 6, 6);
+    omVibrate(target_player, 180, 6, 6);
+    for (var_r31 = 0; var_r31 < 60; var_r31++) {
+        for (var_r30 = 0; var_r30 < var_r28 / 2; var_r30++) {
+            sp6C = sp1A4[var_r30];
+            sp6C.x += 3.0 * sind(frandmods(360));
+            sp6C.y += 3.0 * sind(frandmods(360));
+            BoardModelPosSetV(sp54[var_r30], &sp6C);
+            sp6C = sp180[var_r30];
+            sp6C.x += 3.0 * sind(frandmods(360));
+            sp6C.y += 3.0 * sind(frandmods(360));
+            BoardModelPosSetV(sp54[var_r30 + 3], &sp6C);
+        }
+        HuPrcSleep(2);
+    }
+    for (var_r31 = 0; var_r31 < var_r28 / 2; var_r31++) {
+        BoardModelPosSetV(sp54[var_r31], &sp1A4[var_r31]);
+        BoardModelPosSetV(sp54[var_r31 + 3], &sp180[var_r31]);
+    }
+    for (var_r31 = 0; var_r31 < 3; var_r31++) {
+        spC0[var_r31] = BoardPlayerItemRemove(currItemRestore, 0);
+        // spC0[var_r31 + 3] = BoardPlayerItemRemove(target_player, 0);
+        spC0[var_r31 + 3] = player_state->items[var_r31];
+        if (spC0[var_r31 + 3] == BOARD_ITEM_GADDBRUSH || spC0[var_r31 + 3] == BOARD_ITEM_BARTER_BOX ||
+            spC0[var_r31 + 3] == BOARD_ITEM_WACKY_WATCH) {
+                spC0[var_r31 + 3] = -1;
+        }
+    }
+    for (var_r31 = 0; var_r31 < 3; var_r31++) {
+        if (spC0[var_r31 + 3] != -1) {
+            BoardPlayerItemAdd(currItemRestore, spC0[var_r31 + 3]);
+        }
+        
+        // if (spC0[var_r31] != -1) {
+        //     BoardPlayerItemAdd(target_player, spC0[var_r31]);
+        // }
+    }
+    for (var_r31 = (var_r28 / 2) - 1; var_r31 >= 0; var_r31--) {
+        HuAudFXPlay(0x32C);
+        VECSubtract(&spB4, &sp1A4[var_r31], &sp6C);
+        VECScale(&sp6C, &sp6C, 0.033333335f);
+        VECSubtract(&spB4, &sp180[var_r31], &sp60);
+        VECScale(&sp60, &sp60, 0.033333335f);
+        for (var_r30 = 0; var_r30 < 30; var_r30++) {
+            BoardModelPosSetV(sp54[var_r31], &sp1A4[var_r31]);
+            BoardModelPosSetV(sp54[var_r31 + 3], &sp180[var_r31]);
+            VECAdd(&sp1A4[var_r31], &sp6C, &sp1A4[var_r31]);
+            VECAdd(&sp180[var_r31], &sp60, &sp180[var_r31]);
+            HuPrcVSleep();
+        }
+        BoardModelVisibilitySet(sp54[var_r31], 0);
+        BoardModelVisibilitySet(sp54[var_r31 + 3], 0);
+    }
+    sp9C.y = 0.6f;
+    var_f30 = 255.0f;
+    var_r21 = 0;
+    while (1) {
+        BoardModelRotSetV(suitMdl, &spA8);
+        BoardModelAlphaSet(suitMdl, var_f30);
+        VECAdd(&spA8, &sp9C, &spA8);
+        sp9C.y *= 1.02f;
+        if (sp9C.y >= 35.0f) {
+            if (var_r21 == 0) {
+                HuAudFXPlay(0x365);
+                var_r21 = 1;
+            }
+            sp9C.y = 45.0f;
+            var_f30 -= 5.6666665f;
+            if (var_f30 <= 0.0f) {
+                break;
+            }
+        }
+        HuPrcVSleep();
+    }
+    BoardModelKill(suitMdl);
+    for (var_r31 = 0; var_r31 < var_r28 / 2; var_r31++) {
+        BoardModelKill(sp54[var_r31]);
+        BoardModelKill(sp54[var_r31 + 3]);
+    }
     HuPrcKill(NULL);
     while (1) {
         HuPrcVSleep();

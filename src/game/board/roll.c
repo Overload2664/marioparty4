@@ -2,6 +2,7 @@
 #include "game/audio.h"
 #include "game/board/audio.h"
 #include "game/board/com.h"
+#include "game/board/item.h"
 #include "game/board/main.h"
 #include "game/board/model.h"
 #include "game/board/pause.h"
@@ -168,7 +169,11 @@ static void RollWinCreate(s32 playerNo)
             temp_r25 = BoardPlayerSameTeamFind(playerNo);
             var_r27 += BoardPlayerItemCount(temp_r25);
         }
-        if (BoardItemPrevGet() != -1 || var_r27 == 0 || _CheckFlag(FLAG_ID_MAKE(1, 9)) || BoardMegaDoubleDiceCheck()) {
+        // TODO(me): Make a coherent logic that handles multiple item usage better
+        if (BoardItemPrevGet() != -1 && BoardItemPrevGet() != BOARD_ITEM_GADDBRUSH) {
+            var_r29 = MAKE_MESSID(0x09, 0x04);
+        }
+        else if (var_r27 == 0 || _CheckFlag(FLAG_ID_MAKE(1, 9)) || BoardMegaDoubleDiceCheck()) {
             var_r29 = MAKE_MESSID(0x09, 0x04);
         }
         else {
@@ -419,7 +424,13 @@ static void DoInput(s32 arg0)
                 var_r30 = BoardPlayerSameTeamFind(rollPlayer);
                 var_r31 += BoardPlayerItemCount(var_r30);
             }
-            if (var_r31 == 0 || BoardItemPrevGet() != -1 || BoardMegaDoubleDiceCheck() || _CheckFlag(FLAG_ID_MAKE(1, 9))) {
+            // TODO(me): Make a coherent logic that handles multiple item usage better
+            if (BoardItemPrevGet() != -1 && BoardItemPrevGet() != BOARD_ITEM_GADDBRUSH) {
+                if (_CheckFlag(FLAG_ID_MAKE(1, 9)) && GWBoardGet() == BOARD_ID_MAIN6 && *sp8 == 0x200 && var_r31 != 0) {
+                    HuAudFXPlay(4);
+                }
+            }
+            else if (var_r31 == 0 || BoardMegaDoubleDiceCheck() || _CheckFlag(FLAG_ID_MAKE(1, 9))) {
                 if (_CheckFlag(FLAG_ID_MAKE(1, 9)) && GWBoardGet() == BOARD_ID_MAIN6 && *sp8 == 0x200 && var_r31 != 0) {
                     HuAudFXPlay(4);
                 }

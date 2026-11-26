@@ -57,7 +57,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 1] = {
         BOARD_ITEM_SUPER_WARP_PIPE,
         BOARD_ITEM_CHANCE_CHARM,
         BOARD_ITEM_WACKY_WATCH,
-        BOARD_ITEM_PLUNDER_CHEST
+        BOARD_ITEM_PLUNDER_CHEST,
+        BOARD_ITEM_GADDBRUSH
     },
     {   //Luigi
         BOARD_ITEM_MAGIC_LAMP,
@@ -82,7 +83,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 1] = {
         BOARD_ITEM_SUPER_WARP_PIPE,
         BOARD_ITEM_CHANCE_CHARM,
         BOARD_ITEM_WACKY_WATCH,
-        BOARD_ITEM_PLUNDER_CHEST
+        BOARD_ITEM_PLUNDER_CHEST,
+        BOARD_ITEM_GADDBRUSH
     },   
     {   //Peach
         BOARD_ITEM_MAGIC_LAMP,
@@ -107,7 +109,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 1] = {
         BOARD_ITEM_SUPER_WARP_PIPE,
         BOARD_ITEM_CHANCE_CHARM,
         BOARD_ITEM_WACKY_WATCH,
-        BOARD_ITEM_PLUNDER_CHEST
+        BOARD_ITEM_PLUNDER_CHEST,
+        BOARD_ITEM_GADDBRUSH
     },   
     {   //Yoshi
         BOARD_ITEM_MAGIC_LAMP,
@@ -132,7 +135,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 1] = {
         BOARD_ITEM_SUPER_WARP_PIPE,
         BOARD_ITEM_CHANCE_CHARM,
         BOARD_ITEM_WACKY_WATCH,
-        BOARD_ITEM_PLUNDER_CHEST
+        BOARD_ITEM_PLUNDER_CHEST,
+        BOARD_ITEM_GADDBRUSH
     },    
     {   //Wario
         BOARD_ITEM_MAGIC_LAMP,
@@ -157,7 +161,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 1] = {
         BOARD_ITEM_SUPER_WARP_PIPE,
         BOARD_ITEM_CHANCE_CHARM,
         BOARD_ITEM_WACKY_WATCH,
-        BOARD_ITEM_PLUNDER_CHEST
+        BOARD_ITEM_PLUNDER_CHEST,
+        BOARD_ITEM_GADDBRUSH
     },   
     {   //DK
         BOARD_ITEM_MAGIC_LAMP,
@@ -182,7 +187,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 1] = {
         BOARD_ITEM_SUPER_WARP_PIPE,
         BOARD_ITEM_CHANCE_CHARM,
         BOARD_ITEM_WACKY_WATCH,
-        BOARD_ITEM_PLUNDER_CHEST
+        BOARD_ITEM_PLUNDER_CHEST,
+        BOARD_ITEM_GADDBRUSH
     },   
     {   //Daisy
         BOARD_ITEM_MAGIC_LAMP,
@@ -207,7 +213,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 1] = {
         BOARD_ITEM_SUPER_WARP_PIPE,
         BOARD_ITEM_CHANCE_CHARM,
         BOARD_ITEM_WACKY_WATCH,
-        BOARD_ITEM_PLUNDER_CHEST
+        BOARD_ITEM_PLUNDER_CHEST,
+        BOARD_ITEM_GADDBRUSH
     },   
     {   //Waluigi
         BOARD_ITEM_MAGIC_LAMP,
@@ -232,7 +239,8 @@ static s8 comItemPreferTbl[CHARNO_MAX ][BOARD_ITEMS_END - 1] = {
         BOARD_ITEM_SUPER_WARP_PIPE,
         BOARD_ITEM_CHANCE_CHARM,
         BOARD_ITEM_WACKY_WATCH,
-        BOARD_ITEM_PLUNDER_CHEST
+        BOARD_ITEM_PLUNDER_CHEST,
+        BOARD_ITEM_GADDBRUSH
     }
 };
 // Important
@@ -252,6 +260,7 @@ static UseCheckFunc comItemUseCheckFuncTbl[] = {
     CheckLampUse,
     NULL,
     // Extra (TODO: Make the checks for new items more sophisticated maybe)
+    CheckMiniUse,
     CheckMiniUse,
     CheckMiniUse,
     CheckMiniUse,
